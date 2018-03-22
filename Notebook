@@ -1,0 +1,7 @@
+#!/bin/bash -l
+
+# load modules and run analysis pipeline
+module load python/3.6.2
+python /project/cnsbomic/Omics_Notebook/Pipeline.py
+qrsh -P cnsbomic -pe omp 8 -l gpus=0.5 -b y "/project/cnsbomic/Omics_Notebook/pipeline.sh"
+
