@@ -1,0 +1,150 @@
+---
+title: "Multi-Omics Data Analysis Notebook"
+author: "CNSB"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: united
+    toc: yes
+    code_folding: hide
+---
+
+========================================================
+
+```{r format_variables, echo=FALSE}
+iserror=FALSE;
+tryCatch(expr={
+  
+# source variable file
+source("Variables.R")
+
+# Databases for enrichR search
+search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", "GO_Cellular_Component_2017b",
+                      "GO_Molecular_Function_2017b", "HMDB_Metabolites", 
+                      "MSigDB_Oncogenic_Signatures");
+
+# omics types and names
+look_up <- list(proteo='Global', phospho='Phospho');
+
+# options
+zero_percent <- 0.25 # features must be detected in atleast this fraction of samples
+adjpcutoff <- 0.05 # FDR cutoff for differential analysis
+run_gsea <- gsea_section # if GSEA has already been run, set to false and include results in directory
+
+# Configure filenames
+annotation_filename <- paste(working_dir,annotation_filename, sep="/")
+#annotation.filename <- paste(working.dir,list.files(working.dir)[grep("Annotation+.*.xls+", list.files(working.dir))], sep="/")
+
+if(txtFolder==TRUE) {
+  maxq_global_filename <- file.path(working_dir,"txt",maxq_global_filename)
+  maxq_phospho_filename <- file.path(working_dir,"txt",maxq_phospho_filename) 
+} else {
+  maxq_global_filename <- paste(working_dir,maxq_global_filename, sep="/")
+  maxq_phospho_filename <- paste(working_dir,maxq_phospho_filename, sep="/") 
+}
+}, error=function(e){iserror=TRUE;print("Error importing analysis variables")} ) 
+
+```
+
+```{r libraries, warning=FALSE, message=FALSE}
+tryCatch(expr={
+output_subdir <- paste("Analysis",Sys.Date(), sep="_")
+output_path <- file.path(working_dir, output_subdir)
+output_files_path <- file.path(output_path, "Files")
+output_plots_path <- file.path(output_path, "Plots")
+if( dir.exists(output_path) == FALSE ) {dir.create(output_path)}
+.libPaths("/project/cnsbomic/Tools/R")
+
+library(gdata)
+library(Biobase)
+library(limma)
+library(knitr)
+library(ggplot2)
+library(calibrate)
+library(preprocessCore)
+library(RColorBrewer)
+library(viridis)
+library(reshape2)
+library(tidyr)
+library(dplyr)
+library(grid)
+library(gridExtra)
+library(lattice)
+library(NMF)
+library(enrichR)
+library(VennDiagram)
+library(heatmaply)
+library(edgeR)
+library(Glimma)
+
+source("notebookFunctions.R")
+}, error=function(e){iserror=TRUE;
+                     print("Error loading libraries and setting directories")} )
+install.packages("rJava")
+# source("http://bioconductor.org/biocLite.R")
+# biocLite("UniProt.ws")
+
+#Future work: add met, add wrapper, omics integrator
+```
+
+#### Load Maxquant Output and Process
+```{r load_data_qc}
+tryCatch(expr={
+
+# Import annotation file
+annot <- data.frame(gdata::read.xls(annotation_filename, 1, header=FALSE)); # read annotation
+rownames(annot)<- annot[,1];
+annot <- t(annot[,-1]);
+rownames(annot) <- NULL;
+contrastgroups <- make.names(annot[,1]);
+annot<-data.frame(na.omit(annot[,-1]));
+
+# Import data and make esets
+if(!newcontrastonly){
+  if(isthereProteo) {
+    proteinGroups_global <- data.frame(read.delim(maxq_global_filename, header=TRUE, stringsAsFactors=FALSE, check.names=FALSE));
+    eset_global <- makeEset(proteinGroups_global, annot, cutoff=zero_percent, species=uniprot_species);
+    
+    print(paste("Raw data: ", nrow(proteinGroups_global), "Proteins"));
+    print(paste("After processing: ", nrow(eset_global), "Proteins"));
+    }
+
+  if(istherePhospho) {
+    proteinGroups_phospho <- data.frame(read.delim(maxq_phospho_filename, header=TRUE, stringsAsFactors=FALSE, check.names=FALSE));
+    eset_phospho <- makeEset(proteinGroups_phospho, annot, type='phos', cutoff=zero_percent, species=uniprot_species);
+    
+    print(paste("Raw data: ", nrow(proteinGroups_phospho), "Phosphopeptides"));
+    print(paste("After processing: ", nrow(eset_phospho), "Phosphopeptides"));
+    }
+}
+
+# Load daved data to save time
+if(newcontrastonly){
+  if(isthereProteo){
+      eset_global <- readRDS(file=file.path(output_files_path, "Data_eset_proteo.RDS"));
+      print(paste("After processing: ", nrow(eset_global), "Proteins")); 
+  }
+  if(istherePhospho){
+      eset_phospho <- readRDS(file=file.path(output_files_path, "Data_eset_phospho.RDS"));
+      print(paste("After processing: ", nrow(eset_phospho), "Phosphopeptides"));
+  } 
+}
+}, error=function(e){iserror=TRUE; print("Error loading data");},
+   warning=function(w){iserror=TRUE; print("Error loading data");} )
+```
+
+
+```{r global_options, echo=FALSE}
+knitr::opts_chunk$set(messages=FALSE, fig.width=8, fig.height=12)
+```
+
+```{r child='Proteomics_Notebook_NormQC.Rmd'}
+```
+
+```{r child='Proteomics_Notebook_Diff.Rmd', eval=runDifferential}
+```
+
+# Session Info
+```{r session_info}
+sessionInfo()
+```
