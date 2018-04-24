@@ -13,7 +13,4 @@ SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "$SCRIPT")
 
 # run R pipeline and pass directory
-Rscript $SCRIPTPATH/Pipeline.R $SCRIPTPATH
-
-# end session
-exit
+Rscript $SCRIPTPATH/src/Pipeline.R $SCRIPTPATH

@@ -24,12 +24,13 @@ search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", "GO_Cellular_C
                       "MSigDB_Oncogenic_Signatures");
 
 # omics types and names
-look_up <- list(proteo='Global', phospho='Phospho');
+look_up <- list(proteo='Proteomics', phospho='Phospho');
 
 # options
 zero_percent <- 0.25 # features must be detected in atleast this fraction of samples
 adjpcutoff <- 0.05 # FDR cutoff for differential analysis
 run_gsea <- gsea_section # if GSEA has already been run, set to false and include results in directory
+enrichment_map <- isInteractive
 
 # Configure filenames
 annotation_filename <- paste(working_dir,annotation_filename, sep="/")
@@ -48,11 +49,15 @@ if(txtFolder==TRUE) {
 
 ```{r libraries, warning=FALSE, message=FALSE}
 tryCatch(expr={
-output_subdir <- paste("Analysis",Sys.Date(), sep="_")
+output_subdir <- paste("Analysis",gsub("-","",Sys.Date()), sep="_")
+output_files_subdir <- paste(output_subdir,"Files", sep="/")
+output_plots_subdir <- paste(output_subdir,"Plots", sep="/")
 output_path <- file.path(working_dir, output_subdir)
-output_files_path <- file.path(output_path, "Files")
-output_plots_path <- file.path(output_path, "Plots")
+output_files_path <- file.path(working_dir, output_files_subdir)
+output_plots_path <- file.path(working_dir, output_plots_subdir)
 if( dir.exists(output_path) == FALSE ) {dir.create(output_path)}
+if( dir.exists(output_files_path) == FALSE ) {dir.create(output_files_path)}
+if( dir.exists(output_plots_path) == FALSE ) {dir.create(output_plots_path)}
 .libPaths("/project/cnsbomic/Tools/R")
 
 library(gdata)
@@ -60,6 +65,7 @@ library(Biobase)
 library(limma)
 library(knitr)
 library(ggplot2)
+library(ggrepel)
 library(calibrate)
 library(preprocessCore)
 library(RColorBrewer)
@@ -70,40 +76,55 @@ library(dplyr)
 library(grid)
 library(gridExtra)
 library(lattice)
-library(NMF)
 library(enrichR)
 library(VennDiagram)
 library(heatmaply)
 library(edgeR)
 library(Glimma)
+library(openxlsx)
+library(ComplexHeatmap)
+library(RCurl)
+library(r2cytoscape)
+library(httr)
+library(RJSONIO)
+library(devtools)
+library(r2cytoscape)
+library(EasycyRest)
 
 source("notebookFunctions.R")
-}, error=function(e){iserror=TRUE;
-                     print("Error loading libraries and setting directories")} )
-install.packages("rJava")
+}, error=function(e){iserror=TRUE; print("Error loading libraries and setting directories")} )
+# install.packages("open.xlsx")
 # source("http://bioconductor.org/biocLite.R")
 # biocLite("UniProt.ws")
 
 #Future work: add met, add wrapper, omics integrator
+
 ```
+
 
 #### Load Maxquant Output and Process
 ```{r load_data_qc}
 tryCatch(expr={
 
 # Import annotation file
-annot <- data.frame(gdata::read.xls(annotation_filename, 1, header=FALSE)); # read annotation
-rownames(annot)<- annot[,1];
-annot <- t(annot[,-1]);
-rownames(annot) <- NULL;
-contrastgroups <- make.names(annot[,1]);
-annot<-data.frame(na.omit(annot[,-1]));
+annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
+if( isTRUE(all.equal(annot[,1],c("Contrast", "Group", "SampleName", "Intensity", "Phospho.Intensity"))) ){
+  rownames(annot)<- annot[,1];
+  annot <- t(annot[,-1]);
+  rownames(annot) <- NULL;
+  contrastgroups <- make.names(na.omit(annot[,1]));
+  annot<-data.frame((annot[,-1]));
+} else{ stop('Error with annotation format') }
 
+}, error=function(e){iserror=TRUE; print("Error loading annotation");},
+   warning=function(w){iserror=TRUE; print("Error loading annotation");} )
+
+tryCatch(expr={
 # Import data and make esets
 if(!newcontrastonly){
   if(isthereProteo) {
     proteinGroups_global <- data.frame(read.delim(maxq_global_filename, header=TRUE, stringsAsFactors=FALSE, check.names=FALSE));
-    eset_global <- makeEset(proteinGroups_global, annot, cutoff=zero_percent, species=uniprot_species);
+    eset_global <- makeEset(proteinGroups_global, annot, cutoff=zero_percent);
     
     print(paste("Raw data: ", nrow(proteinGroups_global), "Proteins"));
     print(paste("After processing: ", nrow(eset_global), "Proteins"));
@@ -111,7 +132,7 @@ if(!newcontrastonly){
 
   if(istherePhospho) {
     proteinGroups_phospho <- data.frame(read.delim(maxq_phospho_filename, header=TRUE, stringsAsFactors=FALSE, check.names=FALSE));
-    eset_phospho <- makeEset(proteinGroups_phospho, annot, type='phos', cutoff=zero_percent, species=uniprot_species);
+    eset_phospho <- makeEset(proteinGroups_phospho, annot, type='phos', cutoff=zero_percent);
     
     print(paste("Raw data: ", nrow(proteinGroups_phospho), "Phosphopeptides"));
     print(paste("After processing: ", nrow(eset_phospho), "Phosphopeptides"));
@@ -135,13 +156,20 @@ if(newcontrastonly){
 
 
 ```{r global_options, echo=FALSE}
-knitr::opts_chunk$set(messages=FALSE, fig.width=8, fig.height=12)
+knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messages=FALSE, fig.width=8, fig.height=12)
 ```
 
 ```{r child='Proteomics_Notebook_NormQC.Rmd'}
 ```
 
 ```{r child='Proteomics_Notebook_Diff.Rmd', eval=runDifferential}
+```
+
+```{r, echo=FALSE, eval=( length(contrastgroups)>2 & runDifferential ) }
+contrastgroups[2]<-contrastgroup[3]
+```
+
+```{r child='Proteomics_Notebook_Diff.Rmd', eval=( length(contrastgroups)>2 & runDifferential )}
 ```
 
 # Session Info

@@ -1,15 +1,18 @@
-working.dir <- '/projectnb/cnsbomic/ben/MQ_pipeline'; # Directory for analysis and where data is 
+project_name <- 'Analysis';
+working_dir <- '/projectnb/cnsbomic/ben/TorontoHeart'; # Directory for analysis and where data is 
 isthereProteo <- TRUE;
 istherePhospho <- TRUE;
-maxq.global.filename <- 'proteinGroups.txt';
-maxq.phospho.filename <- 'Phospho (STY)Sites.txt';
-annotation.filename <- 'Annotation.xlsx';
-enrichr_section <- TRUE;
+maxq_global_filename <- 'proteinGroups.txt';
+maxq_phospho_filename <- 'Phospho (STY)Sites.txt';
+annotation_filename <- 'Annotation.xlsx';
+saveXlsx <- TRUE;
+enrichr_section <- FALSE;
 gsea_section <- TRUE;
-enrichment_map <- FALSE;
-map.color <- 'viridis';
-norm.method <- 'loess';
+enrichment_map <- TRUE;
+map_color <- 'viridis';
+norm_method <- 'loess';
 newcontrastonly <- FALSE;
 txtFolder <- FALSE;
-isInteractive <- FALSE;
+isInteractive <- TRUE;
 notebook_dir <- '/project/cnsbomic/Omics_Notebook/src';
+runDifferential <- TRUE;
