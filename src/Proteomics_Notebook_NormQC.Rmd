@@ -1,6 +1,6 @@
 # QC and Exploratory Proteomics Analysis
 
-`r if(!iserror && txtFolder){"## Raw Data QC Report (PTXQC)"}`
+`r if(txtFolder){"### Raw Data QC Report (PTXQC)"}`
 ```{r PTX_QC_report, results='hide', message=FALSE, warning=FALSE}
 # if txt folder provided, generate PTXQC report
 tryCatch(expr={
@@ -14,408 +14,165 @@ if(txtFolder && !newcontrastonly){
 }
 }, error=function(e){print("Error generating PTXQC report")} )
 ```
-`r if(!iserror){if(txtFolder){"[ View Raw Data QC Report (PTXQC) ](txt/report_v0.92.3_MQ_pipeline.pdf)" }}` 
+`r if(txtFolder){"[ View Raw Data QC Report (PTXQC) ](txt/report_v0.92.3_MQ_pipeline.pdf)" }` 
 
 ---
 
-## Normalization: Boxplot and Distribution
+### Normalization: Boxplot and Distribution
 ```{r boxplots_QC_and_norm, message=FALSE, warning=FALSE, fig.width=12, fig.height=4}
-tryCatch( expr={
 if(!newcontrastonly){
-  QCandNorm <- function(eset, norm, type='proteo', outputpath=output_plots_path,
-                        annotate=annot, lookup=look_up){
-    
-    col_palette <- rainbow(length(levels(pData(eset)$Group)))
-    annotCol <- col_palette[pData(eset)$Group]
-  
-    eset_matrix <- exprs(eset)
-    df <- data.frame(reshape2::melt(eset_matrix, id.vars = NULL));
-    colnames(df) <- c("Feature","Sample", "Intensity");
-    plot1 <- ggplot(df, aes(x = Sample, y = Intensity)) + geom_boxplot(fill=annotCol) +
-      theme_bw() + theme(axis.text.x=element_text(angle=45, hjust=1)) +  
-      labs(title=paste(lookup[type], " log2 Intensity: Before Normalization", sep=''));
-    plot2 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + 
-      labs(title=paste(lookup[type], " log2 Intensity: Before Normalization", sep=''));
-    
-    if(norm=='quantile'){
-      eset_matrix_norm <- as.matrix(normalize.quantiles(eset_matrix))
-      dimnames(eset_matrix_norm) <- dimnames(eset_matrix)
-    }
-    else if (norm=='loess'){
-      eset_matrix_norm <- as.matrix(normalizeCyclicLoess(eset_matrix, method='pairs'))
-    }
-    else {  eset_matrix_norm<-eset_matrix }
-  
-    df <- data.frame(reshape2::melt(eset_matrix_norm, id.vars = NULL));
-    colnames(df) <- c("Feature","Sample", "Intensity");
-    plot3 <- ggplot(df, aes(x = Sample, y = Intensity)) + geom_boxplot(fill=annotCol) +
-      theme_bw() + theme(axis.text.x=element_text(angle=45, hjust=1)) + 
-      labs(title=paste(lookup[type], " log2 Intensity: After ",
-                       toupper(norm)," Normalization", sep=''));
-    plot4 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + 
-      labs(title=paste(lookup[type], " log2 Intensity: After ",
-                       toupper(norm)," Normalization", sep=''));
-    
-    output_filename<-file.path(outputpath, paste("boxplot_histogram_",type,".pdf", sep=''));
-    pdf(output_filename);
-    print(plot1);
-    print(plot3);
-    print(plot2);
-    print(plot4);
-    dev.off();
-  
-    grid.arrange(plot1+labs(title="Raw Data"), plot3+labs(title="Normalized"),
-                 plot2+theme(legend.position="none")+labs(title="Raw Data"), 
-                 plot4+theme(legend.position="none")+labs(title="Normalized"),
-                 top=paste(lookup[type], ":", sep=""), ncol=4);
-
-    output_filename<-file.path(outputpath, paste("MAplots_",type,".pdf", sep=''))
-    pdf(output_filename)
-    for (i in 1:ncol(eset)) {
-      limma::plotMA(eset_matrix, array=i, main=paste(lookup[type], "MA Plot",i,sep=" "))
-      limma::plotMA(eset_matrix_norm, array=i, 
-                    main=paste(lookup[type],toupper(norm),"Normalized MA Plot",i,sep=" "))
-    }
-    dev.off();
-  
-    mn <- apply(eset_matrix_norm, 1, median);
-    rle <- data.frame(sweep(eset_matrix_norm, MARGIN=1, STATS=mn, FUN='-'));
-    output_filename <- file.path(outputpath, paste("RLE_",type,".pdf", sep=''));
-    pdf(output_filename, width=11, height=8.5);
-    par(mar=c(10,4,4,2)+0.1)
-    boxplot(rle, main="RLE (Relative Log Expression)\nShould be centered on 0 (blue line)",
-        names=colnames(eset_matrix_norm), las=2)
-    lines(x=c(0,ncol(eset_matrix_norm)+1), y=rep(0,2), col="blue", lty=2)
-    lines(x=c(0,ncol(eset_matrix_norm)+1), y=rep(0.1,2), col="red", lty=2)
-    par(mar=c(5,4,4,2)+0.1)
-    dev.off();
-     
-    eset_norm <- ExpressionSet(assayData=eset_matrix_norm);
-    pData(eset_norm) <- pData(eset);
-    rownames(pData(eset_norm)) <- colnames(eset_matrix_norm);
-    fData(eset_norm) <- fData(eset);
-  
-    return (eset_norm);
+  for(i in 1:length(omicsList)){
+    omicsList[[i]][[5]] <- QCandNorm(eset=omicsList[[i]][[5]], type=omicsList[[i]][[1]], norm=norm_method)
   }
-
-  if(isthereProteo) {eset_global <- QCandNorm(eset_global, norm=norm_method)}
-  
-  if(istherePhospho) {eset_phospho <- QCandNorm(eset_phospho, norm=norm_method, type="phospho")}
 }
-}, error=function(e){iserror=TRUE; print("Error performing normalization");} )
+
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_plots_subdir,"/boxplot_histogram_",omicsList[[1]][["dataType"]],".pdf)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/boxplot_histogram_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
+
 ```
-Click below to view full size images:
-`r if(!iserror){if(isthereProteo){paste(" | |  Proteomic  ](",output_plots_subdir,"/boxplot_histogram_proteo.pdf)", sep="") }}` 
-`r if(!iserror){if(istherePhospho){paste(" | [  Phosphoproteomic  ](",output_plots_subdir,"/boxplot_histogram_phospho.pdf)", sep="") }}`
+Click to view full size images: `r if(output_links != ""){ output_links }`  
 
 ---
 
-## PCA Plots
+### PCA Plots
 ```{r PCA_plots, results='hide', fig.keep='all', fig.width=12, fig.height=4}
-tryCatch(expr={
-if(!newcontrastonly){
-  # plot pca function (edit as needed)
-  plot.pca <- function(eset, x_axis="PC1", y_axis="PC2", type="proteo", lookup=look_up, outputpath=output_plots_path) {
-    
-    PC_data <- prcomp(t(exprs(eset)))
-    percent_variance <- summary(PC_data)$importance["Proportion of Variance",]*100
-    
-    pca_graph <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,x_axis], y=PC_data$x[,y_axis], colour=pData(eset)$Group))+ 
-      geom_point() + theme_bw() + theme(legend.title=element_blank()) + 
-      labs(title=paste("Principal Component Analysis \nAcross All Features in All Samples - ",lookup[type],sep=""),
-           x=paste(x_axis, sprintf(" (%2.0f%%)", percent_variance[x_axis]), sep=""),
-           y=paste(y_axis, sprintf(" (%2.0f%%)", percent_variance[y_axis]), sep="")) +
-      geom_text_repel(aes(x=PC_data$x[,x_axis], y=PC_data$x[,y_axis], label=rownames(PC_data$x)), colour="black")
 
-    pca_loading_graph <- ggplot(data=as.data.frame(PC_data$rotation), aes(x=(PC_data$rotation[,x_axis]), y=PC_data$rotation[,y_axis])) +
-      geom_text(label=rownames(PC_data$rotation), colour="black") + 
-      labs(x=paste(x_axis, sep=""), y=paste(y_axis, sep=""),
-           title=paste("Principal Component Factor Loadings\nAcross all Features and Samples - ",lookup[type], sep=""))
-    
-    output_filename <- file.path(outputpath, paste("PCAplots_",type,".pdf",sep=""))
-    pdf(output_filename)
-    print(pca_graph)
-    print(pca_loading_graph)
-    plot(PC_data, type = 'l', main=paste("Variances vs. Principal Components - ",lookup[type],sep=""))
-    dev.off()
-    
-    return(pca_graph)
-    }
-  
-  if(isthereProteo) { plotProteo <- plot.pca(eset_global) }
-
-  if(istherePhospho) { plotPhospho <- plot.pca(eset_phospho, type="phospho") }
-
-  if(isthereProteo && !istherePhospho){ grid.arrange(plotProteo, ncol=1) }
-  if(!isthereProteo && istherePhospho){ grid.arrange(plotPhospho, ncol=1) }
-  if(isthereProteo && istherePhospho){
-    grid.arrange(plotProteo+labs(title="Proteomics"), 
-                 plotPhospho+labs(title="Phospho"),ncol=2)
-    }
+for(i in 1:length(omicsList)){
+  plot.pca(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
 }
-}, error=function(e){iserror=TRUE; print("Error generating PCA plots");} )
+
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_plots_subdir,"/PCAplots_",omicsList[[1]][["dataType"]],".pdf)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
+
 ```
-Click below to view full size images:
-`r if(!iserror){if(isthereProteo){paste(" | [  Proteomic  ](",output_plots_subdir,"/PCAplots_proteo.pdf)", sep="") }}`
-`r if(!iserror){if(istherePhospho){paste(" | [  Phosphoproteomic  ](",output_plots_subdir,"/PCAplots_phospho.pdf)", sep="") }}`  
+Click to view full size images: `r if(output_links != ""){ output_links }`  
 
 ---
 
-## Venn Diagram
-```{r venn, message=FALSE, fig.width=4, fig.height=3}
-tryCatch( expr={
-if(isthereProteo && istherePhospho){
-  hit_list <- list(Proteins=fData(eset_global)$Gene, 
-                   Phosphoproteins=fData(eset_phospho)$Gene )
-  fill_col <- c('green', 'blue')
-  size <- rep(1,2)
-  futile.logger::flog.threshold(ERROR);
-  venn <- venn.diagram( x=hit_list, filename=NULL, height=2000, width=2000, 
-                        fill=fill_col, cat.default.pos="outer", cat.cex=size,
-                        main="Overlap of Proteins and Phosphoproteins",
-                        cat.pos=c(180,180 ));
-  output_filename <- file.path(output_plots_path, "VennDiagram.pdf");
-  pdf(output_filename);
-  grid.draw(venn);
-  tmp<-dev.off();
-  grid.draw(venn);
+`r if(length(omicsList)>1){"### Venn Diagram"}`
+```{r venn, message=FALSE, fig.width=4, fig.height=3, eval= (length(omicsList)>1) }
+
+hit_list <- vector("list", length(omicsList))
+
+for(i in 1:length(omicsList)){
+  hit_list[[i]] <- fData(omicsList[[i]][["eSet"]])$Gene
+  names(hit_list)[i] <-omicsList[[i]][["dataType"]]
 }
-}, error=function(e){iserror=TRUE; print("Error generating venn diagram");} )
+
+fill_col <- rainbow(length(omicsList))
+futile.logger::flog.threshold(ERROR);
+venn <- venn.diagram( x=hit_list, filename=NULL, height=2000, width=2000, 
+                      cat.default.pos="outer", fill=fill_col,main="Overlap" );
+output_filename <- file.path(output_plots_path, "VennDiagram.pdf");
+pdf(output_filename);
+grid.draw(venn);
+tmp<-dev.off();
+grid.draw(venn);
+
 ```
 
 ---
 
-## Variation Plots, Filtering
+### Variation Plots, Filtering
 ```{r variation, message=FALSE, warning=FALSE}
-tryCatch(expr={
+
 if(!newcontrastonly){
-  variationPlotFilter <- function(eset, type="proteo", outputpath=output_plots_path, 
-                                  percent_choice=0.1) {
-    emat<-exprs(eset)
-    MEAN <- apply(emat, 1, mean)
-    STDEV <- apply(emat, 1, sd)
-    MAD <- apply(emat, 1, mad)
-    MED <- apply(emat, 1, median)
-    top_hits <- names(MAD)[order(MAD, decreasing=TRUE)[1:(percent_choice*length(MAD))]]
-    emat_top <- emat[top_hits[top_hits!=""],]
-  
-    output_filename<-file.path(outputpath, paste("variation_",type,".pdf", sep=""))
-    pdf(output_filename)
-    plot(MEAN, STDEV, pch=".", cex=4, main=paste("mean vs. stdev: ", type, sep=""))
-    plot(MED, MAD, pch=19, cex=0.5, log="", main=paste("median vs MAD: ",type, sep=""))
-    points(MED[top_hits], MAD[top_hits], pch=19, cex=0.5, col="red")
-    legend("topright", pch=20, col=c("black", "red"), legend=c("all points", paste("filtered top ", percent_choice*100, "%", sep="")) )
-    dev.off()
-    
-    output_filename<-file.path(outputpath, paste("variation_",type,".jpeg", sep=""))
-    jpeg(output_filename)
-    pairs(emat, pch=".")
-    dev.off()
-    return (emat_top)
-   }
-
-  if(isthereProteo) { emat_global_top <- variationPlotFilter(eset_global) }
-
-  if(istherePhospho) { emat_phospho_top <- variationPlotFilter(eset_phospho, type="phospho") }
-  
-}}, error=function(e){iserror=TRUE; print("Error generating variation plots");} )
-```
-Click below to view SD vs Mean plots:
-`r if(!iserror){if(isthereProteo){paste(" | [  Proteomic  ](",output_plots_subdir,"/variation_proteo.pdf)", sep="") }}`
-`r if(!iserror){if(istherePhospho){paste(" | [  Phosphoproteomic  ](",output_plots_subdir,"/variation_phospho.pdf)", sep="") }}`  
-Click below to view Pairs plots:
-`r if(!iserror){if(isthereProteo){paste(" | [  Proteomic  ](",output_plots_subdir,"/variation_proteo.jpeg)", sep="") }}`
-`r if(!iserror){if(istherePhospho){paste(" | [  Phosphoproteomic  ](",output_plots_subdir,"/variation_phospho.jpeg)", sep="") }}`  
-
----
-
-## Global Static Heatmaps
-```{r heatmaps_qc, message=FALSE}
-tryCatch(expr={
-if(!newcontrastonly){
-  drawthemaps <- function(eset, emat_top, type='proteo', outputpath=output_plots_path,
-                        mapcolor=map_color, lookup=look_up){
-  
-    annotLab <- data.frame(Group = factor(pData(eset)$Group));
-    annotCol <- list(Group = rainbow(length(levels(pData(eset)$Group))))
-    names(annotCol$Group) <- levels(annotLab$Group)
-    ha_column <- HeatmapAnnotation(df=annotLab, col=annotCol)
-  
-    if(mapcolor=="viridis"){mapcolor <- viridis(11); maponeway <- viridis(11);
-    } else {mapcolor <- (rev(brewer.pal(11, mapcolor)));
-            maponeway <- rev(brewer.pal(9, "Blues")) }
-  
-    output_filename <- file.path(outputpath, paste("heatmaps_",type,".pdf", sep=''));
-    pdf(output_filename);
-    # all features, z-score
-    emat_sel <- t(scale(t(exprs(eset)))) # Z-score across rows
-    emat_sel[emat_sel < -2] <- -2
-    emat_sel[emat_sel > 2] <- 2
-    draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
-            column_title=paste(lookup[type], ": All features, row z score", sep='') ))
-            
-  
-    # all features, log2 intensity
-    emat_sel <- exprs(eset)
-    draw(Heatmap(matrix=emat_sel, col=maponeway, name="", top_annotation=ha_column,show_row_names=FALSE,
-                 column_title=paste(lookup[type], ": All proteins, log2 Intensity", sep='') ))
-
-    # variation filter, z score
-    emat_sel <- emat_top
-    emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
-    emat_sel[emat_sel < -2] <- -2
-    emat_sel[emat_sel > 2] <- 2
-    draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
-                 column_title=paste(lookup[type], ": Highest variation, row z score", sep='') ))
-    tmp<-dev.off();
+  for(i in 1:length(omicsList)){
+    omicsList[[i]][[6]] <- variationPlotFilter(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+    names(omicsList[[i]])[6] <- "topVariableMatrix";
   }
+}
 
-  if(isthereProteo){ drawthemaps(eset=eset_global,emat_top=emat_global_top) }
-  if(istherePhospho){ drawthemaps(eset=eset_phospho,emat_top=emat_phospho_top, type='phospho') }
-
-}}, error=function(e){iserror=TRUE; print("Error generating static heatmaps");} )
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-Variation ](", output_plots_subdir,"/variation_",omicsList[[1]][["dataType"]],".pdf) | ",
+                      "[ ",omicsList[[1]][["dataType"]], "-Pairs ](", output_plots_subdir,"/variation_",omicsList[[1]][["dataType"]],".jpeg)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Variation ](", output_plots_subdir,"/variation_",omicsList[[i]][["dataType"]],".pdf) | ",
+                      "[ ",omicsList[[i]][["dataType"]], "-Pairs ](", output_plots_subdir,"/variation_",omicsList[[i]][["dataType"]],".jpeg)", sep="")
+  output_links <- paste(output_links, add_link, sep="  \n" )
+} }
+  
 ```
-Click below to view static heatmaps plots:
-`r if(!iserror){if(isthereProteo){ paste(" | [  Proteomic - All  ](",output_plots_subdir,"/heatmaps_proteo.pdf)", sep="") }}`
-`r if(!iserror){if(istherePhospho){ paste(" | [  Phosphoproteomic - All ](",output_plots_subdir,"/heatmaps_phospho.pdf)", sep="") }}`  
+Click below to view SD vs Mean and Pairs plots:  
+`r if(output_links != ""){ output_links }`  
 
 ---
 
-## Interactive Heatmap
+### Global Static Heatmaps
+```{r heatmaps_qc, message=FALSE}
+
+if(!newcontrastonly){
+  for(i in 1:length(omicsList)){
+    drawthemaps(eset=omicsList[[i]][["eSet"]], emat_top=omicsList[[i]][["topVariableMatrix"]], type=omicsList[[i]][["dataType"]]);
+  }
+}
+
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[1]][["dataType"]],".pdf)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
+
+```
+Click to view static heatmaps plots: `r if(output_links != ""){ output_links }`  
+
+---
+
+### Interactive Heatmap
 ```{r interactive_plots_qc, warning=FALSE, message=FALSE}
 
 if(!newcontrastonly){
-  makeInteractiveHM <- function(eset, type="proteo", outputpath=output_plots_path,mapcolor=map_color ){
-  
-  annotCol <- c("red", "green", "blue", "yellow", "green", "purple",
-                "brown", "black", "grey", "orange", "white", "light green", 
-                "pink", "light blue" );
-  sampleCols <- annotCol[1:length(levels(pData(eset)$Group))][pData(eset)$Group];
-  
-  if(mapcolor=="viridis"){mapcolor <- viridis(11)
-  } else {mapcolor <- colorRampPalette(rev(brewer.pal(11, mapcolor))) }
-
-#   emat.sel <- exprs(eset[rownames(eset) %in% rownames(limmaSig),])
-    output_filename <- file.path(outputpath, paste("heatmap_all_",type,".html", sep=''));
-    emat_sel <- exprs(eset)
-    emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
-    emat_sel[emat_sel < -2] <- -2
-    emat_sel[emat_sel > 2] <- 2
-    invisible(capture.output(tmp<-heatmaply(emat_sel, scale='none', margins=c(100,100,40,20),
-              col_side_colors=pData(eset)$Group,
-              colors=mapcolor,file=output_filename )));
-    rm(tmp)
+  for(i in 1:length(omicsList)){
+    makeInteractiveHM(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
   }
-  
-  if(isthereProteo){ makeInteractiveHM(eset=eset_global) }
-
-  if(istherePhospho){ makeInteractiveHM(eset=eset_phospho, type="phospho") }
 }
+
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-All ](", output_plots_subdir,"/heatmaps_all_",omicsList[[1]][["dataType"]],".html)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-All ](", output_plots_subdir,"/heatmaps_all_",omicsList[[i]][["dataType"]],".html)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
 
 ```
 
-Click below to view interactive heatmaps:
-`r if(!iserror){if(isthereProteo){paste(" | [  Proteomic-All  ](",output_plots_subdir,"/heatmap_all_proteo.html)", sep="") }}`
-`r if(!iserror){if(istherePhospho){paste(" | [  Phosphoroteomic-All  ](",output_plots_subdir,"/heatmap_all_phospho.html)", sep="") }}`  
+Click to view interactive heatmaps: `r if(output_links != ""){ output_links }`  
 
 ---
 
-## Save Data
+### Save Data
 ```{r save_data_qc, message=FALSE }
-tryCatch( expr={
+
 # save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
-saveTheFiles <- function(eset, type='proteo', outputpath=output_files_path, workingdir=working.dir,
-                         saveTheEset=!newcontrastonly){
-    if(saveTheEset){
-      output_filename <- file.path(outputpath, paste("Data_eset_",type,".RDS", sep=""));             
-      saveRDS(eset, file=output_filename); 
-    }
 
-    output_filename <- file.path(outputpath,paste("Expression_matrix_",type,".txt", sep=''));
-    write.table(x=cbind(fData(eset)[,c("Gene", "Protein.names")], exprs(eset)), 
-            file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
-    
-    output_filename <- file.path(outputpath,paste("Uniprot_IDs",type,".txt", sep=''));
-    write.table(x=fData(eset)[,"Protein"], 
-            file=output_filename, sep='\t',row.names=FALSE, col.names=FALSE, quote=FALSE);
-}
-
-if(isthereProteo){ saveTheFiles(eset_global); }
-
-if(istherePhospho){ saveTheFiles(eset_phospho, type="phospho"); }
+if(!newcontrastonly){
+  for(i in 1:length(omicsList)){
+    saveTheFiles(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+  }
+}  
 
 if(newcontrastonly==FALSE && runDifferential==FALSE && saveXlsx==TRUE){   
   
   wbOut <- createWorkbook()
   
-  writeDataToSheets <- function(wb, eset, mapcolor=map_color, type="proteo", lookup=look_up){
-    
-    annotLab <- data.frame(Group = factor(pData(eset)$Group));
-    annotCol <- list(Group = gsub('.{2}$','', rainbow(length(levels(pData(eset)$Group)))))
-    sampleCols <- annotCol$Group[1:length(levels(pData(eset)$Group))][pData(eset)$Group];
-    mapcolor <- rev(brewer.pal(7, "RdYlBu"))
-    
-    stName <- unlist(lookup[type])
-    addWorksheet(wb=wb, sheetName=stName)
-
-    links <- fData(eset)$Link
-    names(links) <- fData(eset)$Protein
-    class(links) <- "hyperlink"
-
-    emat_sel <- t(scale(t(exprs(eset)))) # Z-score across rows
-    emat_sel[emat_sel < -2] <- -2
-    emat_sel[emat_sel > 2] <- 2
-    formatted_table <- data.frame(cbind(fData(eset)[,c("Gene", "Protein.names", "Protein")],emat_sel, 
-                                        fData(eset)[,c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                                        "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID")],
-                                        exprs(eset) ))
-    names <- make.unique(c("Gene", "Protein", "Uniprot", colnames(eset), "Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                           "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID", colnames(eset) ))
-    if(type=="phospho") { formatted_table <- data.frame(cbind(formatted_table, fData(eset)[,"Phospho..STY..Probabilities"]))
-                          names <- c(names, "Phospho..STY..Probabilities")}
-    colnames(formatted_table) <- names
-    
-    writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
-    writeData(wb=wb, sheet=stName, x=links, xy=c("C",3))
-    
-    conditionalFormatting(wb=wb, sheet=stName, type="colourScale", cols=4:(3+ncol(eset)), rows=3:(2+nrow(eset)), style=mapcolor[c(1,4,7)])
-    
-    for (c in 1:ncol(eset)){
-      addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"), rows=2, cols=c+3)
-    }
-    for (c in 1:ncol(eset)){
-      addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"), rows=2, cols=(c+3+9+ncol(eset)) )
-    }
-
-    mergeCells(wb=wb, sheet=stName, rows=1, cols=4:(3+ncol(eset)) )
-    writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity, Row Z Score", xy=c(4,1))
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=4, stack=TRUE)
-    
-    mergeCells(wb=wb, sheet=stName, rows=1, cols=(13+ncol(eset)):(12+ncol(eset)+ncol(eset)) )
-    writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c((13+ncol(eset)),1))
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=(13+ncol(eset)), stack=TRUE)
-
-    freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", fontColour='black'), rows=1:2, cols=1:(3+ncol(eset)+9+ncol(eset)),gridExpand=TRUE, stack=TRUE)   
-    
-    setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)
-    setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+9+ncol(eset)), widths=c(16,50,16,rep(4, ncol(eset)),50,50,50, 50,50,50, 8,8,8, rep(4, ncol(eset)) ))
-  }
-
-  if(isthereProteo){ writeDataToSheets(wb=wbOut, eset=eset_global); }
-
-  if(istherePhospho){ writeDataToSheets(wb=wbOut, eset=eset_phospho, type="phospho"); }  
+  for(i in 1:length(omicsList)){
+    writeDataToSheets(wb=wbOut, eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+  } 
   
   output_filename=file.path(output_path, paste(project_name, "_Summary.xlsx", sep=""))
   saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
-  
 }
 
-}, error=function(e){iserror=TRUE; print("Error saving data");} )
-```
-Click below to view expression matrix:
-`r if(!iserror){if(isthereProteo){paste(" | [  Proteomic  ](",output_files_subdir,"/Expression_matrix_proteo.txt)", sep="") }}`
-`r if(!iserror){if(istherePhospho){paste(" | [  Phosphoproteomic  ](",output_files_subdir,"/Expression_matrix_phospho.txt)", sep="") }}`  
+``` 
 
 ---
 

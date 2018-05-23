@@ -1,45 +1,39 @@
 # Differential Analysis `r contrastgroups[2]` - `r contrastgroups[1]`  
 
-## Limma
-```{r differential}
+### Limma
+```{r }
 #limma
-tryCatch( expr= {  
-if(isthereProteo){
-  TS <- factor(pData(eset_global)$Group)#paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
-  design <- model.matrix(~ 0 + TS)
-  colnames(design) <- make.names(levels(TS))
-  fit1 <- lmFit(eset_global, design)
-  contrast_matrix <- makeContrasts(paste(contrastgroups[2],'-',contrastgroups[1], sep=''), levels=design)
-  fit1 <- contrasts.fit(fit1, contrast_matrix)
-  fit_global <- eBayes(fit1)
+for(i in 1:length(omicsList)){
+  
+  TS <- factor(pData(omicsList[[i]][["eSet"]])$Group); #paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
+  design <- model.matrix(~ 0 + TS);
+  colnames(design) <- make.names(levels(TS));
+  fit1 <- lmFit( omicsList[[i]][["eSet"]], design);
+  
+  if(contrastgroups[2]=="Others"){ contrast_matrix <- makeContrasts(contrastgroups[2], levels=design);
+  } else { contrast_matrix <- makeContrasts(paste(contrastgroups[2],'-',contrastgroups[1], sep=''), levels=design); }
+  
+  fit1 <- contrasts.fit(fit1, contrast_matrix);
+  omicsList[[i]][[7]] <- eBayes(fit1);
+  names(omicsList[[i]])[7] <- "fit";
 
-  limmaRes_global <- topTable(fit_global, coef=1, adjust.method="BH", n=Inf, sort.by = 'p')
-  limmaRes_global_sig <- subset(limmaRes_global, adj.P.Val < adjpcutoff)
-  print(paste("There are ", nrow(limmaRes_global_sig), " proteins with differential intensities with an FDR less than ", adjpcutoff,".", sep="") );
-  print(paste("The top 10th percentile of differenital protein intensities has an FDR of ", 
-              limmaRes_global[0.1*nrow(limmaRes_global),]$adj.P.Val,".", sep="") );
-  if( nrow(limmaRes_global_sig) < 100) { limmaRes_global_sig <- limmaRes_global[1:(0.1*nrow(limmaRes_global)),] }
-  dt_global <- decideTests(fit_global)
-  summary(dt_global)
-}
+  omicsList[[i]][[8]] <- topTable(omicsList[[i]][["fit"]], coef=1, adjust.method="BH", n=Inf, sort.by = 'p');
+  names(omicsList[[i]])[8] <- "limmaRes";
+  
+  
+  omicsList[[i]][[9]] <- subset(omicsList[[i]][["limmaRes"]], adj.P.Val < adjpcutoff);
+  names(omicsList[[i]])[9] <- "limmaRes_sig";
 
-if(istherePhospho){
-  TS <- factor(pData(eset_phospho)$Group)#paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
-  design <- model.matrix(~ 0 + TS)
-  colnames(design) <- make.names(levels(TS))
-  fit1 <- lmFit(eset_phospho, design)
-  contrast_matrix <- makeContrasts(paste(contrastgroups[2],'-',contrastgroups[1], sep=''), levels=design)
-  fit1 <- contrasts.fit(fit1, contrast_matrix)
-  fit_phospho <- eBayes(fit1)
-
-  limmaRes_phospho <- topTable(fit_phospho, coef=1, adjust.method="BH", n=Inf, sort.by = 'p')
-  limmaRes_phospho_sig <- subset(limmaRes_phospho, adj.P.Val < adjpcutoff)
-  print(paste("There are ", nrow(limmaRes_phospho_sig), " phosphopeptides with differential intensities with an FDR less than ",adjpcutoff,".",sep="") );
-  print(paste("The top 10th percentile of differenital phosphopeptide intensities has an FDR of ", 
-              limmaRes_phospho[0.1*nrow(limmaRes_phospho),]$adj.P.Val,".", sep="") );
-  if( nrow(limmaRes_phospho_sig) < 100) { limmaRes_phospho_sig <- limmaRes_phospho[1:(0.1*nrow(limmaRes_phospho)),] }
-  dt_phospho <- decideTests(fit_phospho)
-  summary(dt_phospho)
+  print(paste(omicsList[[i]][["dataType"]],": ", nrow(omicsList[[i]][["limmaRes_sig"]]), " features with differential intensities at an FDR less than ", adjpcutoff,".", sep="") );
+  print(paste("The top 10th percentile of differenital freature intensities has an FDR of ", 
+              omicsList[[i]][["limmaRes"]][0.1*nrow(omicsList[[i]][["limmaRes"]]),]$adj.P.Val,".", sep="") );
+  
+  if( nrow(omicsList[[i]][["limmaRes_sig"]]) < 100) { omicsList[[i]][["limmaRes_sig"]] <- omicsList[[i]][["limmaRes"]][1:(0.1*nrow(omicsList[[i]][["limmaRes"]])),] }
+  
+  omicsList[[i]][[10]] <- decideTests(omicsList[[i]][["fit"]]);
+  names(omicsList[[i]])[10] <- "dt";
+  summary(omicsList[[i]][["dt"]])
+  
 }
 
 output_contrast_subdir <- paste(output_subdir,gsub("\\.","",paste(contrastgroups[2],contrastgroups[1], sep="_")), sep="/" )
@@ -47,217 +41,129 @@ output_contrast_path <- file.path(working_dir, output_contrast_subdir)
 if( dir.exists(output_contrast_path) == FALSE ) { dir.create(output_contrast_path) }
 
 #carat
-}, error=function(e){iserror=TRUE; print("Error in limma (differential expression)");} )
+
 ```
 
 ---
 
-## Volcano plots
-```{r volcano_diff, message=FALSE, fig.width=4, fig.height=3}
-tryCatch(expr={
-makeVolcano <- function(dat, dt, type='proteo', outputpath=output_contrast_path, lookup=look_up){ 
-  threshold_fc_high <- sort(dat$logFC, decreasing=TRUE)[12]
-  threshold_fc_low <- sort(dat$logFC, decreasing=FALSE)[12]
-  threshold_p_low <- sort(dat$adj.P.Val, decreasing=FALSE)[20]
-  
-  plot1 <- ggplot(data=data.frame(dat)) + geom_point(aes(x=logFC, y=-log10(adj.P.Val),colour=(dat$adj.P.Val<0.05))) +
-    scale_colour_manual(name="adj.P.Val<0.05", values=setNames(c("red", "black"), c(T,F))) +
-    labs(title=paste(lookup[type],"Volcano Plot:",colnames(dt), sep=" ")) + theme_bw() + 
-    geom_text_repel(data=data.frame(subset(dat, logFC>threshold_fc_high)), aes(x=logFC, y=-log10(adj.P.Val), label=Gene)) + 
-    geom_text_repel(data=data.frame(subset(dat, logFC<threshold_fc_low)), aes(x=logFC, y=-log10(adj.P.Val), label=Gene)) + 
-    geom_text_repel(data=data.frame(subset(dat, adj.P.Val<threshold_p_low)), aes(x=logFC, y=-log10(adj.P.Val), label=Gene))
-  
-  output_filename <- file.path(outputpath, paste("volcano_",type,".pdf", sep=''));
-  pdf(output_filename);
-  plot(plot1)
-  tmp<-dev.off();
+### Volcano plots
+```{r, message=FALSE, fig.width=4, fig.height=3}
+
+for(i in 1:length(omicsList)){
+  makeVolcano(omicsList[[i]][["limmaRes"]], dt=omicsList[[i]][["dt"]], type=omicsList[[i]][["dataType"]]);
 }
 
-if(isthereProteo){ makeVolcano(limmaRes_global, dt_global) }
-if(istherePhospho){ makeVolcano(limmaRes_phospho, dt_phospho, type="phospho") }
-
-}, error=function(e){print("Error generating volcano plots")} )
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_contrast_subdir,"/volcano_",omicsList[[1]][["dataType"]],".pdf)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_contrast_subdir,"/volcano",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
 
 ```
-Click below to view static volcano plots:
-`r if(!iserror){if(isthereProteo){ paste(" | [  Proteomic  ](",output_contrast_subdir,"/volcano_proteo.pdf)", sep="") }}`
-`r if(!iserror){if(istherePhospho){ paste(" | [  Phosphoproteomic  ](",output_contrast_subdir,"/volcano_phospho.pdf)", sep="") }}`
+Click to view static volcano plots: `r if(output_links != ""){ output_links }`  
 
 ---
 
-## Differential Static Heatmaps
-```{r heatmaps_diff, message=FALSE}
-tryCatch(expr={
-drawthemapsDiff <- function(eset, limmaSig, dt, type='proteo', outputcontrastpath=output_contrast_path,
-                            mapcolor=map_color, lookup=look_up){
-  
-  annotLab <- data.frame(Group = factor(pData(eset)$Group));
-  annotCol <- list(Group = rainbow(length(levels(pData(eset)$Group))));
-  names(annotCol$Group) <- levels(annotLab$Group)
-  ha_column <- HeatmapAnnotation(df=annotLab, col=annotCol)
-  
-  if(mapcolor=="viridis"){mapcolor <- viridis(11); maponeway <- viridis(11);
-  } else {mapcolor <- (rev(brewer.pal(11, mapcolor))) }
-  
-  output_filename <- file.path(outputcontrastpath, paste("heatmaps_",type,".pdf", sep=''));
-  pdf(output_filename);
-  
-  # limma differential expression, z score
-  emat_sel <- exprs(eset[rownames(eset) %in% rownames(limmaSig),])
-  emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
-  emat_sel[emat_sel < -2] <- -2
-  emat_sel[emat_sel > 2] <- 2 
-  draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
-               column_title=paste(lookup[type], ": Differential Expression (",colnames(dt),"), row z score", sep='') ))
-  tmp<-dev.off();
+### Differential Static Heatmaps
+```{r, message=FALSE}
+
+for(i in 1:length(omicsList)){
+  drawthemapsDiff(eset=omicsList[[i]][["eSet"]], dt=omicsList[[i]][["dt"]], limmaSig=omicsList[[i]][["limmaRes"]], type=omicsList[[i]][["dataType"]])
 }
 
-if(isthereProteo){ drawthemapsDiff(eset=eset_global, dt=dt_global, limmaSig=limmaRes_global_sig) }
-
-if(istherePhospho){ 
-  drawthemapsDiff(eset=eset_phospho, dt=dt_phospho, limmaSig=limmaRes_phospho_sig, type='phospho')
-  }
-
-}, error=function(e){iserror=TRUE; print("Error generating static heatmaps");} )
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-Differential ](", output_contrast_subdir,"/heatmaps_",omicsList[[1]][["dataType"]],".pdf)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Differential ](", output_contrast_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
 
 ```
-Click below to view static heatmap plots:
-`r if(!iserror){if(isthereProteo){ paste(" | [  Proteomic-Differential ](",output_contrast_subdir,"/heatmaps_proteo.pdf)", sep="") }}`
-`r if(!iserror){if(istherePhospho){ paste(" | [  Phosphoproteomic - Differential  ](",output_contrast_subdir,"/heatmaps_phospho.pdf)", sep="") }}`
+Click to view static heatmap plots: `r if(output_links != ""){ output_links }`   
+
 
 ---
 
-## Interactive Volcano Plots
-```{r interactive_plots, warning=FALSE, message=FALSE}
-tryCatch( expr= {
-makeInteractiveV <- function(eset, fit, limmaSig, dt, type="proteo", outputcontrastpath=output_contrast_path ){
-  
-  annotCol <- c("red", "green", "blue", "yellow", "green", "purple",
-                "brown", "black", "grey", "orange", "white", "light green", 
-                "pink", "light blue" );
-  sampleCols <- annotCol[1:length(levels(pData(eset)$Group))][pData(eset)$Group];
-  
-#   if(!newcontrast){
-#     glMDSPlot(exprs(eset), groups=pData(eset)$Group, html=paste("MDS-Plot_",type,sep=""),
-#            folder="InteractivePlots", path=outputpath, launch=FALSE  );
-#   }
-#   glMDPlot(fit, groups=pData(eset)$Group, status=dt, counts=exprs(eset),
-#            anno=fit$genes[,c("Gene", "Protein", "Protein.names","Uniprot")],
-#            xlab="Normalized log2 Intensity",
-#            display.columns=c("Gene", "Protein", "Protein.names", "Uniprot"),
-#            side.main="Gene", side.ylab="Normalized Intensity",
-#            main=colnames(dt), sample.cols=sampleCols,
-#            html=paste("MD-Plot_",type,sep=""),
-#            folder="InteractivePlots", path=outputcontrastpath, launch=FALSE );
-            
-  glXYPlot(x=fit$coef, y=fit$lod, xlab="logFC", status=dt, counts=exprs(eset),
-           groups=pData(eset)$Group, ylab="logOdds", sample.cols=pData(eset)$Group,
-           side.ylab="Normalized Intensity",
-           anno=fit$genes[,c("Gene", "Protein", "Protein.names", "Uniprot")], side.main='Gene',
-           html=paste("Volcano-Plot_",type, sep=""),
-           folder="InteractivePlots", path=outputcontrastpath, launch=FALSE  );
+### Interactive Volcano Plots
+```{r, warning=FALSE, message=FALSE}
+
+for(i in 1:length(omicsList)){
+  makeInteractiveV(eset=omicsList[[i]][["eSet"]], fit=omicsList[[i]][["fit"]], dt=omicsList[[i]][["dt"]],
+                   limmaSig=omicsList[[i]][["limmaRes"]], type=omicsList[[i]][["dataType"]]);
 }
 
-if(isthereProteo){ makeInteractiveV(eset=eset_global, fit=fit_global, limmaSig=limmaRes_global_sig, dt=dt_global) }
-
-if(istherePhospho){
-  makeInteractiveV(eset=eset_phospho, fit=fit_phospho, limmaSig=limmaRes_phospho_sig,
-                  dt=dt_phospho, type="phospho")
-}
-}, error=function(e){iserror=TRUE; print("Error generating interactive plots");} )
+output_links <- "";
+output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",omicsList[[1]][["dataType"]],".html)", sep="")
+if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",omicsList[[i]][["dataType"]],".html)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
 
 ```
-Click below to view interactive Volcano plots:
-`r if(!iserror){if(isthereProteo){ paste(" | [  Proteomic  ](",output_contrast_subdir,"/InteractivePlots/Volcano-Plot_proteo.html)", sep="") }}`
-`r if(!iserror){if(istherePhospho){ paste(" | [  Phosphoproteomic  ](",output_contrast_subdir,"/InteractivePlots/Volcano-Plot_phospho.html)", sep="") }}`
+Click to view interactive Volcano plots: `r if(output_links != ""){ output_links }`   
+
 
 ---
 
-# Enrichment
-`r if(enrichr_section){"## EnrichR"}`
-```{r enrichr, message=FALSE, results='hide' }
+## Enrichment
+`r if(enrichr_section){"### EnrichR"}`
+```{r, message=FALSE, results='hide' }
 # enrichR, save GSEA ranked list, eventually add run GSEA
-tryCatch( expr= {
+
+output_links <- "";
 if(enrichr_section==TRUE){
-  runEnrichR <- function (genes, type='proteo', search_dat=search_databases, 
-                          outputpath=output_contrast_path) {
+
+  for(i in 1:length(omicsList)){
+    runEnrichR(omicsList[[i]][["limmaRes_sig"]][, c("Gene", "logFC") ], type=omicsList[[i]][["dataType"]]) 
+  }
+  
+  if(length(omicsList)>1){
     
-    genes_up <- genes[genes[,"logFC"]>0,"Gene"]
-    genes_down <- genes[genes[,"logFC"]<0,"Gene"]
-  
-    enriched_up <- enrichr(unique(genes_up), databases = search_dat);
-    enriched_up <- bind_rows(enriched_up, .id="databases")
-    enriched_up <- enriched_up[order(enriched_up[,"Adjusted.P.value"]),]
-  
-    enriched_down <- enrichr(unique(genes_down), databases = search_dat);
-    enriched_down <- bind_rows(enriched_down, .id="databases")
-    enriched_down <- enriched_down[order(enriched_down[,"Adjusted.P.value"]),]
-  
-    output_filename <- file.path(outputpath,paste("enrichr_results_", type,"_up.txt", sep='')); 
-    write.table(enriched_up, file=output_filename, sep="\t");
-    output_filename <- file.path(outputpath,paste("enrichr_results_", type,"_down.txt", sep='')); 
-    write.table(enriched_down, file=output_filename, sep="\t");
+    gene_table <- omicsList[[1]][["limmaRes_sig"]][, c("Gene", "logFC") ]
+    for(i in 2:length(omicsList)){
+      gene_table <- rbind(gene_table, omicsList[[i]][["limmaRes_sig"]][, c("Gene", "logFC") ])
+    }
+    runEnrichR(gene_table, type="combined" )
   }
 
-  if(isthereProteo){  runEnrichR(limmaRes_global_sig[, c("Gene", "logFC") ]) }
-  
-  if(istherePhospho){ 
-    runEnrichR(limmaRes_phospho_sig[, c("Gene", "logFC")],type='phospho')
-    }
-  
-  if(isthereProteo && istherePhospho){ 
-    runEnrichR(rbind(limmaRes_phospho_sig[,c("Gene", "logFC")],
-                     limmaRes_global_sig[,c("Gene", "logFC")]), type="combined" )
-    }
-  }
-}, error=function(e){iserror=TRUE; print("Error running EnrichR");} )
+  output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-Up ](", output_contrast_subdir,"/enrichr_results_",omicsList[[1]][["dataType"]],"_up.txt) | ",
+                        "[ ",omicsList[[1]][["dataType"]], "-Down ](", output_contrast_subdir,"/enrichr_results_",omicsList[[1]][["dataType"]],"_down.txt)", sep="")
+  if(length(omicsList)>1) {  for (i in 2:length(omicsList)){
+    add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Up ](", output_contrast_subdir,"/enrichr_results_",omicsList[[i]][["dataType"]],"_up.txt) | ",
+                      "[ ",omicsList[[i]][["dataType"]], "-Down ](", output_contrast_subdir,"/enrichr_results_",omicsList[[i]][["dataType"]],"_down.txt)", sep="")
+    output_links <- paste(output_links, add_link, sep="  \n" )
+  } }
+}
 
 ```
 `r if(enrichr_section){"Click below to view enrichR results:  "}`
-`r if(!iserror){if(isthereProteo && enrichr_section){ paste("[  Proteomic-Up  ](",output_contrast_subdir, "/enrichr_results_proteo_up.txt) | ", sep="") }}`
-`r if(!iserror){if(isthereProteo && enrichr_section){ paste("[  Proteomic-Down  ](",output_contrast_subdir,"/enrichr_results_proteo_down.txt)", sep="") }}`  
-`r if(!iserror){if(istherePhospho && enrichr_section){ paste("[  Phosphoproteomic-Up  ](",output_contrast_subdir,"/enrichr_results_phospho_up.txt) | ", sep="") }}`
-`r if(!iserror){if(istherePhospho && enrichr_section){ paste("[  Phosphoproteomic-Down  ](",output_contrast_subdir,"/enrichr_results_phospho_down.txt)", sep="") }}`  
-`r if(!iserror){if(isthereProteo && istherePhospho && enrichr_section){ paste("[  Combined-Up  ](",output_contrast_subdir,"/enrichr_results_combined_up.txt) | ", sep="") }}`
-`r if(!iserror){if(isthereProteo && istherePhospho && enrichr_section){ paste("[  Combined-Down  ](",output_contrast_subdir,"/enrichr_results_combined_down.txt)", sep="") }}`  
+`r if(enrichr_section){ if(output_links != ""){ output_links }} `   
 
 ---
 
-## Save Data
-```{r save_data_diff, message=FALSE }
-tryCatch( expr={
+### Save Data
+```{r, message=FALSE }
 # save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
-saveTheFiles <- function(eset, limmaRes, type='proteo', outputcontrastpath=output_contrast_path){
-    output_filename <- file.path(outputcontrastpath,paste("GSEA_rankedlist_",type,".rnk", sep=''));
-    ranked <- cbind(limmaRes[,"Gene"],sign(limmaRes[,"logFC"]) * -log10(limmaRes[,"adj.P.Val"]))
-    colnames(ranked)<-c("GeneName", "rank")
-    colnames(ranked)<-c("GeneName", "rank")
-    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    ranked <- ranked[ranked[,"GeneName"]!="", ]
-    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-    write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
+
+for(i in 1:length(omicsList)){
+  saveTheFilesDiff(omicsList[[i]][["eSet"]], topTable(omicsList[[i]][["fit"]], coef=1, adjust.method="BH", 
+                                      n=Inf, sort.by = 'logFC'), type=omicsList[[i]][["dataType"]])
 }
 
-if(isthereProteo){
-  saveTheFiles(eset_global, topTable(fit_global, coef=1, adjust.method="BH", 
-                                     n=Inf, sort.by = 'logFC') );
-}
-
-if(istherePhospho){
-  saveTheFiles(eset_phospho, topTable(fit_phospho, coef=1, adjust.method="BH", 
-                                      n=Inf, sort.by = 'logFC'), type='phospho')
-}
-
-if(isthereProteo && istherePhospho){
-  ranked1 <- cbind(limmaRes_global[,"Gene"], 
-                   sign(limmaRes_global[,"logFC"]) * -log10(limmaRes_global[,"adj.P.Val"]))  
-  ranked2 <- cbind(limmaRes_phospho[,"Gene"],
-                   sign(limmaRes_phospho[,"logFC"]) * -log10(limmaRes_phospho[,"adj.P.Val"])) 
-  ranked <- rbind(ranked1, ranked2)
+if(length(omicsList)>1){
+  ranked <- cbind(omicsList[[1]][["limmaRes"]][,"Gene"], sign(omicsList[[1]][["limmaRes"]][,"logFC"]) * -log10(omicsList[[1]][["limmaRes"]][,"adj.P.Val"])) 
+  
+  if(length(omicsList)>1) { for(i in 2:length(omicsList)){
+    ranked1 <- cbind(omicsList[[i]][["limmaRes"]][,"Gene"], sign(omicsList[[i]][["limmaRes"]][,"logFC"]) * -log10(omicsList[[i]][["limmaRes"]][,"adj.P.Val"]))
+    ranked <- rbind(ranked, ranked1)
+  } }
+  
   colnames(ranked)<-c("GeneName", "rank")
-  ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
   ranked <- ranked[ranked[,"GeneName"]!="", ]
+  ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
   ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
+  ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
   output_filename <- file.path(output_contrast_path,"GSEA_rankedlist_combined.rnk");
   write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
 }
@@ -265,86 +171,24 @@ if(isthereProteo && istherePhospho){
 if(runDifferential==TRUE && saveXlsx==TRUE){   
   
   wbOut <- createWorkbook()
-  
-  writeDataToSheets <- function(wb, eset, limmaRes, mapcolor=map_color, type="proteo", lookup=look_up, contrastnames=contrastgroups){
-    
-    eset <- eset[match(rownames(limmaRes),rownames(eset)),]
-    
-    annotLab <- data.frame(Group = factor(pData(eset)$Group));
-    annotCol <- list(Group = gsub('.{2}$','', rainbow(length(levels(pData(eset)$Group)))))
-    sampleCols <- annotCol$Group[1:length(levels(pData(eset)$Group))][pData(eset)$Group];
-    mapcolor <- rev(brewer.pal(7, "RdYlBu"))
-    
-    stName <- as.character(lookup[type])
-    addWorksheet(wb=wb, sheetName=stName)
 
-    links <- fData(eset)$Link
-    names(links) <- fData(eset)$Protein
-    class(links) <- "hyperlink"
-        
-    emat_sel <- t(scale(t(exprs(eset)))) # Z-score across rows
-    emat_sel[emat_sel < -2] <- -2
-    emat_sel[emat_sel > 2] <- 2
-    formatted_table <- data.frame(cbind(fData(eset)[,c("Gene", "Protein.names", "Protein")],emat_sel,
-                                        (limmaRes[,"adj.P.Val"]),(limmaRes[,"logFC"]),(limmaRes[,"AveExpr"]),(limmaRes[,"logFC"]),
-                                        fData(eset)[,c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                                        "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID")],
-                                        exprs(eset), stringsAsFactors=FALSE ), stringsAsFactors=FALSE)
-    names <- make.unique(c("Gene", "Protein", "Uniprot", colnames(eset), "adj.P.Val", "logFC", "AveExpr", "Log Fold Change",
-                           "Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                           "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID", colnames(eset) ))
-    if(type=="phospho") { formatted_table <- data.frame(cbind(formatted_table, fData(eset)[,"Phospho..STY..Probabilities"]))
-                          names <- c(names, "Phospho..STY..Probabilities")}
-    colnames(formatted_table) <- names
-    
-    writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
-    writeData(wb=wb, sheet=stName, x=links, xy=c("C",3))
-    
-    conditionalFormatting(wb=wb, sheet=stName, type="colourScale", cols=4:(3+ncol(eset)), rows=3:(2+nrow(eset)), style=mapcolor[c(1,4,7)])
-    conditionalFormatting(wb=wb, sheet=stName, cols= (4+ncol(exprs(eset))+3), rows=3:(3+nrow(limmaRes)), type="databar", style=c("blue", "red"), showvalue=FALSE)
-    
-    for (c in 1:ncol(eset)){
-      addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"), rows=2, cols=c+3)
-    }
-    for (c in 1:ncol(eset)){
-      addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"), rows=2, cols=(c+3+4+9+ncol(eset)) )
-    }
-
-    mergeCells(wb=wb, sheet=stName, rows=1, cols=4:(3+ncol(eset)) )
-    writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity, Row Z Score", xy=c(4,1))
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=4, stack=TRUE)
-    
-    mergeCells(wb=wb, sheet=stName, rows=1, cols=(17+ncol(eset)):(16+ncol(eset)+ncol(eset)) )
-    writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c((17+ncol(eset)),1))
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=(17+ncol(eset)), stack=TRUE)
-    
-    freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", fontColour='black'),
-             rows=1:2, cols=1:(3+ncol(eset)+4+9+ncol(eset)),gridExpand=TRUE, stack=TRUE)   
-    
-    setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)
-    setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+9+4+ncol(eset)), widths=c(16,50,16,rep(4, ncol(eset)), 8,8,8,16, 50,50,50, 50,50,50, 8,8,8, rep(4, ncol(eset)) ))
-  }
-  
-  
-  if(isthereProteo){ writeDataToSheets(wb=wbOut, eset=eset_global, limmaRes=limmaRes_global); }
-
-  if(istherePhospho){ writeDataToSheets(wb=wbOut, eset=eset_phospho, limmaRes=limmaRes_phospho, type="phospho"); }  
+  for(i in 1:length(omicsList)){
+    writeDataToSheetsDiff(wb=wbOut, eset=omicsList[[i]][["eSet"]], limmaRes=omicsList[[i]][["limmaRes"]], type=omicsList[[i]][["dataType"]]); 
+  }  
   
   output_filename=file.path(output_path, paste(project_name, "_Summary_", gsub("\\.","",contrastgroups[2]), "-",gsub("\\.","",contrastgroups[1]), ".xlsx", sep=""))
   saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
   
 }
 
-}, error=function(e){iserror=TRUE; print("Error saving data");} )
 ```
 
 ---
 
-`r if(gsea_section){"## GSEA and EnrichmentMap"}`
-```{r gsea_enrichmentmap, results='hide', message=FALSE, warning=FALSE, error=FALSE}
+`r if(gsea_section){"### GSEA and EnrichmentMap"}`
+```{r, results='hide', message=FALSE, warning=FALSE, error=FALSE}
 output_network_file <- FALSE
-tryCatch( expr={
+
 if(gsea_section==TRUE) {
   tryCatch(expr = { library(RCurl)}, 
          error = function(e) { install.packages("RCurl")}, finally = library(RCurl))
@@ -354,17 +198,15 @@ if(gsea_section==TRUE) {
          error = function(e) { install.packages("RJSONIO")}, finally = library(RJSONIO))
   
   gsea_jar <- "/project/cnsbomic/Tools/gsea-3.0.jar"
-  analysis_name <- gsub("-","_",gsub("\\.","",colnames(dt_global)))
+  analysis_name <- gsub("-","_",gsub("\\.","",colnames(omicsList[[1]][["dt"]])))
   gsea_working_dir <- gsub("\\.", "_", paste("GSEA_", analysis_name, sep=""))
   gsea_working_path <- file.path(output_path, gsea_working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
   
-  if(isthereProteo & istherePhospho){ rnk_file <- paste(output_contrast_path, "GSEA_rankedlist_combined.rnk", sep="/")
-  } else if (isthereProteo) {rnk_file <- paste(output_contrast_path,"GSEA_rankedlist_proteo.rnk", sep="/")
-  } else if (istherePhospho){rnk_file <- paste(output_contrast_path, "GSEA_rankedlist_phospho.rnk", sep="/") }
+  if(length(omicsList)>1){ rnk_file <- paste(output_contrast_path, "GSEA_rankedlist_combined.rnk", sep="/")
+  } else { rnk_file <- paste(output_contrast_path,"/GSEA_rankedlist_",omicsList[[i]][["dataType"]],".rnk", sep="") }
   
-  if(isthereProteo){expression_file <- file.path(paste(output_files_subdir, "/Expression_matrix_proteo.txt", sep=""))
-  } else {expression_file <- file.path(paste(output_files_subdir, "/Expression_matrix_phospho.txt", sep="")) }
+  expression_file <- file.path(paste(output_files_subdir, "/Expression_matrix_",omicsList[[1]][["dataType"]],".txt", sep=""))
 
   # Only if you need a new GMT file
   gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/"
@@ -394,10 +236,9 @@ if(gsea_section==TRUE) {
     if(length(tmp)==1){
       if(nchar(tmp[1])==5){file.remove(paste(notebook_dir, tmp[1], sep="/")) }
     } 
-    } }
-}, error=function(e){iserror=TRUE; print("Error running GSEA");} )
+  }
+}
 
-tryCatch( expr={
 if(enrichment_map && gsea_section){
   #use easy cyRest library to communicate with cytoscape.
   tryCatch(expr = { library(devtools)}, 
@@ -436,8 +277,8 @@ if(enrichment_map && gsea_section){
 
   # MOVE TO PYTHON VARAIBLES SCRIPT EVERNTUALLY
   #defined threshold for GSEA enrichments (need to be strings for cyrest call)
-  pvalue_gsea_threshold <- "0.5"
-  qvalue_gsea_threshold <- "0.3"
+  pvalue_gsea_threshold <- enrichmentmap_p_val
+  qvalue_gsea_threshold <- enrichmentmap_q_val
   similarity_threshold <- "0.375"
   similarity_metric = "COMBINED"
 
@@ -467,23 +308,23 @@ if(enrichment_map && gsea_section){
   current_network_suid <- 0
   #enrichment map command will return the suid of newly created network unless it Failed.  If it failed it will contain the word failed
   if(length(response)>0){ #fix for not getting suid
-  if(grepl(pattern="Failed", response)){
-    paste(response)
-  } else {
-  current_network_suid <- response
-  response <- renameNetwork(new.name = current_network_name, network = current_network_suid, base.url)
+    if(grepl(pattern="Failed", response)){
+      paste(response)
+    } else {
+      current_network_suid <- response
+      response <- renameNetwork(new.name = current_network_name, network = current_network_suid, base.url)
   
-  output_network_file <- paste(gsea_working_path,"screenshot_network.pdf",sep="/")
-  em_command2 = paste("view export OutputFile= ",output_network_file, " options=PDF", sep="")
-  commandRun(em_command2)
-  em_command2 = paste("session save as file= ",paste(output_path,analysis_name,sep="/"), sep="")
-  commandRun(em_command2)
-  }}
+      output_network_file <- paste(gsea_working_path,"screenshot_network.pdf",sep="/")
+      em_command2 = paste("view export OutputFile= ",output_network_file, " options=PDF", sep="")
+      commandRun(em_command2)
+      em_command2 = paste("session save as file= ",paste(output_path,analysis_name,sep="/"), sep="")
+      commandRun(em_command2)
+    }
+  }
 }
-}, error=function(e){iserror=TRUE; print("Error running EnrichmentMap/Cytoscape");} )
 
 ```
 
-`r if(!iserror){if(gsea_section){ paste("[ GSEA Results ](",output_subdir,"/",gsea_working_dir,"/",gsea_output_dir,"/index.html)", sep="") }}`
-`r if(!iserror){if(enrichment_map & output_network_file!=FALSE){ paste(" | [ EnrichmentMap Image](",output_subdir,"/",gsea_working_dir,"/screenshot_network.pdf)", sep="") }}`
+`r if(gsea_section){ paste("[ GSEA Results ](",output_subdir,"/",gsea_working_dir,"/",gsea_output_dir,"/index.html)", sep="") }`
+`r if(enrichment_map & output_network_file!=FALSE){ paste(" | [ EnrichmentMap Image](",output_subdir,"/",gsea_working_dir,"/screenshot_network.pdf)", sep="") }`
 

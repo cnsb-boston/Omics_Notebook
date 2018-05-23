@@ -17,40 +17,40 @@
 #' 
 #' @export
 
-makeEset <- function(data, annotate, type='proteo', cutoff=0.05,
-                     format="MaxQuant") {
+makeEset <- function(data, annotate, type, cutoff,
+                     format) {
   data <- data[data[,"Potential.contaminant"]!='+',]; #remove potential contaminants
   data <- data[data[,"Reverse"]!='+',]; #remove reverse
   annotate[,"SampleName"] <- make.names(annotate[,"SampleName"] ); #format sample names
   
-  if (type=='proteo'){
+  if (format=='Protein.Groups..MQ.'){
     # pull out sample intensity values based on annotation
-    annotate[,"Intensity"] <- make.names(annotate[,"Intensity"] );
-    data.matrix <- as.matrix(data[, annotate[ (annotate[,"Intensity"]!="NA." & annotate[,"SampleName"]!="NA."),"Intensity"] ]);
+    annotate[,type] <- make.names(annotate[,type] );
+    data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
     # parse out protein namea
     data[,"Protein"] <- apply(data, 1, function(x) {
       if(grepl(';', x["Majority.protein.IDs"])){ substr(x["Majority.protein.IDs"], 0, 
                                                         unlist(gregexpr(';', x["Majority.protein.IDs"]))[1]-1)
       } else {x["Majority.protein.IDs"]} } );
   }
-  if(type=="phos"){
+  if(format=="Sites..MQ."){
     data <- data[ data[,"Diagnostic.peak"]!='+',]; #remove diagnostic features
     data <- data[ data[,"Localization.prob"]>=0.70 ,]; #filter low probability features
     
     # pull out sample intensity values based on annotation and collapse multiple sites
-    annotate[,"Phospho.Intensity"] <- make.names(annotate[,"Phospho.Intensity"] );
-    data1 <- data[, -grep(paste(annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"Phospho.Intensity"],
+    annotate[,type] <- make.names(annotate[,type] );
+    data1 <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
                                 collapse='|'), colnames(data)) ]; 
     data1 <- data1[rep(rownames(data1), 3),];
-    for (i in 1:length(annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"Phospho.Intensity"])){
-      cols.keep <- colnames(data)[grep(annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"Phospho.Intensity"][i],
+    for (i in 1:length(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type])){
+      cols.keep <- colnames(data)[grep(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type][i],
                                        colnames(data) )];  
       data1 <- cbind(data1, melt(data[, cols.keep], measure.vars=cols.keep,
                                  variable.name=paste("Phospho.Site.", i-1, sep=''),
-                                 value.name=annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"Phospho.Intensity"][i] ));
+                                 value.name=annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type][i] ));
     }
     data <- data1;
-    data.matrix <- as.matrix(data[,annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"Phospho.Intensity"]]);
+    data.matrix <- as.matrix(data[,annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type]]);
     # parse out protein namea
     data[,"Protein"] <- apply(data, 1, function(x) {
       if(grepl(';', x["Protein"])){ substr(x["Protein"], 0, 
@@ -58,6 +58,9 @@ makeEset <- function(data, annotate, type='proteo', cutoff=0.05,
       else {x["Protein"]} } );
   }
   
+  # log2 Intensity Values
+  data.matrix <- log2(data.matrix+1)
+
   # Make uniprot hyperlink
   data[, "Link"] <- paste("https://www.uniprot.org/uniprot/", data[,"Protein"], sep="")
   data[,"Uniprot"] <- paste("<a href='https://www.uniprot.org/uniprot/",data[,"Protein"],"'>",
@@ -71,29 +74,26 @@ makeEset <- function(data, annotate, type='proteo', cutoff=0.05,
   # Add uniprot annotation
   data <- cbind(data, addUniprotAnnotation(data[,"Protein"]))
   
-  # log 2 transform data
-  data.matrix <- log2(data.matrix+1)
-  
   # Make column and row names for data matrix
-  if(type=="proteo"){
-    colnames(data.matrix) <- annotate[ (annotate[,"Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
+  if(format=="Protein.Groups..MQ."){
+    colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
   } 
-  if (type=="phos"){
-    colnames(data.matrix) <- annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
+  if (format=="Sites..MQ."){
+    colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
   }
   rownames(data.matrix) <- rownames(data)
   
   # make expression set object
   eset <- ExpressionSet(assayData=data.matrix)
-  if (type=='proteo'){
-    fData(eset) <- data[, -grep(paste(annotate[ (annotate[,"Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"Intensity"],
+  if (format=='Protein.Groups..MQ.'){
+    fData(eset) <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
                                       collapse='|'), colnames(data)) ];
-    pData(eset) <- cbind(annotate[ (annotate[,"Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
+    pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
   }
-  if(type=='phos'){
-    fData(eset) <- data[, -grep(paste(annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),"Phospho.Intensity"],
+  if(format=='Sites..MQ.'){
+    fData(eset) <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
                                       collapse='|'), colnames(data)) ];
-    pData(eset) <- cbind(annotate[ (annotate[,"Phospho.Intensity"]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
+    pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
   }
   rownames(pData(eset)) <- colnames(data.matrix)
   
@@ -140,7 +140,7 @@ addUniprotAnnotation <- function(IDs){
     info_url<-paste("http://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
                     "&query=accession%3A",paste(IDs_unique[ (1 + 100*(i-1)) : (100*i) ], collapse="+OR+accession%3A"), sep="")
     if(url.exists(info_url)==TRUE){
-      invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE))) )
+      invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE, quote=""))) )
       if (class(info_annot) != 'try-error') { if(dim(info_annot)[2]==length(uniprot_columns)+1){
         if(colnames(info_annot)[2]=="Function..CC."){ colnames(info_annot) <- colnames(annotUniprot)
                                                       annotUniprot <- rbind(annotUniprot, info_annot) }
@@ -152,7 +152,7 @@ addUniprotAnnotation <- function(IDs){
                   "&query=accession%3A",paste(IDs_unique[ ((length(IDs) %/% 100)*100) : (((length(IDs_unique) %/% 100)*100) + (length(IDs_unique) %% 100))],
                                               collapse="+OR+accession%3A"), sep="")
   if(url.exists(info_url)==TRUE){
-    invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE))) )
+    invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE, quote=""))) )
     if (class(info_annot) != 'try-error') {  if(dim(info_annot)[2]==length(uniprot_columns)+1){
       if(colnames(info_annot)[2]=="Function..CC."){ colnames(info_annot) <- colnames(annotUniprot)
                                                     annotUniprot <- rbind(annotUniprot, info_annot) }
