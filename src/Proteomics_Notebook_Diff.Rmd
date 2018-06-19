@@ -56,7 +56,7 @@ for(i in 1:length(omicsList)){
 output_links <- "";
 output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_contrast_subdir,"/volcano_",omicsList[[1]][["dataType"]],".pdf)", sep="")
 if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_contrast_subdir,"/volcano_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_contrast_subdir,"/volcano",omicsList[[i]][["dataType"]],".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
 } }
 
@@ -209,8 +209,7 @@ if(gsea_section==TRUE) {
   expression_file <- file.path(paste(output_files_subdir, "/Expression_matrix_",omicsList[[1]][["dataType"]],".txt", sep=""))
 
   # Only if you need a new GMT file
-  if(species=="Mouse"){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Mouse/symbol/"}
-  if(species=="Human"){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Mouse/symbol/"}
+  gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/"
   filenames = getURL(gmt_url)   #list all the files on the server
   tc = textConnection(filenames)
   contents = readLines(tc)
@@ -227,7 +226,7 @@ if(gsea_section==TRUE) {
                      dest_gmt_file, "-rnk" , rnk_file,
                      #"-cls",paste(working.dir,cls_filename,sep="/"),
                      "-collapse false -nperm 1000 -permute gene_set -scoring_scheme weighted -rpt_label",
-                     analysis_name,"  -num 100 -plot_top_x 20 -rnd_seed 12345  -set_max 500 -set_min 15", 
+                     analysis_name,"  -num 100 -plot_top_x 20 -rnd_seed 12345  -set_max 200 -set_min 15", 
                      "-zip_report false -out" ,gsea_working_path, "-gui false > ",
                      paste(gsea_working_path,"gsea_output.txt", sep="/"),sep=" ")
     system(command)

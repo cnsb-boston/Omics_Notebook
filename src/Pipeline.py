@@ -169,6 +169,7 @@ class GUI(tk.Frame):
     
       outputfile.write("zero_percent <- " + str(cutoff_zero_val.get()) + ";\n")
       outputfile.write("adjpcutoff <- " + str(cutoff_fdr_val.get()) + ";\n")
+      outputfile.write("BUSCC <- TRUE;\n")
 
       outputfile.close()
       lbl.configure(text="Variables file created.")
