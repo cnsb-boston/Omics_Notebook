@@ -1,8 +1,8 @@
-project_name <- 'Analysis';
-working_dir <- '/projectnb/cnsbomic/ben/TorontoHeart'; # Directory for analysis and where data is 
-annotation_filename <- '/projectnb/cnsbomic/ben/TorontoHeart/Annotation.xlsx';
+project_name <- 'Matt Test#2';
+working_dir <- '/projectnb/cnsbomic/Matt/Test Run'; # Directory for analysis and where data is 
+annotation_filename <- '/projectnb/cnsbomic/Matt/Test Run/AnnotationML20180530.xlsx';
 saveXlsx <- TRUE;
-enrichr_section <- FALSE;
+enrichr_section <- TRUE;
 gsea_section <- TRUE;
 enrichment_map <- TRUE;
 map_color <- 'viridis';
@@ -11,7 +11,7 @@ norm_method <- 'loess';
 newcontrastonly <- FALSE;
 txtFolder <- FALSE;
 isInteractive <- TRUE;
-notebook_dir <- '/project/cnsbomic/Omics_NotePy/src';
+notebook_dir <- '/project/cnsbomic/Omics_Notebook/src';
 runDifferential <- TRUE;
 enrichmentmap_p_val <- 0.05;
 enrichmentmap_q_val <- 0.30;

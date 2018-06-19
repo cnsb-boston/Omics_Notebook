@@ -174,20 +174,7 @@ class GUI(tk.Frame):
       outputfile.close()
       lbl.configure(text="Variables file created.")
     
-      if isInteractive_state.get()==True:
-        pipeline_file = dir_path + "/pipeline.sh"
-        outputfile = open(pipeline_file, "w")
-        outputfile.write("#!/bin/bash\n")
-        outputfile.write("# run Interactive pipeline\n")
-        outputfile.write("source \"" + dir_path + "/pipelineInteractive.sh\"")
-        outputfile.close()
-      elif isInteractive_state.get()==False:
-        pipeline_file = dir_path + "/pipeline.sh"
-        outputfile = open(pipeline_file, "w")
-        outputfile.write("#!/bin/bash\n")
-        outputfile.write("# run pipeline as batch job\n")
-        outputfile.write("source \"" + dir_path + "/pipelineBatch.sh\"")
-        outputfile.close()
+
       quit()
     
     btn= tk.Button(self, text="Enter", command=clicked_button)
