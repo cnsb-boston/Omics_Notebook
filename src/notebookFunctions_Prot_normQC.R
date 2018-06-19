@@ -267,7 +267,7 @@ writeDataToSheets <- function(wb, eset, mapcolor=map_color, type){
   sampleCols <- annotCol$Group[1:length(levels(pData(eset)$Group))][pData(eset)$Group];
   mapcolor <- rev(brewer.pal(7, "RdYlBu"))
   
-  stName <- unlist(lookup[type])
+  stName <- type
   addWorksheet(wb=wb, sheetName=stName)
   
   links <- fData(eset)$Link

@@ -89,6 +89,13 @@ class GUI(tk.Frame):
     heatcolors['values']=('viridis', 'RdYlBu', 'RdBu')
     heatcolors.current(0)
     heatcolors.grid(column=1, row=14)
+    
+    species_lbl = tk.Label(self, text="Species:")
+    species_lbl.grid(column=0, row=15)
+    species = ttk.Combobox(self)
+    species['values']=('Human', 'Mouse')
+    species.current(0)
+    species.grid(column=1, row=15)
 
     txtFolder_lbl = tk.Label(self, text="txt Folder report:")
     txtFolder_lbl.grid(column=0, row=16)
@@ -119,7 +126,7 @@ class GUI(tk.Frame):
     enrichmentmap_q_val.grid(column=3, row=19)
 
     cutoff_lbl = tk.Label(self, text="Cut Offs:")
-    cutoff_lbl.grid(column=2, columnspan=1, row=17, pady=(20,0))
+    cutoff_lbl.grid(column=0, columnspan=1, row=17, pady=(20,0))
     cutoff_zero_lbl = tk.Label(self, text="Zero Percent:")
     cutoff_zero_lbl.grid(column=0, row=18)
     cutoff_zero_start = tk.StringVar(self)
@@ -149,6 +156,7 @@ class GUI(tk.Frame):
       outputfile.write("enrichment_map <- " + str(isInteractive_state.get()).upper() + ";\n")
 
       outputfile.write("map_color <- '" + str(heatcolors.get()) + "';\n")
+      outputfile.write("species <- '" + str(species.get()) + "';\n")
       outputfile.write("norm_method <- '" + str(normMethod.get()) + "';\n")
       outputfile.write("newcontrastonly <- " + str(newcontrast_state.get()).upper() + ";\n")
       outputfile.write("txtFolder <- " + str(txtFolder.get()).upper() + ";\n")

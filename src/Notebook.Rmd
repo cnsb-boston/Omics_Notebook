@@ -17,7 +17,7 @@ output:
 source("Variables.R")
 
 # Databases for enrichR search
-search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", "GO_Cellular_Component_2017b",
+search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_Component_2017b",
                       "GO_Molecular_Function_2017b", "HMDB_Metabolites", 
                       "MSigDB_Oncogenic_Signatures");
 
