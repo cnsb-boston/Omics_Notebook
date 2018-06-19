@@ -77,9 +77,9 @@ library(devtools)
 library(r2cytoscape)
 library(EasycyRest)
 
-source("notebookFunctions.R")
-source("notebookFunctions_Prot_normQC.R")
-source("notebookFunctions_Prot_Diff.R")
+source(file.path(notebook_dir,"notebookFunctions.R"))
+source(file.path(notebook_dir, "notebookFunctions_Prot_normQC.R"))
+source(file.path(notebook_dir, "notebookFunctions_Prot_Diff.R"))
 }, error=function(e){print("Error loading libraries and setting directories")} )
 # install.packages("open.xlsx")
 # source("http://bioconductor.org/biocLite.R")
@@ -157,24 +157,24 @@ if(newcontrastonly){
 knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messages=FALSE, fig.width=8, fig.height=12, knitr.duplicate.label="allow")
 ```
 
-```{r child='Proteomics_Notebook_NormQC.Rmd'}
+```{r child=file.path(notebook_dir, 'Proteomics_Notebook_NormQC.Rmd')}
 ```
 
-```{r child='Proteomics_Notebook_Diff.Rmd', eval=runDifferential}
+```{r child=file.path(notebook_dir, 'Proteomics_Notebook_Diff.Rmd'), eval=runDifferential}
 ```
 
 ```{r, echo=FALSE, eval=( length(contrastgroups)>2 & runDifferential ) }
 contrastgroups[2]<-contrastgroups[3]
 ```
 
-```{r child='Proteomics_Notebook_Diff.Rmd', eval=( length(contrastgroups)>2 & runDifferential )}
+```{r child=file.path(notebook_dir, 'Proteomics_Notebook_Diff.Rmd'), eval=( length(contrastgroups)>2 & runDifferential )}
 ```
 
 ```{r, echo=FALSE, eval=( length(contrastgroups)>3 & runDifferential ) }
 contrastgroups[2]<-contrastgroups[4]
 ```
 
-```{r child='Proteomics_Notebook_Diff.Rmd', eval=( length(contrastgroups)>3 & runDifferential )}
+```{r child=file.path(notebook_dir, 'Proteomics_Notebook_Diff.Rmd'), eval=( length(contrastgroups)>3 & runDifferential )}
 ```
 
 # Session Info

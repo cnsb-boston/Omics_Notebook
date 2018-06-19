@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-# Python script to take variables and write Variables.R and pipeline.sh scripts to run Omics_Notebook
+# Python script to take variables and write Variables.R and run Omics_Notebook
 
 import tkinter as tk
 from tkinter import ttk, filedialog
 import os
 import subprocess
+import sys
 
 class GUI(tk.Frame):
   def __init__(self, parent):
@@ -144,10 +145,13 @@ class GUI(tk.Frame):
     # SAVE VARIABLES FILE AND CLOSE COMMAND
     def clicked_button():
       dir_path = os.path.dirname(os.path.realpath(__file__))
-      variable_file = dir_path + "/Variables.R"
+      analysis_dir = str(tk.StringVar(self, value=fileDir).get()) 
+      
+      variable_file = analysis_dir + "/Variables.R"
       outputfile = open(variable_file, "w")
+      
       outputfile.write("project_name <- '" + nameProj_var.get() +"';\n")
-      outputfile.write("working_dir <- '" + str(tk.StringVar(self, value=fileDir).get()) + "'; # Directory for analysis and where data is \n")
+      outputfile.write("working_dir <- '" + analysis_dir + "'; # Directory for analysis and where data is \n")
       outputfile.write("annotation_filename <- '" + str(tk.StringVar(self, value=nameAnn).get()) + "';\n")
 
       outputfile.write("saveXlsx <- " + str(runXlsx_state.get()).upper() + ";\n")
@@ -173,9 +177,7 @@ class GUI(tk.Frame):
 
       outputfile.close()
       lbl.configure(text="Variables file created.")
-    
-
-      quit()
+      sys.exit(analysis_dir)
     
     btn= tk.Button(self, text="Enter", command=clicked_button)
     btn.grid(column=0, row=20, columnspan=3, pady=(20,0))
@@ -189,9 +191,9 @@ class GUI(tk.Frame):
     else:
       return False
 
-if __name__== "__main__":
-  root=tk.Tk()
-  root.title('Omics Notebook Setup')
-  GUI(root).pack(fill="both", expand=True)
-  root.mainloop()
+root=tk.Tk()
+root.title('Omics Notebook Setup')
+GUI(root).pack(fill="both", expand=True)
+root.mainloop()
+
 

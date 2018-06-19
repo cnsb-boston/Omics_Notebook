@@ -1,5 +1,6 @@
 import subprocess
 import os
+import sys
 
 # Get the location of the Notebook script
 notebook_path = os.path.dirname(os.path.abspath(__file__))
@@ -9,7 +10,8 @@ pipeline_path = os.path.normpath(notebook_path + "/src" + "/Pipeline.py")
 r_path = os.path.normpath(notebook_path + "/src" + "/Pipeline.R")
 
 # Run pipeline scripts
-subprocess.run(["python", pipeline_path])
+p = subprocess.Popen(args=["python", pipeline_path], stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+analysis_dir = str(p.communicate()[0], 'utf-8').rstrip()
 
-subprocess.run(["Rscript", r_path, notebook_path])
+subprocess.Popen(args=["Rscript", r_path, notebook_path, analysis_dir])
 
