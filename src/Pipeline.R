@@ -5,7 +5,8 @@ notebook_dir <- file.path(run_directories[6], "src");
 analysis_dir <- file.path(run_directories[7]);
 
 # source run variables
-source(file.path(analysis_dir,"Variables.R"));
+setwd(analysis_dir);
+source(file.path(analysis_dir, "Variables.R"));
 
 # set for BU SCC
 if(BUSCC==TRUE) {
@@ -19,6 +20,7 @@ library(rmarkdown);
 # run notebook
 rmarkdown::render(file.path(notebook_dir,'Notebook.Rmd'),
                   knit_root_dir=analysis_dir,
-                  output_file=paste("Analysis_Notebook_",Sys.Date(),".html", sep=""),
-                  output_dir=working_dir);
+                  intermediates_dir=analysis_dir,
+                  output_file=paste(gsub("\\.","",make.names(project_name)),"_",gsub("-","",Sys.Date()),".html", sep=""),
+                  output_dir=analysis_dir);
 

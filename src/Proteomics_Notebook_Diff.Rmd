@@ -4,7 +4,7 @@
 ```{r }
 #limma
 for(i in 1:length(omicsList)){
-  
+
   TS <- factor(pData(omicsList[[i]][["eSet"]])$Group); #paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
   design <- model.matrix(~ 0 + TS);
   colnames(design) <- make.names(levels(TS));
@@ -230,11 +230,11 @@ if(gsea_section==TRUE) {
                      "-zip_report false -out" ,gsea_working_path, "-gui false > ",
                      paste(gsea_working_path,"gsea_output.txt", sep="/"),sep=" ")
     system(command)
-    tmp<-list.files(notebook_dir) #clean up default output folder
+    tmp<-list.files(working_dir) #clean up default output folder
     tmp<-tmp[file.info(tmp)$isdir==TRUE]
     tmp<-tmp[!is.na(tmp)]
     if(length(tmp)==1){
-      if(nchar(tmp[1])==5){file.remove(paste(notebook_dir, tmp[1], sep="/")) }
+      if(nchar(tmp[1])==5){file.remove(paste(working_dir, tmp[1], sep="/")) }
     } 
   }
 }

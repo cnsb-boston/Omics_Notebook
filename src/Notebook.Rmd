@@ -35,7 +35,7 @@ enrichment_map <- isInteractive
 
 ```{r libraries, warning=FALSE, message=FALSE}
 tryCatch(expr={
-output_subdir <- paste("Analysis",gsub("-","",Sys.Date()), sep="_")
+output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
 output_files_subdir <- paste(output_subdir,"Files", sep="/")
 output_plots_subdir <- paste(output_subdir,"Plots", sep="/")
 output_path <- file.path(working_dir, output_subdir)
