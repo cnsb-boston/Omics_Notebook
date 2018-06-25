@@ -22,19 +22,14 @@ search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_
                       "MSigDB_Oncogenic_Signatures");
 
 # options
-#zero_percent <- 0.25 # features must be detected in atleast this fraction of samples
-#adjpcutoff <- 0.05 # FDR cutoff for differential analysis
 run_gsea <- gsea_section # if GSEA has already been run, set to false and include results in directory
-enrichment_map <- isInteractive
-
-# Configure filenames
-#annotation_filename <- paste(working_dir,annotation_filename, sep="/")
-#annotation.filename <- paste(working.dir,list.files(working.dir)[grep("Annotation+.*.xls+", list.files(working.dir))], sep="/")
+enrichment_map <- isInteractive # only run enrichment map if interactive session
 
 ```
 
 ```{r libraries, warning=FALSE, message=FALSE}
 tryCatch(expr={
+# Make output subdirectories
 output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
 output_files_subdir <- paste(output_subdir,"Files", sep="/")
 output_plots_subdir <- paste(output_subdir,"Plots", sep="/")
@@ -44,8 +39,11 @@ output_plots_path <- file.path(working_dir, output_plots_subdir)
 if( dir.exists(output_path) == FALSE ) {dir.create(output_path)}
 if( dir.exists(output_files_path) == FALSE ) {dir.create(output_files_path)}
 if( dir.exists(output_plots_path) == FALSE ) {dir.create(output_plots_path)}
-.libPaths("/project/cnsbomic/Tools/R")
 
+# Set library path for BU SCC
+if(BUSCC==TRUE) { .libPaths("/project/cnsbomic/Tools/R") }
+
+# Load pipeline libraries
 library(gdata)
 library(Biobase)
 library(limma)
@@ -77,15 +75,16 @@ library(devtools)
 library(r2cytoscape)
 library(EasycyRest)
 
+# Source function files
 source(file.path(notebook_dir,"notebookFunctions.R"))
 source(file.path(notebook_dir, "notebookFunctions_Prot_normQC.R"))
 source(file.path(notebook_dir, "notebookFunctions_Prot_Diff.R"))
 }, error=function(e){print("Error loading libraries and setting directories")} )
+
+
 # install.packages("open.xlsx")
 # source("http://bioconductor.org/biocLite.R")
 # biocLite("UniProt.ws")
-
-#Future work: add met, add wrapper, omics integrator
 
 ```
 
@@ -96,26 +95,31 @@ source(file.path(notebook_dir, "notebookFunctions_Prot_Diff.R"))
 
 # Import annotation file
 annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
-contrastgroups <- make.names(na.omit(t(annot[1,-1:-3])));
+contrastgroups <- gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3]))));
 annot<-annot[c(-1,-4),];
 
+# Make omicsList object
 omicsList <- vector("list", (nrow(annot)-2) )
 for (i in 3:nrow(annot)){
   omicsList[[i-2]] <- vector("list", 12);
   omicsList[[i-2]][1] <- make.names(annot[i,1]);
-  names(omicsList[[i-2]])[1] <- "dataType";
+  names(omicsList[[i-2]])[1] <- gsub("\\.","", make.names("dataType"));
   omicsList[[i-2]][2] <- make.names(annot[i,2]);
   names(omicsList[[i-2]])[2] <- "dataFormat";
   omicsList[[i-2]][[3]] <- annot[i,3];
   names(omicsList[[i-2]])[3] <- "filename";
 }
 
+# Format annotation table
 annot[3:nrow(annot),3] <- annot[3:nrow(annot),1];
 annot <- t(annot[,-1:-2]);
 rownames(annot) <- NULL;
 colnames(annot)<-annot[1,];
 annot<-data.frame((annot[-1,]));
+annot[,"Group"]<-gsub("\\.","",make.names(annot[,"Group"]))
+annot[,"SampleName"]<-gsub("\\.","",make.names(annot[,"SampleName"]))
 
+# Changes for generating txt report
 if(txtFolder==TRUE) {
   for (i in 1:length(omicsList)){
     omicsList[[i]][[3]] <- file.path(working_dir, "txt", omicsList[[i]][[3]])
@@ -126,8 +130,7 @@ if(txtFolder==TRUE) {
   }
 }
 
-
-# Import data and make esets
+# Import data and make eset objects
 if(!newcontrastonly){
   for (i in 1:length(omicsList)){
     omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE, check.names=FALSE));
@@ -137,11 +140,11 @@ if(!newcontrastonly){
     names(omicsList[[i]])[5] <- "eSet";
     
     print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[4]]), " features detected in raw data.", sep=""))
-    print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[5]]), " features detected in processed data.", sep=""))
+    print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[5]]), " features detected in filtered data.", sep=""))
   }
 }
 
-# Load daved data to save time
+# Load previously saved data - saves time
 if(newcontrastonly){
   for (i in 1:length(omicsList)){
     omicsList[[i]][[5]] <- readRDS(file=file.path(output_files_path, paste("Data_eset_", omicsList[[i]][[1]], ".RDS", sep="")))
@@ -163,19 +166,6 @@ knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messa
 ```{r child=file.path(notebook_dir, 'Proteomics_Notebook_Diff.Rmd'), eval=runDifferential}
 ```
 
-```{r, echo=FALSE, eval=( length(contrastgroups)>2 & runDifferential ) }
-contrastgroups[2]<-contrastgroups[3]
-```
-
-```{r child=file.path(notebook_dir, 'Proteomics_Notebook_Diff.Rmd'), eval=( length(contrastgroups)>2 & runDifferential )}
-```
-
-```{r, echo=FALSE, eval=( length(contrastgroups)>3 & runDifferential ) }
-contrastgroups[2]<-contrastgroups[4]
-```
-
-```{r child=file.path(notebook_dir, 'Proteomics_Notebook_Diff.Rmd'), eval=( length(contrastgroups)>3 & runDifferential )}
-```
 
 # Session Info
 ```{r session_info}

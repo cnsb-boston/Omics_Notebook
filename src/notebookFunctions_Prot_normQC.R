@@ -190,8 +190,8 @@ drawthemaps <- function(eset, emat_top, type, outputpath=output_plots_path,
                         mapcolor=map_color){
   
   annotLab <- data.frame(Group = factor(pData(eset)$Group));
-  annotCol <- list(Group = rainbow(length(levels(pData(eset)$Group))))
-  names(annotCol$Group) <- levels(annotLab$Group)
+  annotCol <- list(Group = rainbow(length(levels(factor(pData(eset)$Group)))))
+  names(annotCol$Group) <- levels(factor(annotLab$Group))
   ha_column <- HeatmapAnnotation(df=annotLab, col=annotCol)
   
   if(mapcolor=="viridis"){mapcolor <- viridis(11); maponeway <- viridis(11);

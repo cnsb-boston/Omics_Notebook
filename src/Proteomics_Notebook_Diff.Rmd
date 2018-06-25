@@ -1,46 +1,53 @@
-# Differential Analysis `r contrastgroups[2]` - `r contrastgroups[1]`  
+# Differential Analysis  
 
 ### Limma
 ```{r }
 #limma
 for(i in 1:length(omicsList)){
 
-  TS <- factor(pData(omicsList[[i]][["eSet"]])$Group); #paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
-  design <- model.matrix(~ 0 + TS);
-  colnames(design) <- make.names(levels(TS));
+  # Create a model matrix and lmFit based on group - For more complex models, edit the following code in this chunk.
+  f <- factor(pData(omicsList[[i]][["eSet"]])$Group, levels=contrastgroups); #paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
+  design <- model.matrix(~ 0 + f);
+  colnames(design) <- make.names(levels(f));
   fit1 <- lmFit( omicsList[[i]][["eSet"]], design);
   
-  if(contrastgroups[2]=="Others"){ contrast_matrix <- makeContrasts(contrastgroups[2], levels=design);
-  } else { contrast_matrix <- makeContrasts(paste(contrastgroups[2],'-',contrastgroups[1], sep=''), levels=design); }
-  
+  # Make all contrasts between groups
+  contrast_strings <- "";
+  for (j in 1:(length(contrastgroups)-1)){
+    for (k in (j+1):length(contrastgroups)){
+      contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[j], sep=''));
+  }  }
+  contrast_strings <- contrast_strings[-1]
+  contrast_matrix <- makeContrasts(contrasts=contrast_strings, levels=design);
+    
+  # Add the fit object to the omicsList
   fit1 <- contrasts.fit(fit1, contrast_matrix);
   omicsList[[i]][[7]] <- eBayes(fit1);
   names(omicsList[[i]])[7] <- "fit";
 
-  omicsList[[i]][[8]] <- topTable(omicsList[[i]][["fit"]], coef=1, adjust.method="BH", n=Inf, sort.by = 'p');
-  names(omicsList[[i]])[8] <- "limmaRes";
+  # Summary of the fit
+  end_col <- ncol(topTable(omicsList[[i]][["fit"]], adjust="BH"))
+  start_col <- end_col - (3+length(contrast_strings))
+  print(topTable(omicsList[[i]][["fit"]], adjust="BH")[,seq(start_col, end_col)])
   
-  
-  omicsList[[i]][[9]] <- subset(omicsList[[i]][["limmaRes"]], adj.P.Val < adjpcutoff);
-  names(omicsList[[i]])[9] <- "limmaRes_sig";
-
-  print(paste(omicsList[[i]][["dataType"]],": ", nrow(omicsList[[i]][["limmaRes_sig"]]), " features with differential intensities at an FDR less than ", adjpcutoff,".", sep="") );
-  print(paste("The top 10th percentile of differenital freature intensities has an FDR of ", 
-              omicsList[[i]][["limmaRes"]][0.1*nrow(omicsList[[i]][["limmaRes"]]),]$adj.P.Val,".", sep="") );
-  
-  if( nrow(omicsList[[i]][["limmaRes_sig"]]) < 100) { omicsList[[i]][["limmaRes_sig"]] <- omicsList[[i]][["limmaRes"]][1:(0.1*nrow(omicsList[[i]][["limmaRes"]])),] }
-  
+  # Save the decide tests results and print summary 
   omicsList[[i]][[10]] <- decideTests(omicsList[[i]][["fit"]]);
   names(omicsList[[i]])[10] <- "dt";
-  summary(omicsList[[i]][["dt"]])
+  print(summary(omicsList[[i]][["dt"]]))
+  vennDiagram(omicsList[[i]][["dt"]]);
+
+  # Save the information about the number of coeficients and the contrasts names
+  omicsList[[i]][[8]] <- length(contrast_strings)
+  names(omicsList[[i]])[8] <- "numCoef"
+  omicsList[[i]][[9]] <- contrast_strings
+  names(omicsList[[i]])[9] <- "contrasts"
   
 }
 
-output_contrast_subdir <- paste(output_subdir,gsub("\\.","",paste(contrastgroups[2],contrastgroups[1], sep="_")), sep="/" )
+# Make differential directory
+output_contrast_subdir <- paste(output_subdir,"Differential", sep="/" )
 output_contrast_path <- file.path(working_dir, output_contrast_subdir)
 if( dir.exists(output_contrast_path) == FALSE ) { dir.create(output_contrast_path) }
-
-#carat
 
 ```
 
@@ -48,16 +55,20 @@ if( dir.exists(output_contrast_path) == FALSE ) { dir.create(output_contrast_pat
 
 ### Volcano plots
 ```{r, message=FALSE, fig.width=4, fig.height=3}
+output_links <- "";
 
 for(i in 1:length(omicsList)){
-  makeVolcano(omicsList[[i]][["limmaRes"]], dt=omicsList[[i]][["dt"]], type=omicsList[[i]][["dataType"]]);
-}
-
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_contrast_subdir,"/volcano_",omicsList[[1]][["dataType"]],".pdf)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_contrast_subdir,"/volcano",omicsList[[i]][["dataType"]],".pdf)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
+  for(c in 1:omicsList[[i]][["numCoef"]]){
+    # For the data set and coefficient, make the summary table and name
+    top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
+    type_name <- paste(omicsList[[i]][["dataType"]],omicsList[[i]][["contrasts"]][c], sep="_");
+    
+    # run Volcan function
+    makeVolcano(top_sum, type=type_name);
+    
+    # Make output hyperlinks for markdown
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/volcano_",type_name,".pdf)", sep="")
+    output_links <- paste(output_links, add_link, sep=" | " )   
 } }
 
 ```
@@ -67,17 +78,23 @@ Click to view static volcano plots: `r if(output_links != ""){ output_links }`
 
 ### Differential Static Heatmaps
 ```{r, message=FALSE}
+output_links <- "";
 
 for(i in 1:length(omicsList)){
-  drawthemapsDiff(eset=omicsList[[i]][["eSet"]], dt=omicsList[[i]][["dt"]], limmaSig=omicsList[[i]][["limmaRes"]], type=omicsList[[i]][["dataType"]])
-}
-
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-Differential ](", output_contrast_subdir,"/heatmaps_",omicsList[[1]][["dataType"]],".pdf)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Differential ](", output_contrast_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
+  for(c in 1:omicsList[[i]][["numCoef"]]){
+    # For the data set and coefficient, make the summary table and name
+    top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c, p.value=adjpcutoff);
+    if (nrow(top_sum)<100){ top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=100, sort.by='p', coef=c); }
+    type_name <- paste(omicsList[[i]][["dataType"]],omicsList[[i]][["contrasts"]][c], sep="_");
+    
+    # run heatmap function
+    drawthemapsDiff(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name);
+    
+    # Make output hyperlinks for markdown
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="");
+    output_links <- paste(output_links, add_link, sep=" | " ); 
 } }
+
 
 ```
 Click to view static heatmap plots: `r if(output_links != ""){ output_links }`   
@@ -87,18 +104,20 @@ Click to view static heatmap plots: `r if(output_links != ""){ output_links }`
 
 ### Interactive Volcano Plots
 ```{r, warning=FALSE, message=FALSE}
+output_links <- "";
 
 for(i in 1:length(omicsList)){
-  makeInteractiveV(eset=omicsList[[i]][["eSet"]], fit=omicsList[[i]][["fit"]], dt=omicsList[[i]][["dt"]],
-                   limmaSig=omicsList[[i]][["limmaRes"]], type=omicsList[[i]][["dataType"]]);
-}
+  for(c in 1:omicsList[[i]][["numCoef"]]){
+    top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
+    type_name <- paste(omicsList[[i]][["dataType"]],omicsList[[i]][["contrasts"]][c], sep="_");
 
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",omicsList[[1]][["dataType"]],".html)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",omicsList[[i]][["dataType"]],".html)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
-} }
+    makeInteractiveV(eset=omicsList[[i]][["eSet"]], fit=omicsList[[i]][["fit"]], dt=omicsList[[i]][["dt"]],
+                     limmaSig=top_sum, type=type_name, col=c);
+
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",type_name,".html)", sep="");
+    output_links <- paste(output_links, add_link, sep=" | " ); 
+}  }
+
 
 ```
 Click to view interactive Volcano plots: `r if(output_links != ""){ output_links }`   
@@ -113,27 +132,42 @@ Click to view interactive Volcano plots: `r if(output_links != ""){ output_links
 
 output_links <- "";
 if(enrichr_section==TRUE){
-
-  for(i in 1:length(omicsList)){
-    runEnrichR(omicsList[[i]][["limmaRes_sig"]][, c("Gene", "logFC") ], type=omicsList[[i]][["dataType"]]) 
-  }
   
-  if(length(omicsList)>1){
-    
-    gene_table <- omicsList[[1]][["limmaRes_sig"]][, c("Gene", "logFC") ]
-    for(i in 2:length(omicsList)){
-      gene_table <- rbind(gene_table, omicsList[[i]][["limmaRes_sig"]][, c("Gene", "logFC") ])
-    }
-    runEnrichR(gene_table, type="combined" )
-  }
+  # Run Enrichr for each data type
+  for(i in 1:length(omicsList)){
+    for(c in 1:omicsList[[i]][["numCoef"]]){
+      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c, p.value=adjpcutoff);
+      if (nrow(top_sum)<50){ top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=50, sort.by='p', coef=c); }
+      type_name <- paste(omicsList[[i]][["dataType"]],omicsList[[i]][["contrasts"]][c], sep="_");
+      
+      runEnrichR(top_sum[, c("Gene", "logFC") ], type=type_name) 
 
-  output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-Up ](", output_contrast_subdir,"/enrichr_results_",omicsList[[1]][["dataType"]],"_up.txt) | ",
-                        "[ ",omicsList[[1]][["dataType"]], "-Down ](", output_contrast_subdir,"/enrichr_results_",omicsList[[1]][["dataType"]],"_down.txt)", sep="")
-  if(length(omicsList)>1) {  for (i in 2:length(omicsList)){
-    add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Up ](", output_contrast_subdir,"/enrichr_results_",omicsList[[i]][["dataType"]],"_up.txt) | ",
-                      "[ ",omicsList[[i]][["dataType"]], "-Down ](", output_contrast_subdir,"/enrichr_results_",omicsList[[i]][["dataType"]],"_down.txt)", sep="")
-    output_links <- paste(output_links, add_link, sep="  \n" )
-  } }
+
+      add_link <- paste("[ ",type_name, "-Up ](", output_contrast_subdir,"/enrichr_results_",type_name,"_up.txt) | ",
+                      "[ ",type_name, "-Down ](", output_contrast_subdir,"/enrichr_results_",type_name,"_down.txt)", sep="")
+      output_links <- paste(output_links, add_link, sep="  \n" )
+  }  }
+  
+  # Run enrichr for combined data
+  if(length(omicsList)>1){
+    for(c in 1:omicsList[[i]][["numCoef"]]){
+      type_name <- paste("Combined",omicsList[[i]][["contrasts"]][c], sep="_");
+      
+      gene_table <- topTable(omicsList[[1]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c, p.value=adjpcutoff);
+      if (nrow(gene_table)<50){ gene_table<-topTable(omicsList[[1]][["fit"]], adjust="BH", n=50, sort.by='p', coef=c)[, c("Gene", "logFC") ]; }
+      for(i in 2:length(omicsList)){
+        add_to_table <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c, p.value=adjpcutoff);
+        if (nrow(add_to_table)<50){ add_to_table<-topTable(omicsList[[i]][["fit"]], adjust="BH", n=50, sort.by='p', coef=c); }
+        gene_table <- rbind(gene_table, add_to_table[, c("Gene", "logFC") ])
+      }
+
+      runEnrichR(gene_table, type=type_name )
+
+      add_link <- paste("[ ",type_name, "-Up ](", output_contrast_subdir,"/enrichr_results_",type_name,"_up.txt) | ",
+                      "[ ",type_name, "-Down ](", output_contrast_subdir,"/enrichr_results_",type_name,"_down.txt)", sep="")
+      output_links <- paste(output_links, add_link, sep="  \n" )
+    }
+  }
 }
 
 ```
@@ -147,25 +181,33 @@ if(enrichr_section==TRUE){
 # save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
 
 for(i in 1:length(omicsList)){
-  saveTheFilesDiff(omicsList[[i]][["eSet"]], topTable(omicsList[[i]][["fit"]], coef=1, adjust.method="BH", 
-                                      n=Inf, sort.by = 'logFC'), type=omicsList[[i]][["dataType"]])
+  for (c in 1:(omicsList[[1]][["numCoef"]])){
+    top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
+    type_name <- paste(omicsList[[i]][["dataType"]],gsub("-","_",omicsList[[i]][["contrasts"]][c]), sep="_");
+    
+    saveTheFilesDiff(omicsList[[i]][["eSet"]], top_sum, type=type_name)
+  }
 }
 
 if(length(omicsList)>1){
-  ranked <- cbind(omicsList[[1]][["limmaRes"]][,"Gene"], sign(omicsList[[1]][["limmaRes"]][,"logFC"]) * -log10(omicsList[[1]][["limmaRes"]][,"adj.P.Val"])) 
+  for (c in 1:(omicsList[[1]][["numCoef"]])){
+    top_sum <- topTable(omicsList[[1]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=c)
+    ranked <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
+
+    for(i in 2:length(omicsList)){
+      top_sum <- topTable(omicsList[[i]][["fit"]], coef=c, adjust.method="BH", n=Inf, sort.by='p')
+      ranked1 <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
+      ranked <- rbind(ranked, ranked1)
+    }
   
-  if(length(omicsList)>1) { for(i in 2:length(omicsList)){
-    ranked1 <- cbind(omicsList[[i]][["limmaRes"]][,"Gene"], sign(omicsList[[i]][["limmaRes"]][,"logFC"]) * -log10(omicsList[[i]][["limmaRes"]][,"adj.P.Val"]))
-    ranked <- rbind(ranked, ranked1)
-  } }
-  
-  colnames(ranked)<-c("GeneName", "rank")
-  ranked <- ranked[ranked[,"GeneName"]!="", ]
-  ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-  ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-  ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-  output_filename <- file.path(output_contrast_path,"GSEA_rankedlist_combined.rnk");
-  write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    colnames(ranked)<-c("GeneName", "rank")
+    ranked <- ranked[ranked[,"GeneName"]!="", ]
+    ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
+    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
+    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
+    output_filename <- file.path(output_contrast_path,paste("GSEA_rankedlist_",gsub("-","_",omicsList[[i]][["contrasts"]][c]),"_combined.rnk", sep=""));
+    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+  }
 }
   
 if(runDifferential==TRUE && saveXlsx==TRUE){   
@@ -173,14 +215,14 @@ if(runDifferential==TRUE && saveXlsx==TRUE){
   wbOut <- createWorkbook()
 
   for(i in 1:length(omicsList)){
-    writeDataToSheetsDiff(wb=wbOut, eset=omicsList[[i]][["eSet"]], limmaRes=omicsList[[i]][["limmaRes"]], type=omicsList[[i]][["dataType"]]); 
+    writeDataToSheetsDiff(wb=wbOut, eset=omicsList[[i]][["eSet"]], limmaFit=omicsList[[i]][["fit"]], 
+                          type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]); 
   }  
   
-  output_filename=file.path(output_path, paste(project_name, "_Summary_", gsub("\\.","",contrastgroups[2]), "-",gsub("\\.","",contrastgroups[1]), ".xlsx", sep=""))
+  output_filename=file.path(output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary", ".xlsx", sep=""))
   saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
   
 }
-
 ```
 
 ---
@@ -198,14 +240,22 @@ if(gsea_section==TRUE) {
          error = function(e) { install.packages("RJSONIO")}, finally = library(RJSONIO))
   
   gsea_jar <- "/project/cnsbomic/Tools/gsea-3.0.jar"
-  analysis_name <- gsub("-","_",gsub("\\.","",colnames(omicsList[[1]][["dt"]])))
-  gsea_working_dir <- gsub("\\.", "_", paste("GSEA_", analysis_name, sep=""))
+
+  analysis_names <- vector("list", omicsList[[1]][["numCoef"]])
+  for (i in 1:length(analysis_names)){
+    analysis_names[[i]] <- gsub("-", "_", omicsList[[1]][["contrasts"]][i])
+  }
+
+  gsea_working_dir <- "GSEA"#gsub("\\.", "_", paste("GSEA_", analysis_name, sep=""))
   gsea_working_path <- file.path(output_path, gsea_working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
   
-  if(length(omicsList)>1){ rnk_file <- paste(output_contrast_path, "GSEA_rankedlist_combined.rnk", sep="/")
-  } else { rnk_file <- paste(output_contrast_path,"/GSEA_rankedlist_",omicsList[[i]][["dataType"]],".rnk", sep="") }
-  
+  rnk_files <-vector("list", omicsList[[1]][["numCoef"]])
+  for (i in 1:length(analysis_names)){  
+    if(length(omicsList)>1){ 
+      rnk_files[[i]] <- paste(output_contrast_path, "/GSEA_rankedlist_",gsub("-","_",omicsList[[1]][["contrasts"]][c]),"_combined.rnk", sep="")
+    } else { rnk_files[[i]] <- paste(output_contrast_path,"/GSEA_rankedlist_",gsub("-","_",omicsList[[1]][["dataType"]]),"_",omicsList[[1]][["contrasts"]][c],".rnk", sep="") }
+  }
   expression_file <- file.path(paste(output_files_subdir, "/Expression_matrix_",omicsList[[1]][["dataType"]],".txt", sep=""))
 
   # Only if you need a new GMT file
@@ -222,20 +272,24 @@ if(gsea_section==TRUE) {
   download.file(paste(gmt_url,gmt_file,sep=""),destfile=dest_gmt_file)
 
   if(run_gsea){
-    command <- paste("java  -Xmx1G -cp",gsea_jar,  "xtools.gsea.GseaPreranked -gmx",
-                     dest_gmt_file, "-rnk" , rnk_file,
-                     #"-cls",paste(working.dir,cls_filename,sep="/"),
-                     "-collapse false -nperm 1000 -permute gene_set -scoring_scheme weighted -rpt_label",
-                     analysis_name,"  -num 100 -plot_top_x 20 -rnd_seed 12345  -set_max 200 -set_min 15", 
-                     "-zip_report false -out" ,gsea_working_path, "-gui false > ",
-                     paste(gsea_working_path,"gsea_output.txt", sep="/"),sep=" ")
-    system(command)
-    tmp<-list.files(working_dir) #clean up default output folder
-    tmp<-tmp[file.info(tmp)$isdir==TRUE]
-    tmp<-tmp[!is.na(tmp)]
-    if(length(tmp)==1){
-      if(nchar(tmp[1])==5){file.remove(paste(working_dir, tmp[1], sep="/")) }
-    } 
+    for (i in 1:length(analysis_names)){
+      analysis_name <- analysis_names[[i]]
+      rnk_file <- rnk_files[[i]]
+      command <- paste("java  -Xmx1G -cp",gsea_jar,  "xtools.gsea.GseaPreranked -gmx",
+                       dest_gmt_file, "-rnk" , rnk_file,
+                       #"-cls",paste(working.dir,cls_filename,sep="/"),
+                       "-collapse false -nperm 1000 -permute gene_set -scoring_scheme weighted -rpt_label",
+                       analysis_name,"  -num 100 -plot_top_x 20 -rnd_seed 12345  -set_max 200 -set_min 15", 
+                       "-zip_report false -out" ,gsea_working_path, "-gui false > ",
+                       paste(gsea_working_path,"gsea_output.txt", sep="/"),sep=" ")
+      system(command)
+      tmp<-list.files(working_dir) #clean up default output folder
+      tmp<-tmp[file.info(tmp)$isdir==TRUE]
+      tmp<-tmp[!is.na(tmp)]
+      if(length(tmp)==1){
+        if(nchar(tmp[1])==5){file.remove(paste(working_dir, tmp[1], sep="/")) }
+      } 
+    }
   }
 }
 
@@ -253,7 +307,7 @@ if(enrichment_map && gsea_section){
   gsea_directories <- list.files(path = gsea_working_path, pattern = "\\.GseaPreranked")
   details = file.info(gsea_directories) #get the details on the files
   details = details[with(details, order(as.POSIXct(mtime),decreasing = TRUE)), ]
-  gsea_output_dir <- row.names(details)[1]   #use the newest file
+  gsea_output_dir <- row.names(details)[length(analysis_names)]   #use the first file of this batch
   gsea_output_path <- paste(gsea_working_path, gsea_output_dir, sep="/")
   
   # Basic settings
@@ -297,7 +351,7 @@ if(enrichment_map && gsea_section){
                    'pvalue=',pvalue_gsea_threshold, 'qvalue=',qvalue_gsea_threshold,
                    'similaritycutoff=',similarity_threshold,
                    'coefficients=',similarity_metric,
-                   'ranksDataset1=',rnk_file,
+                   'ranksDataset1=',rnk_files[1],
                    'enrichmentsDataset1=',gsea_results_filename, 'filterByExpressions=false',
                    'expressionDataset1=',paste(working_dir,expression_file,sep="/"),
                    sep=" ")

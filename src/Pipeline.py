@@ -144,7 +144,7 @@ class GUI(tk.Frame):
 
     # SAVE VARIABLES FILE AND CLOSE COMMAND
     def clicked_button():
-      dir_path = os.path.dirname(os.path.realpath(__file__))
+      dir_path = os.path.normpath(os.path.dirname(os.path.realpath(__file__)))
       analysis_dir = str(tk.StringVar(self, value=fileDir).get()) 
       
       variable_file = analysis_dir + "/Variables.R"
