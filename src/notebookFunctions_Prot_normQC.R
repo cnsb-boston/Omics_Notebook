@@ -186,7 +186,7 @@ variationPlotFilter <- function(eset, type, outputpath=output_plots_path,
 #' @examples
 #' 
 #' @export
-drawthemaps <- function(eset, emat_top, type, outputpath=output_plots_path,
+drawthemaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_path,
                         mapcolor=map_color){
   
   annotLab <- data.frame(Group = factor(pData(eset)$Group));
@@ -213,12 +213,15 @@ drawthemaps <- function(eset, emat_top, type, outputpath=output_plots_path,
                column_title=paste(type, ": All proteins, log2 Intensity", sep='') ))
   
   # variation filter, z score
-  emat_sel <- emat_top
-  emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
-  emat_sel[emat_sel < -2] <- -2
-  emat_sel[emat_sel > 2] <- 2
-  draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
-               column_title=paste(type, ": Highest variation, row z score", sep='') ))
+  if ( class(emat_top) =="matrix" ){
+    emat_sel <- emat_top
+    emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
+    emat_sel[emat_sel < -2] <- -2
+    emat_sel[emat_sel > 2] <- 2
+    draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
+                 column_title=paste(type, ": Highest variation, row z score", sep='') ))
+  }
+  
   tmp<-dev.off();
 }
 
