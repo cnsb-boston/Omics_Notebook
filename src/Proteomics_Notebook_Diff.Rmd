@@ -6,7 +6,8 @@
 for(i in 1:length(omicsList)){
 
   # Create a model matrix and lmFit based on group - For more complex models, edit the following code in this chunk.
-  f <- factor(pData(omicsList[[i]][["eSet"]])$Group, levels=contrastgroups); #paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
+  f <- factor(pData(omicsList[[i]][["eSet"]])$Group)#, levels=contrastgroups); 
+  #paste(pData(eset)Group, pData(eset1)$Disease, sep='.'))
   design <- model.matrix(~ 0 + f);
   colnames(design) <- make.names(levels(f));
   fit1 <- lmFit( omicsList[[i]][["eSet"]], design);
