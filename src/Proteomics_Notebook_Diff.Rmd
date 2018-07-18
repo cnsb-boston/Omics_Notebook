@@ -35,7 +35,7 @@ for(i in 1:length(omicsList)){
   omicsList[[i]][[10]] <- decideTests(omicsList[[i]][["fit"]]);
   names(omicsList[[i]])[10] <- "dt";
   print(summary(omicsList[[i]][["dt"]]))
-  vennDiagram(omicsList[[i]][["dt"]]);
+  #vennDiagram(omicsList[[i]][["dt"]]);
 
   # Save the information about the number of coeficients and the contrasts names
   omicsList[[i]][[8]] <- length(contrast_strings)
@@ -230,7 +230,8 @@ if(runDifferential==TRUE && saveXlsx==TRUE){
 
 `r if(gsea_section){"### GSEA and EnrichmentMap"}`
 ```{r, results='hide', message=FALSE, warning=FALSE, error=FALSE}
-output_network_file <- FALSE
+output_network_file <- FALSE;
+output_links <- "";
 
 if(gsea_section==TRUE) {
   tryCatch(expr = { library(RCurl)}, 
@@ -292,6 +293,18 @@ if(gsea_section==TRUE) {
       } 
     }
   }
+  
+  gsea_directories <- list.files(path = gsea_working_path, pattern = "\\.GseaPreranked")
+  details = file.info(file.path(gsea_working_path, gsea_directories)) #get the details on the files
+  details = details[with(details, order(as.POSIXct(mtime),decreasing = TRUE)), ]
+  gsea_subdir_names <- gsub("(.*)/","", rev(row.names(details)[1:length(analysis_names)]))
+  
+  for (i in 1:length(analysis_names)){
+    add_link <- paste("[ ",analysis_names[[i]], " ](", output_subdir,"/",gsea_working_dir,"/",gsea_subdir_names[i],"/index.html)", sep="");
+    output_links <- paste(output_links, add_link, sep=" | " ); 
+  }
+  
+  gsea_output_paths <- rev(row.names(details)[1:length(analysis_names)])
 }
 
 if(enrichment_map && gsea_section){
@@ -304,13 +317,7 @@ if(enrichment_map && gsea_section){
   tryCatch(expr = { library(EasycyRest)}, 
           error = function(e) { install_github('BaderLab/Easycyrest/EasycyRest')},
           finally = library(EasycyRest))
-    
-  gsea_directories <- list.files(path = gsea_working_path, pattern = "\\.GseaPreranked")
-  details = file.info(gsea_directories) #get the details on the files
-  details = details[with(details, order(as.POSIXct(mtime),decreasing = TRUE)), ]
-  gsea_output_dir <- row.names(details)[length(analysis_names)]   #use the first file of this batch
-  gsea_output_path <- paste(gsea_working_path, gsea_output_dir, sep="/")
-  
+
   # Basic settings
   port.number = 1234
   base.url = paste("http://localhost:", toString(port.number), "/v1", sep="")
@@ -330,30 +337,29 @@ if(enrichment_map && gsea_section){
     print(cy.version)
   } 
 
-  # MOVE TO PYTHON VARAIBLES SCRIPT EVERNTUALLY
   #defined threshold for GSEA enrichments (need to be strings for cyrest call)
   pvalue_gsea_threshold <- enrichmentmap_p_val
   qvalue_gsea_threshold <- enrichmentmap_q_val
   similarity_threshold <- "0.375"
   similarity_metric = "COMBINED"
 
-  cur_model_name <- analysis_name
-  gsea_results_path <- paste(gsea_output_path,"edb",sep="/")
-  gsea_results_filename <- paste(gsea_results_path,"results.edb",sep="/")
+  cur_model_name <- analysis_names[1]
+  current_network_name <- paste(cur_model_name,pvalue_gsea_threshold,qvalue_gsea_threshold,sep="_")
+  
+  gsea_results_paths <- paste(gsea_output_paths,"edb",sep="/")
+  gsea_results_filenames <- paste(gsea_results_paths,"results.edb",sep="/")
 
   # Although there is a gmt file in the gsea edb results directory it have been filtered to contain only genes represented in the expression set.  
   # If you use this fltered file you will get different pathway connectivity depending on the dataset being used.  
   # We recommend using original gmt file used for the gsea analysis and not the filtered one in the results directory.
   gmt_gsea_file <- paste(dest_gmt_file,sep="/")
 
-  current_network_name <- paste(cur_model_name,pvalue_gsea_threshold,qvalue_gsea_threshold,sep="_")
-
   em_command = paste('enrichmentmap build analysisType="gsea" gmtFile=',gmt_gsea_file,
                    'pvalue=',pvalue_gsea_threshold, 'qvalue=',qvalue_gsea_threshold,
                    'similaritycutoff=',similarity_threshold,
                    'coefficients=',similarity_metric,
                    'ranksDataset1=',rnk_files[1],
-                   'enrichmentsDataset1=',gsea_results_filename, 'filterByExpressions=false',
+                   'enrichmentsDataset1=',gsea_results_filenames[1], 'filterByExpressions=false',
                    'expressionDataset1=',paste(working_dir,expression_file,sep="/"),
                    sep=" ")
 
@@ -362,24 +368,29 @@ if(enrichment_map && gsea_section){
 
   current_network_suid <- 0
   #enrichment map command will return the suid of newly created network unless it Failed.  If it failed it will contain the word failed
-  if(length(response)>0){ #fix for not getting suid
-    if(grepl(pattern="Failed", response)){
-      paste(response)
-    } else {
-      current_network_suid <- response
-      response <- renameNetwork(new.name = current_network_name, network = current_network_suid, base.url)
+  tryCatch({
+    if(length(response)>0){ #fix for not getting suid
+      if(grepl(pattern="Failed", response)){
+        paste(response)
+      } else {
+        current_network_suid <- response
+        response <- renameNetwork(new.name = current_network_name, network = current_network_suid, base.url)
   
-      output_network_file <- paste(gsea_working_path,"screenshot_network.pdf",sep="/")
-      em_command2 = paste("view export OutputFile= ",output_network_file, " options=PDF", sep="")
-      commandRun(em_command2)
-      em_command2 = paste("session save as file= ",paste(output_path,analysis_name,sep="/"), sep="")
-      commandRun(em_command2)
+        output_network_file <- paste(gsea_working_path,"screenshot_network.pdf",sep="/")
+        em_command2 = paste("view export OutputFile= ",output_network_file, " options=PDF", sep="")
+        commandRun(em_command2)
+        em_command2 = paste("session save as file= ",paste(output_path,curr_model_name,sep="/"), sep="")
+        commandRun(em_command2)
+      }
     }
-  }
+  }, error=function(e){output_network_file=FALSE})
 }
 
 ```
+`r if(gsea_section){"Click below to view GSEA results:  "}`
+`r if(gsea_section){ if(output_links != ""){ output_links }}`
 
-`r if(gsea_section){ paste("[ GSEA Results ](",output_subdir,"/",gsea_working_dir,"/",gsea_output_dir,"/index.html)", sep="") }`
-`r if(enrichment_map & output_network_file!=FALSE){ paste(" | [ EnrichmentMap Image](",output_subdir,"/",gsea_working_dir,"/screenshot_network.pdf)", sep="") }`
+`r if(enrichment_map & output_network_file!=FALSE){ "Click to view EnrichmentMap screen shot: \n"}`
+`r if(enrichment_map & output_network_file!=FALSE){ paste(" | [ EnrichmentMap Image](",output_subdir,"/",gsea_working_dir,"/screenshot_network.pdf)", sep="") }`  
+`r if(enrichment_map & output_network_file!=FALSE){ "If multiple contrasts, load GSEA results into Cytoscape/EnrichmentMap manually."}`
 
