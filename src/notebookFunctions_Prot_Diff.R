@@ -151,32 +151,24 @@ drawthemapsDiff <- function(eset, limmaSig, type, outputcontrastpath=output_cont
   tmp<-dev.off();
 }
 
-
-
-makeInteractiveHM <- function(eset, type, outputpath=output_plots_path,mapcolor=map_color ){
-  
-  annotCol <- c("red", "green", "blue", "yellow", "green", "purple",
-                "brown", "black", "grey", "orange", "white", "light green", 
-                "pink", "light blue" );
-  sampleCols <- annotCol[1:length(levels(pData(eset)$Group))][pData(eset)$Group];
-  
-  if(mapcolor=="viridis"){mapcolor <- viridis(11)
-  } else {mapcolor <- colorRampPalette(rev(brewer.pal(11, mapcolor))) }
-  
-  #   emat.sel <- exprs(eset[rownames(eset) %in% rownames(limmaSig),])
-  output_filename <- file.path(outputpath, paste("heatmap_all_",type,".html", sep=''));
-  emat_sel <- exprs(eset)
-  emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
-  emat_sel[emat_sel < -2] <- -2
-  emat_sel[emat_sel > 2] <- 2
-  invisible(capture.output(tmp<-heatmaply(emat_sel, scale='none', margins=c(100,100,40,20),
-                                          col_side_colors=pData(eset)$Group,
-                                          colors=mapcolor,file=output_filename )));
-  rm(tmp)
-}
-
-saveTheFilesDiff <- function(eset, limmaRes, type, outputcontrastpath=output_contrast_path){
-  output_filename <- file.path(outputcontrastpath,paste("GSEA_rankedlist_",type,".rnk", sep=''));
+#-------------------------------------------------
+#' Save Files Differential
+#'
+#' This function saves txt files relevant to the differential analysis for subsequent use
+#' 
+#' @param eset an ExpressionSet object with proteomics data
+#' @param limmaRes topTable output
+#' @param type Type of data to be processed
+#' @param contrast_name name of the contrast
+#' @param outputcontrastpath output file path
+#'
+#' @return
+#' 
+#' @examples
+#' 
+#' @export
+saveTheFilesDiff <- function(eset, limmaRes, type, contrast_name, outputcontrastpath=output_contrast_path){
+  output_filename <- file.path(outputcontrastpath,paste("GSEA_",type, gsub("-","_",contrast_name),".rnk", sep=''));
   ranked <- cbind(limmaRes[,"Gene"],sign(limmaRes[,"logFC"]) * -log10(limmaRes[,"adj.P.Val"]))
   colnames(ranked)<-c("GeneName", "rank")
   colnames(ranked)<-c("GeneName", "rank")
@@ -187,8 +179,25 @@ saveTheFilesDiff <- function(eset, limmaRes, type, outputcontrastpath=output_con
 }
 
 
-
-
+#-------------------------------------------------
+#' Write data to sheets Differential
+#'
+#' This function outputs summary data to an excel sheet to share with collaborators
+#' 
+#' @param wb an openxlsx workbook object
+#' @param eset an ExpressionSet object with proteomics data
+#' @param limmaFit a lmFit object
+#' @param type Type of data to be processed
+#' @param data_format format of data to be processed
+#' @param mapcolor specifies color scale to use for heatmap: "viridis" "RdBu" "RdYlBu"
+#' @param contrastnames specifies names of the contrasts/coefficients in the lmFit object
+#'
+#' @return wb with summary data formatted
+#' 
+#' @examples
+#' 
+#' @export
+#' 
 writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_color, type, contrastnames=contrastgroups){
   
   # Create table for each coefficient
@@ -234,11 +243,14 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
   names <- make.unique(toupper(c("Gene", "Protein", "Uniprot", colnames(eset), rep(c("P.Value","adj.P.Val","logFC"),length(DiffList)),
                          "Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
                          "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID", colnames(eset) )))
-  # Add phospho probabilities
+  
+  # Add phospho site probabilities and data
   if(data_format=="Sites..MQ.") { 
     formatted_table <- data.frame(cbind(formatted_table, fData(eset)[,"Localization.prob"],
-                                        fData(eset)[,grep("Probabilities", colnames(fData(eset)))] ) )
-    names <- c(names, "Localization Probability","Site Probabilities")
+                                        fData(eset)[,grep("Probabilities", colnames(fData(eset)))],
+                                        paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep=""),
+                                        fData(eset)[,"Sequence.window"] ) )
+    names <- c(names, "Localization Probability","Site Probabilities", "Amino Acid", "Peptide Sequence")
   }
   
   colnames(formatted_table) <-  names
@@ -288,6 +300,9 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
   freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
   addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", fontColour='black'),
            rows=1:2, cols=1:length(names),gridExpand=TRUE, stack=TRUE)   
+  
+  # Don't treat gene names as dates
+  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(numFmt="TEXT"), rows=3:(2+nrow(eset)), cols=1, gridExpand=TRUE )
   
   # Set row heights and column widths
   setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)

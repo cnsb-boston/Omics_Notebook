@@ -20,18 +20,18 @@ if(txtFolder && !newcontrastonly){
 
 ### Normalization: Boxplot and Distribution
 ```{r boxplots_QC_and_norm, message=FALSE, warning=FALSE, fig.width=12, fig.height=4}
+output_links <- "";
+
 if(!newcontrastonly){
   for(i in 1:length(omicsList)){
     omicsList[[i]][[5]] <- QCandNorm(eset=omicsList[[i]][[5]], type=omicsList[[i]][[1]], norm=norm_method)
+    
+    # Make output hyperlinks for markdown
+    add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,
+                      "/boxplot_histogram_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+    output_links <- paste(output_links, add_link, sep=" | " )
   }
 }
-
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_plots_subdir,"/boxplot_histogram_",omicsList[[1]][["dataType"]],".pdf)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/boxplot_histogram_",omicsList[[i]][["dataType"]],".pdf)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
-} }
 
 ```
 Click to view full size images: `r if(output_links != ""){ output_links }`  
@@ -40,17 +40,15 @@ Click to view full size images: `r if(output_links != ""){ output_links }`
 
 ### PCA Plots
 ```{r PCA_plots, results='hide', fig.keep='all', fig.width=12, fig.height=4}
+output_links <- "";
 
 for(i in 1:length(omicsList)){
   plot.pca(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
-}
-
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_plots_subdir,"/PCAplots_",omicsList[[1]][["dataType"]],".pdf)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
+  
+  # Make output hyperlinks for markdown
   add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
-} }
+}
 
 ```
 Click to view full size images: `r if(output_links != ""){ output_links }`  
@@ -83,22 +81,20 @@ grid.draw(venn);
 
 ### Variation Plots, Filtering
 ```{r variation, message=FALSE, warning=FALSE}
+output_links <- "";
 
 if(!newcontrastonly){
   for(i in 1:length(omicsList)){
     omicsList[[i]][[6]] <- variationPlotFilter(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
     names(omicsList[[i]])[6] <- "topVariableMatrix";
+    
+    # Make output hyperlinks for markdown
+    add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Variation ](", output_plots_subdir,"/variation_",
+                      omicsList[[i]][["dataType"]],".pdf) | ","[ ",omicsList[[i]][["dataType"]], "-Pairs ](",
+                      output_plots_subdir,"/variation_",omicsList[[i]][["dataType"]],".jpeg)", sep="");
+    output_links <- paste(output_links, add_link, sep="  \n" );
   }
 }
-
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-Variation ](", output_plots_subdir,"/variation_",omicsList[[1]][["dataType"]],".pdf) | ",
-                      "[ ",omicsList[[1]][["dataType"]], "-Pairs ](", output_plots_subdir,"/variation_",omicsList[[1]][["dataType"]],".jpeg)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Variation ](", output_plots_subdir,"/variation_",omicsList[[i]][["dataType"]],".pdf) | ",
-                      "[ ",omicsList[[i]][["dataType"]], "-Pairs ](", output_plots_subdir,"/variation_",omicsList[[i]][["dataType"]],".jpeg)", sep="")
-  output_links <- paste(output_links, add_link, sep="  \n" )
-} }
   
 ```
 Click below to view SD vs Mean and Pairs plots:  
@@ -108,19 +104,17 @@ Click below to view SD vs Mean and Pairs plots:
 
 ### Global Static Heatmaps
 ```{r heatmaps_qc, message=FALSE}
+output_links <- "";
 
 if(!newcontrastonly){
   for(i in 1:length(omicsList)){
     drawthemaps(eset=omicsList[[i]][["eSet"]], emat_top=omicsList[[i]][["topVariableMatrix"]], type=omicsList[[i]][["dataType"]]);
+    
+    # Make output hyperlinks for markdown
+    add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+    output_links <- paste(output_links, add_link, sep=" | " )
   }
 }
-
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[1]][["dataType"]],".pdf)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
-} }
 
 ```
 Click to view static heatmaps plots: `r if(output_links != ""){ output_links }`  
@@ -129,19 +123,18 @@ Click to view static heatmaps plots: `r if(output_links != ""){ output_links }`
 
 ### Interactive Heatmap
 ```{r interactive_plots_qc, warning=FALSE, message=FALSE}
+output_links <- "";
 
 if(!newcontrastonly){
   for(i in 1:length(omicsList)){
     makeInteractiveHM(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+    
+    # Make output hyperlinks for markdown
+    add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-All ](", output_plots_subdir,"/heatmap_all_",
+                      omicsList[[i]][["dataType"]],".html)", sep="");
+    output_links <- paste(output_links, add_link, sep=" | " );
   }
 }
-
-output_links <- "";
-output_links <- paste("[ ",omicsList[[1]][["dataType"]], "-All ](", output_plots_subdir,"/heatmap_all_",omicsList[[1]][["dataType"]],".html)", sep="")
-if(length(omicsList)>1) { for (i in 2:length(omicsList)){
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-All ](", output_plots_subdir,"/heatmap_all_",omicsList[[i]][["dataType"]],".html)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
-} }
 
 ```
 
@@ -160,8 +153,8 @@ if(!newcontrastonly){
   }
 }  
 
-if(newcontrastonly==FALSE && runDifferential==FALSE && saveXlsx==TRUE){   
-  
+# Save excel file summary for collaborators
+if(newcontrastonly==FALSE && runDifferential==FALSE && saveXlsx==TRUE){    
   wbOut <- createWorkbook()
   
   for(i in 1:length(omicsList)){

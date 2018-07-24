@@ -143,7 +143,7 @@ if(enrichr_section==TRUE){
       
       runEnrichR(top_sum[, c("Gene", "logFC") ], type=type_name) 
 
-
+      # Make output hyperlinks for markdown
       add_link <- paste("[ ",type_name, "-Up ](", output_contrast_subdir,"/enrichr_results_",type_name,"_up.txt) | ",
                       "[ ",type_name, "-Down ](", output_contrast_subdir,"/enrichr_results_",type_name,"_down.txt)", sep="")
       output_links <- paste(output_links, add_link, sep="  \n" )
@@ -163,7 +163,8 @@ if(enrichr_section==TRUE){
       }
 
       runEnrichR(gene_table, type=type_name )
-
+      
+      # Make output hyperlinks for markdown
       add_link <- paste("[ ",type_name, "-Up ](", output_contrast_subdir,"/enrichr_results_",type_name,"_up.txt) | ",
                       "[ ",type_name, "-Down ](", output_contrast_subdir,"/enrichr_results_",type_name,"_down.txt)", sep="")
       output_links <- paste(output_links, add_link, sep="  \n" )
@@ -186,7 +187,7 @@ for(i in 1:length(omicsList)){
     top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
     type_name <- paste(omicsList[[i]][["dataType"]],gsub("-","_",omicsList[[i]][["contrasts"]][c]), sep="_");
     
-    saveTheFilesDiff(omicsList[[i]][["eSet"]], top_sum, type=type_name)
+    saveTheFilesDiff(omicsList[[i]][["eSet"]], top_sum, type=type_name, contrast_name=omicsList[[i]][["conrasts"]][c])
   }
 }
 
@@ -206,13 +207,14 @@ if(length(omicsList)>1){
     ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
     ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
     ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    output_filename <- file.path(output_contrast_path,paste("GSEA_rankedlist_",gsub("-","_",omicsList[[i]][["contrasts"]][c]),"_combined.rnk", sep=""));
+    output_filename <- file.path(output_contrast_path,paste("GSEA_combined",gsub("-","_",omicsList[[i]][["contrasts"]][c]),".rnk", sep=""));
     write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
   }
 }
   
 if(runDifferential==TRUE && saveXlsx==TRUE){   
   
+  # Save excel file summary for collaborators
   wbOut <- createWorkbook()
 
   for(i in 1:length(omicsList)){
@@ -255,8 +257,8 @@ if(gsea_section==TRUE) {
   rnk_files <-vector("list", omicsList[[1]][["numCoef"]])
   for (i in 1:length(analysis_names)){  
     if(length(omicsList)>1){ 
-      rnk_files[[i]] <- paste(output_contrast_path, "/GSEA_rankedlist_",gsub("-","_",omicsList[[1]][["contrasts"]][c]),"_combined.rnk", sep="")
-    } else { rnk_files[[i]] <- paste(output_contrast_path,"/GSEA_rankedlist_",gsub("-","_",omicsList[[1]][["dataType"]]),"_",omicsList[[1]][["contrasts"]][c],".rnk", sep="") }
+      rnk_files[[i]] <- paste(output_contrast_path, "/GSEA_combined",gsub("-","_",omicsList[[1]][["contrasts"]][c]),".rnk", sep="")
+    } else { rnk_files[[i]] <- paste(output_contrast_path,"/GSEA_",gsub("-","_",omicsList[[1]][["dataType"]]),"_",gsub("-","_",omicsList[[1]][["contrasts"]][c]),".rnk", sep="") }
   }
   expression_file <- file.path(paste(output_files_subdir, "/Expression_matrix_",omicsList[[1]][["dataType"]],".txt", sep=""))
 

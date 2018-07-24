@@ -81,11 +81,6 @@ source(file.path(notebook_dir, "notebookFunctions_Prot_normQC.R"))
 source(file.path(notebook_dir, "notebookFunctions_Prot_Diff.R"))
 }, error=function(e){print("Error loading libraries and setting directories")} )
 
-
-# install.packages("open.xlsx")
-# source("http://bioconductor.org/biocLite.R")
-# biocLite("UniProt.ws")
-
 ```
 
 

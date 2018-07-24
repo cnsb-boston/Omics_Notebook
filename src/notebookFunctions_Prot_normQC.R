@@ -224,7 +224,21 @@ drawthemaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_path
   
   tmp<-dev.off();
 }
-
+#-------------------------------------------------
+#' Make Interactive Heatmap
+#'
+#' This function generates an interactive heatmap
+#' 
+#' @param eset an ExpressionSet object with proteomics data
+#' @param type Type of data to be processed
+#' @param outputpath output file path for plots
+#' @mapcolor specifies color scale to use for heatmap: "viridis" "RdBu" "RdYlBu"
+#'
+#' @return
+#' 
+#' @examples
+#' 
+#' @export
 makeInteractiveHM <- function(eset, type, outputpath=output_plots_path,mapcolor=map_color ){
   
   annotCol <- c("red", "green", "blue", "yellow", "green", "purple",
@@ -246,7 +260,22 @@ makeInteractiveHM <- function(eset, type, outputpath=output_plots_path,mapcolor=
                                           colors=mapcolor,file=output_filename )));
   rm(tmp)
 }
-
+#-------------------------------------------------
+#' Save Files
+#'
+#' This function saves txt files for subsequent use
+#' 
+#' @param eset an ExpressionSet object with proteomics data
+#' @param type Type of data to be processed
+#' @param outputpath output file path
+#' @param workingdir specifies the working directory
+#' @param saveTheEset specifies whether or not to save the eset as an RDS object
+#'
+#' @return
+#' 
+#' @examples
+#' 
+#' @export
 saveTheFiles <- function(eset, type, outputpath=output_files_path, workingdir=working_dir,
                          saveTheEset=!newcontrastonly){
   if(saveTheEset){
@@ -262,8 +291,23 @@ saveTheFiles <- function(eset, type, outputpath=output_files_path, workingdir=wo
   write.table(x=fData(eset)[,"Protein"], 
               file=output_filename, sep='\t',row.names=FALSE, col.names=FALSE, quote=FALSE);
 }
-
-writeDataToSheets <- function(wb, eset, mapcolor=map_color, type){
+#-------------------------------------------------
+#' Write data to sheets
+#'
+#' This function outputs summary data to an excel sheet to share with collaborators
+#' 
+#' @param wb an openxlsx workbook object
+#' @param eset an ExpressionSet object with proteomics data
+#' @param type Type of data to be processed
+#' @param data_format format of data to be processed
+#' @param mapcolor specifies color scale to use for heatmap: "viridis" "RdBu" "RdYlBu"
+#'
+#' @return wb with summary data formatted
+#' 
+#' @examples
+#' 
+#' @export
+writeDataToSheets <- function(wb, eset, data_format, mapcolor=map_color, type){
   
   annotLab <- data.frame(Group = factor(pData(eset)$Group));
   annotCol <- list(Group = gsub('.{2}$','', rainbow(length(levels(pData(eset)$Group)))))
@@ -286,8 +330,16 @@ writeDataToSheets <- function(wb, eset, mapcolor=map_color, type){
                                       exprs(eset) ))
   names <- make.unique(c("Gene", "Protein", "Uniprot", colnames(eset), "Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
                          "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID", colnames(eset) ))
-  if(type=="phospho") { formatted_table <- data.frame(cbind(formatted_table, fData(eset)[,"Phospho..STY..Probabilities"]))
-                        names <- c(names, "Phospho..STY..Probabilities")}
+  
+  # Add phospho site probabilities and data
+  if(data_format=="Sites..MQ.") { 
+    formatted_table <- data.frame(cbind(formatted_table, fData(eset)[,"Localization.prob"],
+                                        fData(eset)[,grep("Probabilities", colnames(fData(eset)))],
+                                        paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep=""),
+                                        fData(eset)[,"Sequence.window"] ) )
+    names <- c(names, "Localization Probability","Site Probabilities", "Amino Acid", "Peptide Sequence")
+  }
+  
   colnames(formatted_table) <- names
   
   writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
@@ -312,6 +364,9 @@ writeDataToSheets <- function(wb, eset, mapcolor=map_color, type){
   
   freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
   addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", fontColour='black'), rows=1:2, cols=1:(3+ncol(eset)+9+ncol(eset)),gridExpand=TRUE, stack=TRUE)   
+  
+  # Don't treat gene names as dates
+  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(numFmt="TEXT"), rows=3:(2+nrow(eset)), cols=1, gridExpand=TRUE )
   
   setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)
   setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+9+ncol(eset)), widths=c(16,50,16,rep(4, ncol(eset)),50,50,50, 50,50,50, 8,8,8, rep(4, ncol(eset)) ))

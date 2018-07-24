@@ -9,6 +9,7 @@
 #' @param type Type of data to be processed
 #' @param cutoff Fraction of samples that must be non-zero to include feature in analysis
 #' @param format Format of data
+#' @param uniprot_annotation Whether or not to query uniprot for annotation info
 #'
 #' @return an expression set object
 #' 
@@ -18,7 +19,7 @@
 #' @export
 
 makeEset <- function(data, annotate, type, cutoff,
-                     format) {
+                     format, uniprot_annotation=TRUE) {
   data <- data[data[,"Potential.contaminant"]!='+',]; #remove potential contaminants
   data <- data[data[,"Reverse"]!='+',]; #remove reverse
   annotate[,"SampleName"] <- make.names(annotate[,"SampleName"] ); #format sample names
@@ -72,7 +73,7 @@ makeEset <- function(data, annotate, type, cutoff,
   rownames(data) <- make.unique(data[,"Gene"]); 
   
   # Add uniprot annotation
-  data <- cbind(data, addUniprotAnnotation(data[,"Protein"]))
+  if(uniprot_annotation == TRUE) { data <- cbind(data, addUniprotAnnotation(data[,"Protein"])) }
   
   # Make column and row names for data matrix
   if(format=="Protein.Groups..MQ."){
@@ -123,16 +124,19 @@ makeEset <- function(data, annotate, type, cutoff,
 
 addUniprotAnnotation <- function(IDs){
   
+  # Uniprot entries to fetch (and col names)
   uniprot_columns <- c("comment(FUNCTION)", "comment(SUBCELLULAR LOCATION)", "comment(DISEASE)",
                      "go(biological process)", "go(molecular function)", "go(cellular component)", "go-id", "database(Reactome)", "database(KEGG)",
                      "database(BioCyc)", "database(Ensembl)", "database(ChEMBL)", "database(IntAct)","database(STRING)")
   uniprot_col_names <- c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
                        "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID",
                        "BioCyc_ID", "Ensembl_ID", "ChEMBL_ID", "IntAct_ID","STRING_ID")
-
+  
+  # create data frame for storing info
   annotUniprot <- data.frame(matrix(ncol=length(uniprot_col_names)+1))
   colnames(annotUniprot) <- c("ENTRY", uniprot_col_names)
-
+  
+  # List of uniprot IDs (remove duplicates for speed)
   IDs_unique <- IDs[!duplicated(IDs)] #get unique IDs
   
   # Query uniprot server 100 entries at a time
