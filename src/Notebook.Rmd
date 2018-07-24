@@ -131,7 +131,8 @@ if(!newcontrastonly){
     omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE, check.names=FALSE));
     names(omicsList[[i]])[4] <- "RawData";
     
-    omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], format=omicsList[[i]][[2]], cutoff=zero_percent)
+    omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
+                                    data_format=omicsList[[i]][[2]], cutoff=zero_percent)
     names(omicsList[[i]])[5] <- "eSet";
     
     print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[4]]), " features detected in raw data.", sep=""))

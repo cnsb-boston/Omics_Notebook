@@ -245,7 +245,7 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
                          "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID", colnames(eset) )))
   
   # Add phospho site probabilities and data
-  if(data_format=="Sites..MQ.") { 
+  if("Sites..MQ." %in% data_format) { 
     formatted_table <- data.frame(cbind(formatted_table, fData(eset)[,"Localization.prob"],
                                         fData(eset)[,grep("Probabilities", colnames(fData(eset)))],
                                         paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep=""),

@@ -8,7 +8,7 @@
 #' @param annotate An annotation data frame
 #' @param type Type of data to be processed
 #' @param cutoff Fraction of samples that must be non-zero to include feature in analysis
-#' @param format Format of data
+#' @param data_format Format of data
 #' @param uniprot_annotation Whether or not to query uniprot for annotation info
 #'
 #' @return an expression set object
@@ -19,7 +19,7 @@
 #' @export
 
 makeEset <- function(data, annotate, type, cutoff,
-                     format, uniprot_annotation=TRUE) {
+                     data_format, uniprot_annotation=TRUE) {
   data <- data[data[,"Potential.contaminant"]!='+',]; #remove potential contaminants
   data <- data[data[,"Reverse"]!='+',]; #remove reverse
   annotate[,"SampleName"] <- make.names(annotate[,"SampleName"] ); #format sample names
@@ -34,7 +34,7 @@ makeEset <- function(data, annotate, type, cutoff,
                                                         unlist(gregexpr(';', x["Majority.protein.IDs"]))[1]-1)
       } else {x["Majority.protein.IDs"]} } );
   }
-  if(format=="Sites..MQ."){
+  if("Sites..MQ." %in% format){
     data <- data[ data[,"Diagnostic.peak"]!='+',]; #remove diagnostic features
     data <- data[ data[,"Localization.prob"]>=0.70 ,]; #filter low probability features
     
@@ -79,7 +79,7 @@ makeEset <- function(data, annotate, type, cutoff,
   if(format=="Protein.Groups..MQ."){
     colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
   } 
-  if (format=="Sites..MQ."){
+  if ("Sites..MQ." %in% format){
     colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
   }
   rownames(data.matrix) <- rownames(data)
@@ -91,7 +91,7 @@ makeEset <- function(data, annotate, type, cutoff,
                                       collapse='|'), colnames(data)) ];
     pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
   }
-  if(format=='Sites..MQ.'){
+  if("Sites..MQ." %in% format){
     fData(eset) <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
                                       collapse='|'), colnames(data)) ];
     pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
