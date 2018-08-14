@@ -146,10 +146,11 @@ Click to view interactive heatmaps: `r if(output_links != ""){ output_links }`
 ```{r save_data_qc, message=FALSE }
 
 # save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
-
 if(!newcontrastonly){
   for(i in 1:length(omicsList)){
-    saveTheFiles(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+    if(omicsList[[i]][["dataType"]] != "Generic"){
+      saveTheFiles(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+    }
   }
 }  
 

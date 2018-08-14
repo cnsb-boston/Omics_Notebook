@@ -112,7 +112,7 @@ rownames(annot) <- NULL;
 colnames(annot)<-annot[1,];
 annot<-data.frame((annot[-1,]));
 annot[,"Group"]<-gsub("\\.","",make.names(annot[,"Group"]))
-annot[,"SampleName"]<-gsub("\\.","",make.names(annot[,"SampleName"]))
+annot[,"SampleName"]<-gsub("\\.","",make.names(unique(annot[,"SampleName"])))
 
 # Changes for generating txt report
 if(txtFolder==TRUE) {

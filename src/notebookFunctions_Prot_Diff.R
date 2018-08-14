@@ -106,9 +106,9 @@ runEnrichR <- function (genes, type, search_dat=search_databases,
   enriched_down <- enriched_down[order(enriched_down[,"Adjusted.P.value"]),]
   
   output_filename <- file.path(outputpath,paste("enrichr_results_", type,"_up.txt", sep='')); 
-  write.table(enriched_up, file=output_filename, sep="\t");
+  write.table(enriched_up, file=output_filename, sep="\t", row.names=FALSE);
   output_filename <- file.path(outputpath,paste("enrichr_results_", type,"_down.txt", sep='')); 
-  write.table(enriched_down, file=output_filename, sep="\t");
+  write.table(enriched_down, file=output_filename, sep="\t", row.names=FALSE);
 }
 
 #-------------------------------------------------
@@ -143,7 +143,7 @@ drawthemapsDiff <- function(eset, limmaSig, type, outputcontrastpath=output_cont
   
   # limma differential expression, z score
   emat_sel <- exprs(eset[rownames(eset) %in% rownames(limmaSig),])
-  emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
+  emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
   emat_sel[emat_sel < -2] <- -2
   emat_sel[emat_sel > 2] <- 2 
   draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
@@ -198,7 +198,7 @@ saveTheFilesDiff <- function(eset, limmaRes, type, contrast_name, outputcontrast
 #' 
 #' @export
 #' 
-writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_color, type, contrastnames=contrastgroups){
+writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_color, type){
   
   # Create table for each coefficient
   DiffList <- vector("list", (ncol(limmaFit$coefficients)) )
@@ -220,15 +220,20 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
   addWorksheet(wb=wb, sheetName=stName)
   
   # Format Uniprot hyperlinks
-  links <- fData(eset)$Link
-  names(links) <- fData(eset)$Protein
-  class(links) <- "hyperlink"
+  if ("Link" %in% colnames(fData(eset)) ){
+    links <- fData(eset)$Link
+    names(links) <- fData(eset)$Protein
+    class(links) <- "hyperlink"
+  }
   
   # Make row z-score values for "heatmap"
   emat_sel <- t(scale(t(exprs(eset)))) # Z-score across rows
   emat_sel[emat_sel < -2] <- -2
   emat_sel[emat_sel > 2] <- 2
   
+  if ( !("Gene" %in% colnames(fData(eset))) ){ fData(eset)$Gene <- rownames(exprs(eset)) }
+  if ( !("Protein.names" %in% colnames(fData(eset))) ){ fData(eset)$Protein.names <- rownames(exprs(eset)) }
+  if ( !("Protein" %in% colnames(fData(eset))) ){ fData(eset)$Protein <- rownames(exprs(eset)) }
   # Create the data table
   formatted_table<-""
   formatted_table <- cbind(fData(eset)[,c("Gene", "Protein.names", "Protein")],emat_sel,stringsAsFactors=FALSE )
@@ -236,13 +241,20 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
     DiffList[[i]] <- DiffList[[i]][match(rownames(DiffList[[1]]),rownames(DiffList[[i]])),]
     formatted_table <- cbind(formatted_table, DiffList[[i]][,c("P.Value","adj.P.Val","logFC")], stringsAsFactors=FALSE)
   }
-  formatted_table<- data.frame(cbind(formatted_table, fData(eset)[,c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                                                     "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID")],
-                                      exprs(eset), stringsAsFactors=FALSE ), stringsAsFactors=FALSE)
+  if(data_format != "Generic"){
+    formatted_table<- data.frame(cbind(formatted_table, fData(eset)[,c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
+                                                       "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID")],
+                                        stringsAsFactors=FALSE ), stringsAsFactors=FALSE)
+  }
+  formatted_table<- data.frame(cbind(formatted_table, exprs(eset), stringsAsFactors=FALSE ), stringsAsFactors=FALSE)
+  
   # Create column names
-  names <- make.unique(toupper(c("Gene", "Protein", "Uniprot", colnames(eset), rep(c("P.Value","adj.P.Val","logFC"),length(DiffList)),
-                         "Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                         "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID", colnames(eset) )))
+  names <- make.unique(toupper(c("Gene", "Protein", "Uniprot", colnames(eset), rep(c("P.Value","adj.P.Val","logFC"),length(DiffList)) )))
+  if(data_format != "Generic"){
+    names <- c(names, make.unique(toupper(c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease","GO_biological_process",
+                                            "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID" ))))
+  }
+  names <- make.unique(c(names,toupper( colnames(eset) )))
   
   # Add phospho site probabilities and data
   if("Sites..MQ." %in% data_format) { 
@@ -257,7 +269,7 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
   
   # Write data table to sheet
   writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
-  writeData(wb=wb, sheet=stName, x=links, xy=c("C",3))
+  if ("Link" %in% colnames(fData(eset)) ){ writeData(wb=wb, sheet=stName, x=links, xy=c("C",3)) }
 
   # Add heatmap color
   conditionalFormatting(wb=wb, sheet=stName, type="colourScale", cols=4:(3+ncol(eset)), rows=3:(2+nrow(eset)), style=mapcolor[c(1,4,7)])
@@ -267,7 +279,6 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
     conditionalFormatting(wb=wb, sheet=stName, cols= ((3*i)+ncol(exprs(eset))+3), rows=3:(3+nrow(eset)), type="colourScale", style=mapcolor[c(1,4,7)])
   }
   
-  
   # Rotate text for sample names
   for (c in 1:ncol(eset)){
     addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"),
@@ -275,7 +286,7 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
   }
   for (c in 1:ncol(eset)){
     addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"),
-             rows=2, cols=(c+3+(3*length(DiffList))+9+ncol(eset)) )
+             rows=2, cols=(c + ( length(names) - ncol(eset) )  ) )
   }
   
   # Merge cells and add Intensity title
@@ -292,9 +303,9 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
   }
   
   # Add final intensity title
-  mergeCells(wb=wb, sheet=stName, rows=1, cols=(13+(4*length(DiffList))+ncol(eset)):(12+(4*length(DiffList))+(2*ncol(eset))) )
-  writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c((11+(4*length(DiffList))+ncol(eset)),1))
-  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=(13+(4*length(DiffList))+ncol(eset)), stack=TRUE)
+  mergeCells(wb=wb, sheet=stName, rows=1, cols=( length(names) : ( length(names) - ncol(eset) + 1 )) )
+  writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c(( length(names) - ncol(eset) ),1))
+  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=( length(names) - ncol(eset) ), stack=TRUE)
   
   # Freeze columns/rows and bold column titles
   freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
@@ -306,7 +317,11 @@ writeDataToSheetsDiff <- function(wb, eset, limmaFit, data_format, mapcolor=map_
   
   # Set row heights and column widths
   setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)
-  setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+9+(3*length(DiffList))+ncol(eset)), widths=c(16,50,16,rep(4, ncol(eset)), rep(c(8,8,8),length(DiffList)), 50,50,50, 50,50,50, 8,8,8, rep(4, ncol(eset)) ))
+  if (data_format != "Generic"){
+  setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+9+(3*length(DiffList))+ncol(eset)), 
+               widths=c(16,50,16,rep(4, ncol(eset)), rep(c(8,8,8),length(DiffList)), 50,50,50, 50,50,50, 8,8,8, rep(4, ncol(eset)) ))
+  } else {   setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+(3*length(DiffList))+ncol(eset)), 
+                          widths=c(16,50,16,rep(4, ncol(eset)), rep(c(8,8,8),length(DiffList)), rep(4, ncol(eset)) )) }
 }
 
 #writeDataToSheetsDiff <- function(wb, eset, limmaRes, mapcolor=map_color, type, contrastnames=contrastgroups){

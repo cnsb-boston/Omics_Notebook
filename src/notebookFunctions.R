@@ -20,13 +20,23 @@
 
 makeEset <- function(data, annotate, type, cutoff,
                      data_format, uniprot_annotation=TRUE) {
-  data <- data[data[,"Potential.contaminant"]!='+',]; #remove potential contaminants
-  data <- data[data[,"Reverse"]!='+',]; #remove reverse
-  annotate[,"SampleName"] <- make.names(annotate[,"SampleName"] ); #format sample names
   
-  if (format=='Protein.Groups..MQ.'){
+  if( grepl(".MQ.", data_format) ){
+    if ( ("Potential.contaminant" %in% colnames(data)) ){
+      if( "+" %in%  data[,"Potential.contaminant"] ) {
+        data <- data[data[,"Potential.contaminant"]!='+',]; #remove potential contaminants
+    } }
+    if ("Reverse" %in% colnames(data)){
+      if( "+" %in%  data[,"Potential.contaminant"] ) {
+        data <- data[data[,"Reverse"]!='+',]; #remove reverse
+    } }
+    annotate[,"SampleName"] <- make.names(annotate[,"SampleName"] ); #format sample names
+  }
+  
+  annotate[,type] <- make.names(annotate[,type] ); # data column headers
+  
+  if (data_format=='Protein.Groups..MQ.'){
     # pull out sample intensity values based on annotation
-    annotate[,type] <- make.names(annotate[,type] );
     data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
     # parse out protein namea
     data[,"Protein"] <- apply(data, 1, function(x) {
@@ -34,12 +44,11 @@ makeEset <- function(data, annotate, type, cutoff,
                                                         unlist(gregexpr(';', x["Majority.protein.IDs"]))[1]-1)
       } else {x["Majority.protein.IDs"]} } );
   }
-  if("Sites..MQ." %in% format){
+  if( grepl("Sites..MQ.", data_format) ){
     data <- data[ data[,"Diagnostic.peak"]!='+',]; #remove diagnostic features
     data <- data[ data[,"Localization.prob"]>=0.70 ,]; #filter low probability features
     
     # pull out sample intensity values based on annotation and collapse multiple sites
-    annotate[,type] <- make.names(annotate[,type] );
     data1 <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
                                 collapse='|'), colnames(data)) ]; 
     data1 <- data1[rep(rownames(data1), 3),];
@@ -59,43 +68,45 @@ makeEset <- function(data, annotate, type, cutoff,
       else {x["Protein"]} } );
   }
   
+  if( data_format=="Generic" ){
+    data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
+    rownames(data) <- make.unique(data[,1]);
+  }
+  
   # log2 Intensity Values
   data.matrix <- log2(data.matrix+1)
 
-  # Make uniprot hyperlink
-  data[, "Link"] <- paste("https://www.uniprot.org/uniprot/", data[,"Protein"], sep="")
-  data[,"Uniprot"] <- paste("<a href='https://www.uniprot.org/uniprot/",data[,"Protein"],"'>",
-                            data[,"Protein"],"</a>", sep="")
-  # Get gene names
-  data[,"Gene"] <- apply(data, 1, function(x) {
-    if(grepl(';', x["Gene.names"])){ substr(x["Gene.names"], 0, unlist(gregexpr(';', x["Gene.names"]))[1]-1)
-    } else {x["Gene.names"]} } );
-  rownames(data) <- make.unique(data[,"Gene"]); 
-  
-  # Add uniprot annotation
-  if(uniprot_annotation == TRUE) { data <- cbind(data, addUniprotAnnotation(data[,"Protein"])) }
+  if( grepl(".MQ.", data_format) ){
+    if ( "Protein" %in% colnames(data) ){
+      # Make uniprot hyperlink
+      data[, "Link"] <- paste("https://www.uniprot.org/uniprot/", data[,"Protein"], sep="")
+      data[,"Uniprot"] <- paste("<a href='https://www.uniprot.org/uniprot/",data[,"Protein"],"'>",
+                                data[,"Protein"],"</a>", sep="")
+      # Add uniprot annotation
+      if(uniprot_annotation == TRUE) { data <- cbind(data, addUniprotAnnotation(IDs=data[,"Protein"])) }
+    }
+    if ( "Gene.names" %in% colnames(data) ){
+    # Get gene names
+      data[,"Gene"] <- apply(data, 1, function(x) {
+        if(grepl(';', x["Gene.names"])){ substr(x["Gene.names"], 0, unlist(gregexpr(';', x["Gene.names"]))[1]-1)
+        } else {x["Gene.names"]} } );
+      rownames(data) <- make.unique(data[,"Gene"]); 
+    } else {  rownames(data) <- make.unique(data[,1]); }
+  }
   
   # Make column and row names for data matrix
-  if(format=="Protein.Groups..MQ."){
-    colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
-  } 
-  if ("Sites..MQ." %in% format){
-    colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
-  }
+  colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
   rownames(data.matrix) <- rownames(data)
   
   # make expression set object
   eset <- ExpressionSet(assayData=data.matrix)
-  if (format=='Protein.Groups..MQ.'){
-    fData(eset) <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
-                                      collapse='|'), colnames(data)) ];
-    pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
-  }
-  if("Sites..MQ." %in% format){
-    fData(eset) <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
-                                      collapse='|'), colnames(data)) ];
-    pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),], colnames(exprs(eset)));
-  }
+
+  fData(eset) <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
+                                    collapse='|'), colnames(data)) ];
+  pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),],
+                       colnames(exprs(eset)));
+
+  if( !("Gene" %in% colnames(fData(eset))) ){ pData(eset)$Gene <- rownames(eset) }
   rownames(pData(eset)) <- colnames(data.matrix)
   
   # filter out features not detected in enough samples

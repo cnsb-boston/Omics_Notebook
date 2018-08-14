@@ -94,7 +94,7 @@ class GUI(tk.Frame):
     species_lbl = tk.Label(self, text="Species:")
     species_lbl.grid(column=0, row=15)
     species = ttk.Combobox(self)
-    species['values']=('Human', 'Mouse')
+    species['values']=('Human', 'Mouse', 'Other')
     species.current(0)
     species.grid(column=1, row=15)
 

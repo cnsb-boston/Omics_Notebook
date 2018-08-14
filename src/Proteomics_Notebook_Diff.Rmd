@@ -127,12 +127,12 @@ Click to view interactive Volcano plots: `r if(output_links != ""){ output_links
 ---
 
 ## Enrichment
-`r if(enrichr_section){"### EnrichR"}`
+`r if(enrichr_section & species!="Other" ){"### EnrichR"}`
 ```{r, message=FALSE, results='hide' }
 # enrichR, save GSEA ranked list, eventually add run GSEA
 
 output_links <- "";
-if(enrichr_section==TRUE){
+if(enrichr_section==TRUE & species!="Other" ){
   
   # Run Enrichr for each data type
   for(i in 1:length(omicsList)){
@@ -230,12 +230,12 @@ if(runDifferential==TRUE && saveXlsx==TRUE){
 
 ---
 
-`r if(gsea_section){"### GSEA and EnrichmentMap"}`
+`r if(gsea_section & species!="Other" ){"### GSEA and EnrichmentMap"}`
 ```{r, results='hide', message=FALSE, warning=FALSE, error=FALSE}
 output_network_file <- FALSE;
 output_links <- "";
 
-if(gsea_section==TRUE) {
+if(gsea_section==TRUE & species!="Other" ) {
   tryCatch(expr = { library(RCurl)}, 
          error = function(e) { install.packages("RCurl")}, finally = library(RCurl))
   tryCatch(expr = { library(httr)}, 
@@ -257,13 +257,14 @@ if(gsea_section==TRUE) {
   rnk_files <-vector("list", omicsList[[1]][["numCoef"]])
   for (i in 1:length(analysis_names)){  
     if(length(omicsList)>1){ 
-      rnk_files[[i]] <- paste(output_contrast_path, "/GSEA_combined",gsub("-","_",omicsList[[1]][["contrasts"]][c]),".rnk", sep="")
-    } else { rnk_files[[i]] <- paste(output_contrast_path,"/GSEA_",gsub("-","_",omicsList[[1]][["dataType"]]),"_",gsub("-","_",omicsList[[1]][["contrasts"]][c]),".rnk", sep="") }
+      rnk_files[[i]] <- paste(output_contrast_path, "/GSEA_combined",gsub("-","_",omicsList[[1]][["contrasts"]][i]),".rnk", sep="")
+    } else { rnk_files[[i]] <- paste(output_contrast_path,"/GSEA_",gsub("-","_",omicsList[[1]][["dataType"]]),"_",gsub("-","_",omicsList[[1]][["contrasts"]][i]),".rnk", sep="") }
   }
   expression_file <- file.path(paste(output_files_subdir, "/Expression_matrix_",omicsList[[1]][["dataType"]],".txt", sep=""))
 
   # Only if you need a new GMT file
-  gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/"
+  if(species=="Mouse"){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Mouse/symbol/"}
+  if(species=="Human"){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/"}
   filenames = getURL(gmt_url)   #list all the files on the server
   tc = textConnection(filenames)
   contents = readLines(tc)
@@ -309,7 +310,7 @@ if(gsea_section==TRUE) {
   gsea_output_paths <- rev(row.names(details)[1:length(analysis_names)])
 }
 
-if(enrichment_map && gsea_section){
+if(enrichment_map && gsea_section & species!="Other" ){
   #use easy cyRest library to communicate with cytoscape.
   tryCatch(expr = { library(devtools)}, 
          error = function(e) { install.packages("devtools")}, finally = library(devtools))
@@ -389,8 +390,8 @@ if(enrichment_map && gsea_section){
 }
 
 ```
-`r if(gsea_section){"Click below to view GSEA results:  "}`
-`r if(gsea_section){ if(output_links != ""){ output_links }}`
+`r if(gsea_section & species!="Other" ){"Click below to view GSEA results:  "}`
+`r if(gsea_section & species!="Other" ){ if(output_links != ""){ output_links }}`
 
 `r if(enrichment_map & output_network_file!=FALSE){ "Click to view EnrichmentMap screen shot: \n"}`
 `r if(enrichment_map & output_network_file!=FALSE){ paste(" | [ EnrichmentMap Image](",output_subdir,"/",gsea_working_dir,"/screenshot_network.pdf)", sep="") }`  

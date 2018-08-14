@@ -12,7 +12,7 @@
 #' @return an expression set object, with normalized data
 #' 
 #' @examples
-#'   if(isthereProteo) {eset_global <- QCandNorm(eset_global, norm=norm_method)}
+#'   eset <- QCandNorm(eset, norm=norm_method)}
 #' 
 #' @export
 QCandNorm <- function(eset, norm, type, outputpath=output_plots_path,
@@ -201,21 +201,21 @@ drawthemaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_path
   output_filename <- file.path(outputpath, paste("heatmaps_",type,".pdf", sep=''));
   pdf(output_filename);
   # all features, z-score
-  emat_sel <- t(scale(t(exprs(eset)))) # Z-score across rows
+  emat_sel <- na.omit(t(scale(t(exprs(eset))))) # Z-score across rows
   emat_sel[emat_sel < -2] <- -2
   emat_sel[emat_sel > 2] <- 2
   draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
                column_title=paste(type, ": All features, row z score", sep='') ))
   
   # all features, log2 intensity
-  emat_sel <- exprs(eset)
+  emat_sel <- na.omit(exprs(eset))
   draw(Heatmap(matrix=emat_sel, col=maponeway, name="", top_annotation=ha_column,show_row_names=FALSE,
                column_title=paste(type, ": All proteins, log2 Intensity", sep='') ))
   
   # variation filter, z score
   if ( class(emat_top) =="matrix" ){
     emat_sel <- emat_top
-    emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
+    emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2
     draw(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
@@ -252,7 +252,7 @@ makeInteractiveHM <- function(eset, type, outputpath=output_plots_path,mapcolor=
   #   emat.sel <- exprs(eset[rownames(eset) %in% rownames(limmaSig),])
   output_filename <- file.path(outputpath, paste("heatmap_all_",type,".html", sep=''));
   emat_sel <- exprs(eset)
-  emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
+  emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
   emat_sel[emat_sel < -2] <- -2
   emat_sel[emat_sel > 2] <- 2
   invisible(capture.output(tmp<-heatmaply(emat_sel, scale='none', margins=c(100,100,40,20),
@@ -283,13 +283,15 @@ saveTheFiles <- function(eset, type, outputpath=output_files_path, workingdir=wo
     saveRDS(eset, file=output_filename); 
   }
   
+  if ( "Gene" %in% colnames(fData(eset)) &  "Protein.names" %in% colnames(fData(eset)) ) {
+    output_table <- cbind(fData(eset)[,c("Gene", "Protein.names")],exprs(eset))
+  } else {  output_table <- cbind( rownames(exprs(eset)), exprs(eset)) }
   output_filename <- file.path(outputpath,paste("Expression_matrix_",type,".txt", sep=''));
-  write.table(x=cbind(fData(eset)[,c("Gene", "Protein.names")], exprs(eset)), 
-              file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
+  write.table(x= output_table, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
   
-  output_filename <- file.path(outputpath,paste("Uniprot_IDs",type,".txt", sep=''));
-  write.table(x=fData(eset)[,"Protein"], 
-              file=output_filename, sep='\t',row.names=FALSE, col.names=FALSE, quote=FALSE);
+#   output_filename <- file.path(outputpath,paste("Uniprot_IDs",type,".txt", sep=''));
+#   write.table(x=fData(eset)[,"Protein"], 
+#               file=output_filename, sep='\t',row.names=FALSE, col.names=FALSE, quote=FALSE);
 }
 #-------------------------------------------------
 #' Write data to sheets
@@ -314,22 +316,41 @@ writeDataToSheets <- function(wb, eset, data_format, mapcolor=map_color, type){
   sampleCols <- annotCol$Group[1:length(levels(pData(eset)$Group))][pData(eset)$Group];
   mapcolor <- rev(brewer.pal(7, "RdYlBu"))
   
+  if ( !("Gene" %in% colnames(fData(eset))) ){ fData(eset)$Gene <- rownames(exprs(eset)) }
+  if ( !("Protein.names" %in% colnames(fData(eset))) ){ fData(eset)$Protein.names <- rownames(exprs(eset)) }
+  if ( !("Protein" %in% colnames(fData(eset))) ){ fData(eset)$Protein <- rownames(exprs(eset)) }
+  
   stName <- type
   addWorksheet(wb=wb, sheetName=stName)
   
-  links <- fData(eset)$Link
-  names(links) <- fData(eset)$Protein
-  class(links) <- "hyperlink"
+  if ("Link" %in% colnames(fData(eset)) ){
+    links <- fData(eset)$Link
+    names(links) <- fData(eset)$Protein
+    class(links) <- "hyperlink"
+  }
   
   emat_sel <- t(scale(t(exprs(eset)))) # Z-score across rows
   emat_sel[emat_sel < -2] <- -2
   emat_sel[emat_sel > 2] <- 2
-  formatted_table <- data.frame(cbind(fData(eset)[,c("Gene", "Protein.names", "Protein")],emat_sel, 
-                                      fData(eset)[,c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                                                     "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID")],
-                                      exprs(eset) ))
-  names <- make.unique(c("Gene", "Protein", "Uniprot", colnames(eset), "Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
-                         "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID", colnames(eset) ))
+  
+  # Create the data table
+  formatted_table<-""
+  formatted_table <- cbind(fData(eset)[,c("Gene", "Protein.names", "Protein")],emat_sel,stringsAsFactors=FALSE )
+
+  if(data_format != "Generic"){
+    formatted_table<- data.frame(cbind(formatted_table, fData(eset)[,c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
+                                                                       "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID")],
+                                       stringsAsFactors=FALSE ), stringsAsFactors=FALSE)
+  }
+  formatted_table<- data.frame(cbind(formatted_table, exprs(eset), stringsAsFactors=FALSE ), stringsAsFactors=FALSE)
+  
+  # Create column names
+  names <- make.unique(toupper(c("Gene", "Protein", "Uniprot", colnames(eset)  )))
+  if(data_format != "Generic"){
+    names <- c(names, make.unique(toupper(c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease","GO_biological_process",
+                                            "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID" ))))
+  }
+  names <- make.unique(c(names,toupper( colnames(eset) )))
   
   # Add phospho site probabilities and data
   if("Sites..MQ." %in% data_format) { 
@@ -343,24 +364,28 @@ writeDataToSheets <- function(wb, eset, data_format, mapcolor=map_color, type){
   colnames(formatted_table) <- names
   
   writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
-  writeData(wb=wb, sheet=stName, x=links, xy=c("C",3))
+  if ("Link" %in% colnames(fData(eset)) ){ writeData(wb=wb, sheet=stName, x=links, xy=c("C",3)) }
   
   conditionalFormatting(wb=wb, sheet=stName, type="colourScale", cols=4:(3+ncol(eset)), rows=3:(2+nrow(eset)), style=mapcolor[c(1,4,7)])
   
+  # Rotate sample names and add background colors
   for (c in 1:ncol(eset)){
     addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"), rows=2, cols=c+3)
   }
   for (c in 1:ncol(eset)){
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"), rows=2, cols=(c+3+9+ncol(eset)) )
+    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"),
+             rows=2, cols=(c + ( length(names) - ncol(eset) )  ) )
   }
   
+  # Create section titles
   mergeCells(wb=wb, sheet=stName, rows=1, cols=4:(3+ncol(eset)) )
   writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity, Row Z Score", xy=c(4,1))
   addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=4, stack=TRUE)
   
-  mergeCells(wb=wb, sheet=stName, rows=1, cols=(13+ncol(eset)):(12+ncol(eset)+ncol(eset)) )
-  writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c((13+ncol(eset)),1))
-  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=(13+ncol(eset)), stack=TRUE)
+  mergeCells(wb=wb, sheet=stName, rows=1, cols=( length(names) : ( length(names) - ncol(eset) + 1 )) )
+  writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c(( length(names) - ncol(eset) ),1))
+  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=( length(names) - ncol(eset) ), stack=TRUE)
+  
   
   freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
   addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", fontColour='black'), rows=1:2, cols=1:(3+ncol(eset)+9+ncol(eset)),gridExpand=TRUE, stack=TRUE)   
@@ -369,5 +394,11 @@ writeDataToSheets <- function(wb, eset, data_format, mapcolor=map_color, type){
   addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(numFmt="TEXT"), rows=3:(2+nrow(eset)), cols=1, gridExpand=TRUE )
   
   setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)
-  setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+9+ncol(eset)), widths=c(16,50,16,rep(4, ncol(eset)),50,50,50, 50,50,50, 8,8,8, rep(4, ncol(eset)) ))
+
+  if (data_format != "Generic"){
+    setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+9+(3*length(DiffList))+ncol(eset)), 
+                 widths=c(16,50,16,rep(4, ncol(eset)), 50,50,50, 50,50,50, 8,8,8, rep(4, ncol(eset)) ))
+  } else {   setColWidths(wb=wb, sheet=stName, cols=1:(3+ncol(eset)+(3*length(DiffList))+ncol(eset)), 
+                          widths=c(16,50,16,rep(4, ncol(eset)), rep(4, ncol(eset)) )) }
+
 }
