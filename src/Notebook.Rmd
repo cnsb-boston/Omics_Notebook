@@ -77,8 +77,8 @@ library(EasycyRest)
 
 # Source function files
 source(file.path(notebook_dir,"notebookFunctions.R"))
-source(file.path(notebook_dir, "notebookFunctions_Prot_normQC.R"))
-source(file.path(notebook_dir, "notebookFunctions_Prot_Diff.R"))
+source(file.path(notebook_dir, "notebookFunctions_NormQC.R"))
+source(file.path(notebook_dir, "notebookFunctions_Diff.R"))
 }, error=function(e){print("Error loading libraries and setting directories")} )
 
 ```
@@ -156,10 +156,10 @@ if(newcontrastonly){
 knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messages=FALSE, fig.width=8, fig.height=12, knitr.duplicate.label="allow")
 ```
 
-```{r child=file.path(notebook_dir, 'Proteomics_Notebook_NormQC.Rmd')}
+```{r child=file.path(notebook_dir, 'Notebook_NormQC.Rmd')}
 ```
 
-```{r child=file.path(notebook_dir, 'Proteomics_Notebook_Diff.Rmd'), eval=runDifferential}
+```{r child=file.path(notebook_dir, 'Notebook_Diff.Rmd'), eval=runDifferential}
 ```
 
 
