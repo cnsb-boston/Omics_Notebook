@@ -1,0 +1,228 @@
+# QC and Exploratory Analysis
+
+`r if(txtFolder){"### Raw Data QC Report (PTXQC)"}`
+```{r PTX_QC_report, results='hide'}
+# if txt folder provided, generate PTXQC report
+tryCatch(expr={
+if(txtFolder && !newcontrastonly){
+  library(PTXQC)
+  require(methods)
+  library(data.table)
+
+  txt_folder <- file.path(working_dir, "txt");
+  report.mq <- createReport(txt_folder);
+}
+}, error=function(e){print("Error generating PTXQC report")} )
+```
+`r if(txtFolder){"[ View Raw Data QC Report (PTXQC) ](txt/report_v0.92.3_MQ_pipeline.pdf)" }` 
+
+---
+
+### Boxplot and Distribution
+```{r boxplots_QC_and_norm, fig.width=12, fig.height=4}
+output_links<-"";
+if(newcontrastonly){ norm_method <- "none"; }
+
+for(i in 1:length(omicsList)){
+  omicsList[[i]][[5]] <-intensityNorm(eset=omicsList[[i]][[5]], type=omicsList[[i]][[1]], norm=norm_method)
+  # for debugging/testing normalization, change to "eset=omicsList[[i]][[14]]" if 14 defined in Notebook.Rmd
+  
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,
+                    "/boxplot_histogram_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+```
+Click to view full size images: `r { output_links }`  
+
+---
+
+### PCA Plots
+```{r PCA_plots, fig.width=12, fig.height=4}
+output_links<-"";
+pca_output <- vector("list", length(omicsList) )
+
+for(i in 1:length(omicsList)){
+  
+  pca_output[[i]] <- drawPCA(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]], show_sample_names=TRUE)
+  
+  # Batch correction
+  if("Batch" %in% colnames(pData(omicsList[[i]][["eSet"]]))) {
+    require(sva);
+    drawPCA(eset=omicsList[[i]][["prebatch_eset"]], type=paste(omicsList[[i]][["dataType"]],"_precorrection", sep=""), show_sample_names=TRUE);
+  }
+    
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+grid.arrange(grobs=pca_output, ncol=2)
+
+```
+  
+Click to view full size images: `r { output_links }`  
+
+---
+
+`r if(length(omicsList)>1){"### Venn Diagram"}`
+```{r venn, eval= (length(omicsList)>1) }
+
+num_gene <- 0; num_prot <- 0; num_met <- 0;
+
+for ( i in 1:length(omicsList) ) {
+  if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ num_gene <- num_gene +1 }
+  if( "Protein" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ num_prot <- num_prot +1 }
+  if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ num_met <- num_met +1 }
+}
+
+gene_list <- vector("list", num_gene)
+prot_list <- vector("list", num_prot)
+met_list <- vector("list", num_met)
+
+g_index <- 1; p_index <- 1; m_index <- 1;
+
+for(i in 1:length(omicsList)){
+  if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ 
+    gene_list[[g_index]] <- fData(omicsList[[i]][["eSet"]])$Gene
+    names(gene_list)[g_index] <- omicsList[[i]][["dataType"]]
+    g_index <- g_index + 1
+    }
+  if( "Protein" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ 
+    prot_list[[p_index]] <- fData(omicsList[[i]][["eSet"]])$Protein
+    names(prot_list)[p_index] <- omicsList[[i]][["dataType"]]
+    p_index <- p_index + 1
+    }
+  if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ 
+    met_list[[m_index]] <- na.omit(round(fData(omicsList[[i]][["eSet"]])$mz, digits=1))
+    names(met_list)[m_index] <- omicsList[[i]][["dataType"]]
+    m_index <- m_index + 1
+    }
+}
+
+drawVenn <- function(item_list, item_name, outputpath=output_plots_path){
+  fill_col <- rainbow(length(item_list))
+  futile.logger::flog.threshold(ERROR);
+  venn <- venn.diagram( x=item_list, filename=NULL,lty="blank",# height=2000, width=2000, 
+                        #cat.default.pos="outer", 
+                        fill=fill_col,main=paste("Overlap: ", item_name, sep="") );
+  output_filename <- file.path(outputpath, paste("VennDiagram_", item_name,".pdf", sep="") );
+  pdf(output_filename, width=4, height=3);
+  upset(fromList(item_list), order.by = "freq");
+  grid.newpage();
+  pushViewport(viewport(width=unit(0.6, "npc"), height=unit(0.8, "npc")));
+  grid.draw(venn);
+  tmp<-dev.off();  
+}
+
+output_links <-"";
+
+if( num_gene > 1 ){ 
+  drawVenn(gene_list, "Genes")
+  add_link <- paste("[ Genes ](", output_plots_subdir,"/VennDiagram_Genes.pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+  }
+if( num_prot > 1 ){ 
+  drawVenn(prot_list, "Proteins")
+  add_link <- paste("[ Proteins ](", output_plots_subdir,"/VennDiagram_Proteins.pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+  }
+if( num_met > 1 ){ 
+  drawVenn(met_list, "Metabolites_mz")
+  add_link <- paste("[ Metabolites (mz) ](", output_plots_subdir,"/VennDiagram_Metabolites_mz.pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+  }
+
+```
+Click to view full size overlap plots: `r { output_links }`  
+
+---
+
+### Variation Plots, Filtering
+```{r variation}
+output_links<-"";
+
+for(i in 1:length(omicsList)){
+  omicsList[[i]][[6]] <- variationPlot(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+  names(omicsList[[i]])[6] <- "topVariable";
+    
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-Variation ](", output_plots_subdir,"/variation_",
+                    omicsList[[i]][["dataType"]],".pdf) | ","[ ",omicsList[[i]][["dataType"]], "-Pairs ](",
+                    output_plots_subdir,"/variation_",omicsList[[i]][["dataType"]],".jpeg)", sep="");
+  output_links <- paste(output_links, add_link, sep="  \n" );
+}
+  
+```
+Click below to view SD vs Mean and Pairs plots: `r { output_links }`  
+
+---
+
+### Global Static Heatmaps
+```{r heatmaps_qc}
+
+output_links<-"";
+
+for(i in 1:length(omicsList)){
+  drawHeatmaps(eset=omicsList[[i]][["eSet"]], emat_top=omicsList[[i]][["topVariable"]], type=omicsList[[i]][["dataType"]]);
+    
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+```
+Click to view static heatmaps plots: `r { output_links }`  
+
+---
+
+`r if(int_heatmap_section){"### Interactive Heatmap"}`
+```{r interactive_plots_qc, eval=int_heatmap_section}
+
+output_links<-"";
+
+for(i in 1:length(omicsList)){
+  interactiveHeatmap(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+  
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-All ](", output_plots_subdir,"/heatmap_all_",
+                    omicsList[[i]][["dataType"]],".html)", sep="");
+  output_links <- paste(output_links, add_link, sep=" | " );
+}
+
+```
+
+`r if(int_heatmap_section){"Click to view interactive heatmaps:"}`  `r if(int_heatmap_section){ output_links }`  
+
+---
+
+### Save Data
+```{r save_data_qc }
+
+# save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
+if(!newcontrastonly){
+  for(i in 1:length(omicsList)){
+    if(omicsList[[i]][["dataType"]] != "Generic"){
+      saveFiles(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+    }
+  }
+}  
+
+# Save excel file summary for collaborators
+if(newcontrastonly==FALSE && runDifferential==FALSE && saveXlsx==TRUE){    
+  wbOut <- createWorkbook()
+  
+  for(i in 1:length(omicsList)){
+    writeDataToSheets(wb=wbOut, eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]);
+  } 
+  
+  output_filename=file.path(output_path, paste(project_name, "_Summary.xlsx", sep=""))
+  saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
+}
+
+``` 
+
+---
+
+
