@@ -12,23 +12,41 @@ output:
 ========================================================
 
 ```{r format_variables, echo=FALSE}
-  
-# source variable file
-source("Variables.R")
+############################################
+##
+##  SET FILE PATHS FOR LOCAL INSTALL
+##
+############################################
+
+## R libraries path
+#libraries_path = '/project/cnsbomic/Tools/R'
+
+## Inherit paths
+#inherit_paths = "TRUE"
+
+# Loaded from Parameters.R
+
+############################################
+
+## IF NOT RUNNING WITH PIPELINE, SET WORKING DIRECTORY
+# working_dir <- PATH TO DATA FILES
+# setwd(working_dir)
+
+############################################
 
 # Databases for enrichR search
 search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_Component_2017b",
-                      "GO_Molecular_Function_2017b", "HMDB_Metabolites", 
+                      "GO_Molecular_Function_2017b", "HMDB_Metabolites", "Reactome_2016",
                       "MSigDB_Oncogenic_Signatures");
 
-# options
-run_gsea <- gsea_section # if GSEA has already been run, set to false and include results in directory
-enrichment_map <- isInteractive # only run enrichment map if interactive session
+############################################
+
+source('Parameters.R')
 
 ```
 
-```{r libraries, warning=FALSE, message=FALSE}
-tryCatch(expr={
+```{r libraries}
+
 # Make output subdirectories
 output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
 output_files_subdir <- paste(output_subdir,"Files", sep="/")
@@ -36,15 +54,16 @@ output_plots_subdir <- paste(output_subdir,"Plots", sep="/")
 output_path <- file.path(working_dir, output_subdir)
 output_files_path <- file.path(working_dir, output_files_subdir)
 output_plots_path <- file.path(working_dir, output_plots_subdir)
+output_contrast_path <- output_plots_path
 if( dir.exists(output_path) == FALSE ) {dir.create(output_path)}
 if( dir.exists(output_files_path) == FALSE ) {dir.create(output_files_path)}
 if( dir.exists(output_plots_path) == FALSE ) {dir.create(output_plots_path)}
 
 # Set library path for BU SCC
-if(BUSCC==TRUE) { .libPaths("/project/cnsbomic/Tools/R") }
+if(inherit_paths==TRUE) { .libPaths(libraries_path) }
 
 # Load pipeline libraries
-library(gdata)
+suppressPackageStartupMessages({
 library(Biobase)
 library(limma)
 library(knitr)
@@ -57,36 +76,60 @@ library(viridis)
 library(reshape2)
 library(tidyr)
 library(dplyr)
+library(stringr)
 library(grid)
 library(gridExtra)
 library(lattice)
-library(enrichR)
 library(VennDiagram)
+library(UpSetR)
 library(heatmaply)
 library(edgeR)
 library(Glimma)
 library(openxlsx)
 library(ComplexHeatmap)
 library(RCurl)
-library(r2cytoscape)
-library(httr)
-library(RJSONIO)
-library(devtools)
-library(r2cytoscape)
-library(EasycyRest)
 
-# Source function files
+if(enrichr_section){ library(enrichR) }
+
+if(gsea_section){
+  library(httr)
+  library(RJSONIO)
+  }
+if(isInteractive){
+  library(RCy3)
+  #library(EasycyRest)
+}
+
+#library(sva) # combat/batch correction
+#library(hmdbQuery) # metabolite annotation info
+#library(MetaboAnalystR)
+})
+
+# Source function file
 source(file.path(notebook_dir,"notebookFunctions.R"))
-source(file.path(notebook_dir, "notebookFunctions_NormQC.R"))
-source(file.path(notebook_dir, "notebookFunctions_Diff.R"))
-}, error=function(e){print("Error loading libraries and setting directories")} )
 
 ```
 
-
 # Load Search Output and Process
 ```{r load_data_qc}
-# Add error checking for finding files (annotation and data), and making loading/making eset
+############################################
+# The omicsList object is a list of lists. Each top level represents a different omics type.
+#
+# omicsList[[i]][[1]] is the name of the omics set
+# omicsList[[i]][[2]] is the data format of the omics set.
+# omicsList[[i]][[3]] is the filename/path for the omics data set.
+# omicsList[[i]][[4]] is the raw data.
+# omicsList[[i]][[5]] is the working eset object
+# omicsList[[i]][[6]] is the matrix of the most variable features
+# omicsList[[i]][[7]] is the limmaFit output of eBayes
+# omicsList[[i]][[8]] is the number of contrast or coefficients in limmaFit
+# omicsList[[i]][[9]] is the name of each contrast (coefficient)
+# omicsList[[i]][[10]] is the results of decideTests
+# omicsList[[i]][[11]]
+# omicsList[[i]][[12]] is the normalized but pre-batch corrected eset, if applicable
+# omicsList[[i]][[14]] is the un-normalized eset object - for debugging only
+#
+############################################
 
 # Import annotation file
 annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
@@ -95,24 +138,40 @@ annot<-annot[c(-1,-4),];
 
 # Make omicsList object
 omicsList <- vector("list", (nrow(annot)-2) )
+metab_data <- FALSE;
 for (i in 3:nrow(annot)){
-  omicsList[[i-2]] <- vector("list", 12);
+  omicsList[[i-2]] <- vector("list", 14);
   omicsList[[i-2]][1] <- make.names(annot[i,1]);
   names(omicsList[[i-2]])[1] <- gsub("\\.","", make.names("dataType"));
   omicsList[[i-2]][2] <- make.names(annot[i,2]);
   names(omicsList[[i-2]])[2] <- "dataFormat";
+  if(omicsList[[i]][["dataFormat"]]=="Metabolites"){ metab_data <- TRUE  };
   omicsList[[i-2]][[3]] <- annot[i,3];
   names(omicsList[[i-2]])[3] <- "filename";
 }
+
+# Load metabolite libraries
+if(metab_data==TRUE){ suppressPackageStartupMessages({
+  library(MetaboAnalystR)
+  library(hmdbQuery)
+}) }
 
 # Format annotation table
 annot[3:nrow(annot),3] <- annot[3:nrow(annot),1];
 annot <- t(annot[,-1:-2]);
 rownames(annot) <- NULL;
-colnames(annot)<-annot[1,];
+colnames(annot)<-make.unique(annot[1,]);
 annot<-data.frame((annot[-1,]));
 annot[,"Group"]<-gsub("\\.","",make.names(annot[,"Group"]))
-annot[,"SampleName"]<-gsub("\\.","",make.names(unique(annot[,"SampleName"])))
+annot[,"SampleName"]<-gsub("\\.","",make.names(make.unique(as.character(annot[,"SampleName"]))))
+
+# Get batch information if there
+try({
+  annot2 <- openxlsx::read.xlsx(annotation_filename, 2, colNames=FALSE, rowNames=TRUE)
+  annot2 <- data.frame(t(annot2))
+  rownames(annot2) <- NULL;
+  annot <- data.frame(cbind(annot, annot2))
+}, silent=TRUE)
 
 # Changes for generating txt report
 if(txtFolder==TRUE) {
@@ -128,19 +187,23 @@ if(txtFolder==TRUE) {
 # Import data and make eset objects
 if(!newcontrastonly){
   for (i in 1:length(omicsList)){
-    omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE, check.names=FALSE));
+    
+    if( grepl(".csv$", omicsList[[i]][[3]]) ) { file_ext_sep <- ","; } else { file_ext_sep <- "\t"; }
+    omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE,
+                                                 sep=file_ext_sep, check.names=FALSE));
     names(omicsList[[i]])[4] <- "RawData";
     
     omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
                                     data_format=omicsList[[i]][[2]], cutoff=zero_percent)
     names(omicsList[[i]])[5] <- "eSet";
+    #omicsList[[i]][[14]] <- omicsList[[i]][[5]] # use for debugging
     
     print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[4]]), " features detected in raw data.", sep=""))
     print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[5]]), " features detected in filtered data.", sep=""))
   }
 }
 
-# Load previously saved data - saves time
+# Load previously saved data to save time (needs same Analysis name run on same day)
 if(newcontrastonly){
   for (i in 1:length(omicsList)){
     omicsList[[i]][[5]] <- readRDS(file=file.path(output_files_path, paste("Data_eset_", omicsList[[i]][[1]], ".RDS", sep="")))
@@ -151,19 +214,27 @@ if(newcontrastonly){
 
 ```
 
-
 ```{r global_options, echo=FALSE}
 knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messages=FALSE, fig.width=8, fig.height=12, knitr.duplicate.label="allow")
 ```
 
-```{r child=file.path(notebook_dir, 'Notebook_NormQC.Rmd')}
+```{r child=file.path(notebook_dir, 'Notebook_Expl.Rmd')}
 ```
 
 ```{r child=file.path(notebook_dir, 'Notebook_Diff.Rmd'), eval=runDifferential}
 ```
 
+```{r }
+#child=file.path(notebook_dir, 'Notebook_Integ.Rmd'), eval=runDifferential}
+```
+
+---
 
 # Session Info
+
+```{r, code=readLines(file.path(working_dir, "Parameters.R")) }
+```
+
 ```{r session_info}
 sessionInfo()
 ```

@@ -1,4 +1,23 @@
-# Get Notebook directory
+############################################
+##
+##  SET FILE PATHS FOR LOCAL INSTALL
+##
+############################################
+
+## R libraries path
+#libraries_path = '/project/cnsbomic/Tools/R'
+
+## Pandoc path
+#pandoc_path = '/usr/local/apps/rstudio-0.98.1103/rstudio-0.98.1103/bin/pandoc'
+
+## Inherit paths
+#inherit_paths = "TRUE"
+
+# Loaded from Parameters
+
+############################################
+
+# Get Notebook directory - if running pipeline
 run_directories <- commandArgs(trailingOnly=FALSE)
 
 notebook_dir <- file.path(run_directories[6], "src");
@@ -6,16 +25,22 @@ analysis_dir <- file.path(run_directories[7]);
 
 # source run variables
 setwd(analysis_dir);
-source(file.path(analysis_dir, "Variables.R"));
+source(file.path(analysis_dir, "Parameters.R"));
 
-# set for BU SCC
-if(BUSCC==TRUE) {
-  .libPaths('/project/cnsbomic/Tools/R');
-   Sys.setenv(RSTUDIO_PANDOC='/usr/local/apps/rstudio-0.98.1103/rstudio-0.98.1103/bin/pandoc'); 
-} 
+# Set local file paths, if not needed, set BUSCC to false
+if(inherit_paths==TRUE) {
+  .libPaths(libraries_path);
+   Sys.setenv(RSTUDIO_PANDOC=pandoc_path); 
+}
 
 # load rmarkdown
 library(rmarkdown);
+
+# run normalization Shiny
+if(shinyNorm==TRUE){
+  library(shiny);
+  source(file.path(notebook_dir, "Pipeline_Norm.R"));
+}
 
 # run notebook
 rmarkdown::render(file.path(notebook_dir,'Notebook.Rmd'),
