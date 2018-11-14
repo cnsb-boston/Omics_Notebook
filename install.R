@@ -26,6 +26,7 @@ install.packages("VennDiagram")
 install.packages("heatmaply")
 install.packages("openxlsx")
 install.packages("UpSetR")
+install.packages("corrplot")
 
 install.packages("rmarkdown")
 
@@ -41,6 +42,9 @@ biocLite("Glimma")
 # FOR COMBAT BATCH CORRECTION
 biocLite("sva")
 #######
+
+# FOR TXT RAW DATA REPORT
+install.packages("PTXQC")
 
 # FOR METABOLITES ONLY
 metanr_packages <- function(){

@@ -85,10 +85,10 @@ class GUI(tk.Frame):
     incDifferential = ttk.Checkbutton(self, text="Differential Analysis", var=incDifferential_state)
     incDifferential.grid(column=1, row=6, pady=(10,10), sticky=tk.W)
 
-    newcontrast_state = tk.BooleanVar()
-    newcontrast_state.set(False)
-    newcontrast = ttk.Checkbutton(self, text="Reload Data (.RDS)", var=newcontrast_state)
-    newcontrast.grid(column=2, row=6, pady=(10,10), sticky=tk.W)
+    queryWeb_state = tk.BooleanVar()
+    queryWeb_state.set(True)
+    queryWeb = ttk.Checkbutton(self, text="Query Web", var=queryWeb_state)
+    queryWeb.grid(column=2, row=6, pady=(10,10), sticky=tk.W)
 
     runXlsx_state = tk.BooleanVar()
     runXlsx_state.set(True)
@@ -96,25 +96,35 @@ class GUI(tk.Frame):
     runXlsx.grid(column=3, row=6, pady=(10,10), sticky=tk.W)
     
     isIntHM_state = tk.BooleanVar()
-    isIntHM_state.set(True)
+    isIntHM_state.set(False)
     isIntHM = ttk.Checkbutton(self, text="Interactive Heatmap", var=isIntHM_state)
     isIntHM.grid(column=4, row=6, pady=(10,10), sticky=tk.W)
-
-    runGSEA_state = tk.BooleanVar()
-    runGSEA_state.set(True)
-    isInteractive_state = tk.BooleanVar()
-    isInteractive_state.set(True)
-
-    runGSEA = ttk.Checkbutton(self, text="Run GSEA", var=runGSEA_state, command=lambda:isInteractive_state.set(isInteractive_state.get() and runGSEA_state.get()))
-    runGSEA.grid(column=2, row=10, pady=(10,0), sticky=tk.W)
-    isInteractive = ttk.Checkbutton(self, text="Interactive Session (include EnrichmentMap)", var=isInteractive_state, command=lambda:isInteractive_state.set(isInteractive_state.get() and runGSEA_state.get()))
-    isInteractive.grid(column=3, row=10, pady=(10,0), columnspan=2, sticky=tk.W)
     
+    showSampleName_state = tk.BooleanVar()
+    showSampleName_state.set(False)
+    showSampleName = ttk.Checkbutton(self, text="Show Names", var=showSampleName_state)
+    showSampleName.grid(column=2, row=7, pady=(0,10), sticky=tk.W)
+    
+    isIntVl_state = tk.BooleanVar()
+    isIntVl_state.set(True)
+    isIntVl = ttk.Checkbutton(self, text="Interactive Volcano", var=isIntVl_state)
+    isIntVl.grid(column=4, row=7, pady=(0,10), sticky=tk.W)
+
     runEnrichr_state = tk.BooleanVar()
     runEnrichr_state.set(False)
     runEnrichr = ttk.Checkbutton(self, text="Run EnrichR", var=runEnrichr_state)
     runEnrichr.grid(column=1, row=10, pady=(10,0), sticky=tk.W)
-
+    
+    runGSEA_state = tk.BooleanVar()
+    runGSEA_state.set(True)
+    runGSEA = ttk.Checkbutton(self, text="Run GSEA", var=runGSEA_state)
+    runGSEA.grid(column=2, row=10, pady=(10,0), sticky=tk.W)
+    
+    useSiteNorm_state = tk.BooleanVar()
+    useSiteNorm_state.set(False)
+    useSiteNorm = ttk.Checkbutton(self, text="Normalize Sites to Proteome", var=useSiteNorm_state)
+    useSiteNorm.grid(column=3, row=10,columnspan=1, pady=(10,0), sticky=tk.W)
+    
     incShinyNorm_state = tk.BooleanVar()
     incShinyNorm_state.set(False) # adjust when working
     incShinyNorm = ttk.Checkbutton(self, text="Interactive Normalization", var=incShinyNorm_state, state=tk.DISABLED)
@@ -180,7 +190,6 @@ class GUI(tk.Frame):
     cutoff_fdr_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=cutoff_fdr_start, validate='all', validatecommand=vcmd)
     cutoff_fdr_val.grid(column=1, row=18)
     
-    
     txtFolder_lbl = tk.Label(self, text="txt Folder report:")
     txtFolder_lbl.grid(column=0, row=24, pady=(20,0), sticky=tk.E)
     txtFolder_lbl2 = tk.Label(self, text="Copy mqpar file into txt folder for complete results.")
@@ -206,15 +215,16 @@ class GUI(tk.Frame):
       outputfile.write("saveXlsx <- " + str(runXlsx_state.get()).upper() + ";\n")
       outputfile.write("enrichr_section <- " + str(runEnrichr_state.get()).upper() + ";\n")
       outputfile.write("gsea_section <- " + str(runGSEA_state.get()).upper() + ";\n")
-      outputfile.write("enrichment_map <- " + str(isInteractive_state.get()).upper() + ";\n")
+      outputfile.write("use_site_norm <- " + str(useSiteNorm_state.get()).upper() + ";\n")
+      outputfile.write("query_web <- " + str(queryWeb_state.get()).upper() + ";\n")
       outputfile.write("int_heatmap_section <- " + str(isIntHM_state.get()).upper() + ";\n")
-
+      outputfile.write("int_volcano_section <- " + str(isIntVl_state.get()).upper() + ";\n")
+      outputfile.write("show_names <- " + str(showSampleName_state.get()).upper() + ";\n")
+      
       outputfile.write("map_color <- '" + str(heatcolors.get()) + "';\n")
       outputfile.write("species <- '" + str(species.get()) + "';\n")
       outputfile.write("norm_method <- '" + str(normMethod.get()) + "';\n")
-      outputfile.write("newcontrastonly <- " + str(newcontrast_state.get()).upper() + ";\n")
       outputfile.write("txtFolder <- " + str(txtFolder.get()).upper() + ";\n")
-      outputfile.write("isInteractive <- " + str(isInteractive_state.get()).upper() + ";\n")
       outputfile.write("notebook_dir <- '" + dir_path + "';\n")
       outputfile.write("runDifferential <- " + str(incDifferential_state.get()).upper() + ";\n")
       outputfile.write("shinyNorm <- " + str(incShinyNorm_state.get()).upper() +  ";\n")

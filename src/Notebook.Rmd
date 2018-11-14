@@ -11,7 +11,7 @@ output:
 
 ========================================================
 
-```{r format_variables, echo=FALSE}
+```{r format_variables}
 ############################################
 ##
 ##  SET FILE PATHS FOR LOCAL INSTALL
@@ -82,6 +82,7 @@ library(gridExtra)
 library(lattice)
 library(VennDiagram)
 library(UpSetR)
+library(corrplot)
 library(heatmaply)
 library(edgeR)
 library(Glimma)
@@ -94,8 +95,6 @@ if(enrichr_section){ library(enrichR) }
 if(gsea_section){
   library(httr)
   library(RJSONIO)
-  }
-if(isInteractive){
   library(RCy3)
   #library(EasycyRest)
 }
@@ -115,21 +114,31 @@ source(file.path(notebook_dir,"notebookFunctions.R"))
 ############################################
 # The omicsList object is a list of lists. Each top level represents a different omics type.
 #
-# omicsList[[i]][[1]] is the name of the omics set
-# omicsList[[i]][[2]] is the data format of the omics set.
-# omicsList[[i]][[3]] is the filename/path for the omics data set.
-# omicsList[[i]][[4]] is the raw data.
-# omicsList[[i]][[5]] is the working eset object
-# omicsList[[i]][[6]] is the matrix of the most variable features
-# omicsList[[i]][[7]] is the limmaFit output of eBayes
-# omicsList[[i]][[8]] is the number of contrast or coefficients in limmaFit
-# omicsList[[i]][[9]] is the name of each contrast (coefficient)
-# omicsList[[i]][[10]] is the results of decideTests
-# omicsList[[i]][[11]]
-# omicsList[[i]][[12]] is the normalized but pre-batch corrected eset, if applicable
+# omicsList[[i]][[1]] "dataType" is the name of the omics set
+# omicsList[[i]][[2]] "dataFormat" is the data format of the omics set.
+# omicsList[[i]][[3]] "filename" is the filename/path for the omics data set.
+# omicsList[[i]][[4]] "RawData" is the raw data.
+# omicsList[[i]][[5]] "eSet" is the working eset object
+# omicsList[[i]][[6]] "topVariable" is the index of the most variable features
+# omicsList[[i]][[7]] "fit" is the limmaFit output of eBayes
+# omicsList[[i]][[8]] "ratio" difference between samples when not enough replicates
+# omicsList[[i]][[9]] 
+# omicsList[[i]][[10]] "siteNorm" is site data normalized to protein groups
+# omicsList[[i]][[11]] "siteNorm_fit" is the limmaFit output of eBayes
+# omicsList[[i]][[12]] "prebatch_eset" is the normalized but pre-batch corrected eset, if applicable
 # omicsList[[i]][[14]] is the un-normalized eset object - for debugging only
 #
 ############################################
+
+# Make index variables
+metab_data_index <- c();  # index of all Metabolite data
+mz_data_index <- c();     # index of all data with mz
+phos_data_index <- c();   # index of Phospho Site Data (from MQ)
+sites_data_index <- c();  # index of all site data (from MQ)
+sites_norm_index <- c();  # index of site data normalized to proteome (if applicable)
+gene_data_index <- c();   # index of all data  with Gene (HGNC Symbols)
+prot_data_index <- c();   # index of all data with Protein (Uniprot IDs)
+prot_groups_index <- c(); # index of all Protein Groups Data (MQ)
 
 # Import annotation file
 annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
@@ -138,20 +147,23 @@ annot<-annot[c(-1,-4),];
 
 # Make omicsList object
 omicsList <- vector("list", (nrow(annot)-2) )
-metab_data <- FALSE;
-for (i in 3:nrow(annot)){
-  omicsList[[i-2]] <- vector("list", 14);
-  omicsList[[i-2]][1] <- make.names(annot[i,1]);
-  names(omicsList[[i-2]])[1] <- gsub("\\.","", make.names("dataType"));
-  omicsList[[i-2]][2] <- make.names(annot[i,2]);
-  names(omicsList[[i-2]])[2] <- "dataFormat";
-  if(omicsList[[i]][["dataFormat"]]=="Metabolites"){ metab_data <- TRUE  };
-  omicsList[[i-2]][[3]] <- annot[i,3];
-  names(omicsList[[i-2]])[3] <- "filename";
+
+for (i in 1:(nrow(annot)-2) ){
+  omicsList[[i]] <- vector("list", 14);
+  omicsList[[i]][1] <- make.names(annot[i+2,1]);
+  names(omicsList[[i]])[1] <- gsub("\\.","", make.names("dataType"));
+  omicsList[[i]][2] <- make.names(annot[i+2,2]);
+  names(omicsList[[i]])[2] <- "dataFormat";
+  if(omicsList[[i]][["dataFormat"]]=="Metabolites"){ metab_data_index <- c(metab_data_index, i)  };
+  if(omicsList[[i]][["dataFormat"]]=="Phospho.Sites..MQ."){ phos_data_index <- c(phos_data_index, i)  };
+  if(omicsList[[i]][["dataFormat"]]=="Protein.Groups..MQ."){ prot_groups_index <- c(prot_groups_index, i) };
+  if(grepl(".Sites..MQ.",omicsList[[i]][["dataFormat"]]) ){ sites_data_index <- c(sites_data_index, i)  };
+  omicsList[[i]][[3]] <- annot[i+2,3];
+  names(omicsList[[i]])[3] <- "filename";
 }
 
 # Load metabolite libraries
-if(metab_data==TRUE){ suppressPackageStartupMessages({
+if(length(metab_data_index) > 0){ suppressPackageStartupMessages({
   library(MetaboAnalystR)
   library(hmdbQuery)
 }) }
@@ -173,43 +185,31 @@ try({
   annot <- data.frame(cbind(annot, annot2))
 }, silent=TRUE)
 
-# Changes for generating txt report
-if(txtFolder==TRUE) {
-  for (i in 1:length(omicsList)){
-    omicsList[[i]][[3]] <- file.path(working_dir, "txt", omicsList[[i]][[3]])
-  }
-} else {
-  for (i in 1:length(omicsList)){
+# Add file paths to file names (w/chanbge for generating txt report)
+for (i in 1:length(omicsList)){
+  if( (".MQ." %in% omicsList[[i]][["dataFormat"]]) & txtFolder==TRUE ) { 
+    omicsList[[i]][[3]] <- file.path(working_dir, "txt", omicsList[[i]][[3]]) 
+  } else {
     omicsList[[i]][[3]] <- file.path(working_dir, omicsList[[i]][[3]])
   }
 }
 
 # Import data and make eset objects
-if(!newcontrastonly){
-  for (i in 1:length(omicsList)){
+for (i in 1:length(omicsList)){
     
-    if( grepl(".csv$", omicsList[[i]][[3]]) ) { file_ext_sep <- ","; } else { file_ext_sep <- "\t"; }
-    omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE,
-                                                 sep=file_ext_sep, check.names=FALSE));
-    names(omicsList[[i]])[4] <- "RawData";
+  if( grepl(".csv$", omicsList[[i]][[3]]) ) { file_ext_sep <- ","; } else { file_ext_sep <- "\t"; }
+  omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE,
+                                               sep=file_ext_sep, check.names=FALSE));
+  names(omicsList[[i]])[4] <- "RawData";
+  
+  omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
+                                  data_format=omicsList[[i]][[2]], uniprot_annotation=query_web);
+  names(omicsList[[i]])[5] <- "eSet";
+  #omicsList[[i]][[14]] <- omicsList[[i]][[5]] # use for debugging
     
-    omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
-                                    data_format=omicsList[[i]][[2]], cutoff=zero_percent)
-    names(omicsList[[i]])[5] <- "eSet";
-    #omicsList[[i]][[14]] <- omicsList[[i]][[5]] # use for debugging
-    
-    print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[4]]), " features detected in raw data.", sep=""))
-    print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[5]]), " features detected in filtered data.", sep=""))
-  }
-}
-
-# Load previously saved data to save time (needs same Analysis name run on same day)
-if(newcontrastonly){
-  for (i in 1:length(omicsList)){
-    omicsList[[i]][[5]] <- readRDS(file=file.path(output_files_path, paste("Data_eset_", omicsList[[i]][[1]], ".RDS", sep="")))
-    names(omicsList[[i]])[5] <- "eSet";
-    print(paste(omicsList[[i]][[1]], ": ", nrow(omicsList[[i]][[5]]), " features detected in processed data.", sep=""))
-  }
+  if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { gene_data_index <- c(gene_data_index, i) };
+  if( "Protein" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { prot_data_index <- c(prot_data_index, i) };
+  if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { mz_data_index <- c(mz_data_index, i) };
 }
 
 ```
@@ -218,14 +218,18 @@ if(newcontrastonly){
 knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messages=FALSE, fig.width=8, fig.height=12, knitr.duplicate.label="allow")
 ```
 
-```{r child=file.path(notebook_dir, 'Notebook_Expl.Rmd')}
+```{r child=file.path(notebook_dir, 'Notebook_1_Expl.Rmd')}
 ```
 
-```{r child=file.path(notebook_dir, 'Notebook_Diff.Rmd'), eval=runDifferential}
+```{r child=file.path(notebook_dir, 'Notebook_2_Diff.Rmd'), eval=runDifferential}
 ```
 
 ```{r }
-#child=file.path(notebook_dir, 'Notebook_Integ.Rmd'), eval=runDifferential}
+#child=file.path(notebook_dir, 'Notebook_3_Enrch.Rmd'), eval=runDifferential}
+```
+
+```{r }
+#child=file.path(notebook_dir, 'Notebook_4_Integ.Rmd'), eval=runDifferential}
 ```
 
 ---

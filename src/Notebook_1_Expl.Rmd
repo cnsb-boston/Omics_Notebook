@@ -1,0 +1,348 @@
+# QC and Exploratory Analysis
+
+`r if(txtFolder){"### Raw Data QC Report (PTXQC)"}`
+```{r PTX_QC_report, results='hide'}
+# if txt folder provided, generate PTXQC report
+tryCatch(expr={
+if(txtFolder){
+  library(PTXQC)
+  require(methods)
+  library(data.table)
+
+  txt_folder <- file.path(working_dir, "txt");
+  report.mq <- createReport(txt_folder);
+}
+}, error=function(e){print("Error generating PTXQC report")} )
+```
+`r if(txtFolder){"[ View Raw Data QC Report (PTXQC) ](txt/report_v0.92.3_MQ_pipeline.pdf)" }` 
+
+---
+
+### Boxplot and Distribution
+```{r boxplots_QC_and_norm, fig.width=12, fig.height=4}
+output_links<-"";
+
+for(i in 1:length(omicsList)){
+  if(length(zero_percent)==1){use_zero<-zero_percent}else{use_zero<-zero_percent[i]}
+  if(length(norm_method)==1){use_norm<-norm_method}else{use_norm<-norm_method[i]}
+  
+  omicsList[[i]][[5]] <-intensityNorm(eset=omicsList[[i]][[5]], type=omicsList[[i]][[1]], 
+                                      data_format=omicsList[[i]][["dataFormat"]],
+                                      norm=norm_method, cutoff=zero_percent)
+  # for debugging/testing normalization, change to "eset=omicsList[[i]][[14]]" if 14 defined in Notebook.Rmd
+  
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,
+                    "/boxplot_histogram_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+for(i in 1:length(omicsList)){
+    print(paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[4]])," features detected in raw data.",sep=""))
+    print(paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[5]])," features detected in filtered data.",sep=""))
+}
+
+```
+Click to view full size images: `r { output_links }`  
+
+---
+
+### PCA Plots
+```{r PCA_plots, fig.width=12, fig.height=4}
+output_links<-"";
+pca_output <- vector("list", length(omicsList) )
+
+for(i in 1:length(omicsList)){
+  
+  # Batch correction
+  if("Batch" %in% colnames(pData(omicsList[[i]][["eSet"]]))) { try({
+    suppressPackageStartupMessages({require(sva) });
+    suppressMessages({ suppressWarnings({
+    omicsList[[i]][[12]] <- omicsList[[i]][["eSet"]]
+    names(omicsList[[i]])[12] <- "prebatch_eset"
+    
+    pheno = pData(omicsList[[i]][["eSet"]])
+    edata = exprs(omicsList[[i]][["eSet"]])
+    batch = pheno$Batch
+  
+    modcombat = model.matrix(~1, data=pheno)
+    combat_edata = ComBat(dat=edata, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=TRUE)
+    combat_eset = ExpressionSet(assayData=combat_edata)
+    pData(combat_eset) = pData(omicsList[[i]][["eSet"]])
+    fData(combat_eset) = fData(omicsList[[i]][["eSet"]])
+    })})
+    omicsList[[i]][["eSet"]] <- combat_eset
+    tmp<-drawPCA(eset=omicsList[[i]][["prebatch_eset"]], type=paste(omicsList[[i]][["dataType"]],"_precorrection", sep=""), show_sample_names=show_names);
+  }) }
+  
+  # PCA plots
+  pca_output[[i]] <- drawPCA(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]], show_sample_names=show_names)
+  
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+grid.arrange(grobs=pca_output, ncol=2)
+
+```
+Click to view full size images: `r { output_links }`  
+
+---
+
+`r if(length(omicsList)>1){"### Venn Diagram"}`
+```{r venn, eval= (length(omicsList)>1) }
+
+output_links <-"";
+
+if( length(gene_data_index) > 1 ){ 
+  gene_list <- vector("list", length(gene_data_index))
+  for(i in 1:length(gene_data_index)){
+    gene_list[[i]] <- fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene
+    names(gene_list)[i] <- omicsList[[ gene_data_index[i] ]][["dataType"]]
+  }
+  drawVenn(gene_list, "Genes")
+  add_link <- paste("[ Genes ](", output_plots_subdir,"/VennDiagram_Genes.pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+if( length(prot_data_index) > 1 ){ 
+  prot_list <- vector("list", length(prot_data_index))
+  for(i in 1:length(prot_data_index)){
+    prot_list[[i]] <- fData(omicsList[[ prot_data_index[i] ]][["eSet"]])$Protein
+    names(prot_list)[i] <- omicsList[[ prot_data_index[i] ]][["dataType"]]
+  }
+  drawVenn(prot_list, "Proteins")
+  add_link <- paste("[ Proteins ](", output_plots_subdir,"/VennDiagram_Proteins.pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+if( length(mz_data_index) > 1 ){ 
+  mz_list <- vector("list", length(mz_data_index))
+  for(i in 1:length(gene_data_index)){
+    mz_list[[i]] <- na.omit(round(fData(omicsList[[ mz_data_index[i] ]][["eSet"]])$mz,digits=1))
+    names(mz_list)[i] <- omicsList[[ mz_data_index[i] ]][["dataType"]]
+  }
+  drawVenn(mz_list, "Metabolites_mz")
+  add_link <- paste("[ Metabolites (mz) ](", output_plots_subdir,"/VennDiagram_Metabolites_mz.pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+```
+`r if(length(omicsList)>1){"Click to view full size overlap plots: "}` `r { output_links }`  
+
+---
+
+`r if(length(gene_data_index)>1 | length(prot_data_index)>1){"### XY Correlation"}`
+```{r gene_correlation, eval= (length(gene_data_index)>1 | length(prot_data_index)>1) }
+
+output_links <-"";
+
+if(length(gene_data_index)>1){
+  item_name <- "Gene"
+  data_index <- gene_data_index
+  
+  gene_values <- vector("list", length(data_index))
+  for (i in 1:(length(gene_data_index)) ){
+    gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i] ]][["eSet"]]) ); # Make a data frame of values and genes
+    gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i] ]][["eSet"]])[,item_name] ;                                                                         
+    gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+    gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+    gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
+    names(gene_values)[i] <- omicsList[[ data_index[i] ]][["dataType"]]
+  }
+  drawXYCorr(item_list=gene_values, item_name=item_name);
+  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,".pdf)", sep="") ;
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+if(length(gene_data_index)>1){
+  item_name <- "Protein"
+  data_index <- prot_data_index
+  
+  gene_values <- vector("list", length(data_index))
+  for (i in 1:(length(gene_data_index)) ){
+    gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i] ]][["eSet"]]) ); # Make a data frame of values and genes
+    gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i] ]][["eSet"]])[,item_name] ;                                                                         
+    gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+    gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+    gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
+    names(gene_values)[i] <- omicsList[[ data_index[i] ]][["dataType"]]
+  }
+  drawXYCorr(item_list=gene_values, item_name=item_name);
+  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,".pdf)", sep="");
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+```
+`r if(length(gene_data_index)>1){"Click to view full size correlation plots: "}` `r { output_links }`  
+
+---
+
+`r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){"### Site Normalization to Proteins"}`
+```{r site_normalixation, eval= ( length(prot_groups_index)>0 & length(sites_data_index)>0 ) }
+suppressMessages({suppressWarnings({
+output_links<-"";
+
+# Take first protein groups data set for normalization
+item_name <- "Protein"
+data_index <- prot_groups_index
+
+gene_values <- data.frame( exprs(omicsList[[ data_index[1] ]][["eSet"]]) ); # Make a data frame of values and genes
+gene_values[,item_name] <- fData(omicsList[[ data_index[1] ]][["eSet"]])[,item_name] ;                                                                         
+gene_values <- gene_values %>% gather(sample, value, -item_name); # Gather values and get average by gene
+gene_values <- gene_values %>% group_by(.dots=item_name, sample) %>% summarize(mean=mean(value));
+gene_values <- gene_values %>% spread(sample, mean) %>% as.data.frame
+gene_values <- gene_values[gene_values[,item_name]!="",]
+rownames(gene_values) <- gene_values[,item_name];
+gene_values <- gene_values[,colnames(gene_values)!=item_name];
+
+# Normalize sites files
+for(i in 1:length(sites_data_index)){
+  if( identical(omicsList[[ prot_groups_index[1] ]][["eSet"]]$SampleName,
+                omicsList[[ sites_data_index[i] ]][["eSet"]]$SampleName) ) {
+    
+    norm_values <- omicsList[[ sites_data_index[i] ]][["eSet"]] ;
+    norm_values <- norm_values[ fData(norm_values)[,item_name] %in% rownames(gene_values) ,];
+   
+    for(g in 1:nrow(norm_values)) {
+      exprs(norm_values)[g,] <- as.numeric(exprs(norm_values)[g,] / gene_values[which(rownames(gene_values)==fData(norm_values)[g,item_name]),] );
+      exprs(norm_values)[g,] <- as.numeric(exprs(norm_values)[g,] * rowMeans(gene_values[which(rownames(gene_values)==fData(norm_values)[g,item_name]),]) );
+    }
+  
+    omicsList[[ sites_data_index[i] ]][[10]] <- norm_values;
+    names( omicsList[[ sites_data_index[i] ]] )[10] <- "siteNorm";
+  
+    sites_norm_index <- c(sites_norm_index, sites_data_index[i]);
+  }
+}
+
+# Plot new correlation
+gene_values <- vector("list", (length(sites_norm_index)+1) )
+gene_values[[1]] <- data.frame( exprs(omicsList[[ data_index[1] ]][["eSet"]]) ); # Make a data frame of values and genes
+gene_values[[1]][,item_name] <- fData(omicsList[[ data_index[1] ]][["eSet"]])[,item_name] ;                                                                         
+gene_values[[1]] <- gene_values[[1]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+gene_values[[1]] <- gene_values[[1]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+gene_values[[1]] <- gene_values[[1]][gene_values[[i]][,item_name]!="",]
+names(gene_values)[1] <- omicsList[[ data_index[1] ]][["dataType"]]
+
+data_index <- sites_norm_index;
+for (i in 2:(length(data_index)+1) ){
+  gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i-1] ]][["siteNorm"]]) ); # Make a data frame of values and genes
+  gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i-1] ]][["siteNorm"]])[,item_name] ;                                                                         
+  gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+  gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+  gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
+  names(gene_values)[i] <- paste(omicsList[[ data_index[i-1] ]][["dataType"]], "_NormToProteome",sep="")
+}
+
+drawXYCorr(item_list=gene_values, item_name=item_name, file_name="_withSiteNorm" );
+add_link <- paste("[ ",item_name,"_withSiteNorm Correlation Plots ](",output_plots_subdir,
+                  "/Correlation_Plots_",item_name,"_withSiteNorm.pdf)  \n", sep="") ;
+output_links <- paste(output_links, add_link, sep=" | " )
+
+for(i in 1:length(sites_norm_index)){
+  type_name <- paste(omicsList[[ sites_norm_index[i] ]][["dataType"]], "_normtoProteome",sep="")
+  tmp<-drawPCA(eset=omicsList[[ sites_norm_index[i] ]][["siteNorm"]], type=type_name, show_sample_names=TRUE)
+
+  add_link <- paste("[ PCA:",type_name, " ](", output_plots_subdir,"/PCAplots_",type_name,".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+})})
+```
+`r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){"Site to Proteome Normalization:"}`
+`r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){ output_links }`
+
+---
+
+### Variation Plots, Filtering
+```{r variation}
+output_links<-"";
+
+for(i in 1:length(omicsList)){
+  omicsList[[i]][[6]] <- variationPlot(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+  names(omicsList[[i]])[6] <- "topVariable";
+    
+  # Make output hyperlinks for markdown
+  type_name <- omicsList[[i]][["dataType"]]
+  add_link <- paste("[ ",type_name, "-Variation ](", output_plots_subdir,"/variation_",type_name,".pdf) | ",
+                    "[ ",type_name, "-Correlation ](", output_plots_subdir,"/correlation_",type_name,".pdf) | ",
+                    "[ ",type_name, "-Pairs ](",output_plots_subdir,"/pairs_",type_name,".jpeg)",
+                    sep="");
+  
+  output_links <- paste(output_links, add_link, sep="  \n" );
+}
+  
+```
+Click below to view SD vs Mean and Pairs plots: `r { output_links }`  
+
+---
+
+### Global Static Heatmaps
+```{r heatmaps_qc}
+output_links<-"";
+
+for(i in 1:length(omicsList)){
+  drawHeatmaps(eset=omicsList[[i]][["eSet"]], emat_top=omicsList[[i]][["topVariable"]], type=omicsList[[i]][["dataType"]]);
+    
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+}
+
+if(length(sites_norm_index)>0){ for(i in 1:length(sites_norm_index)){
+  type_name <- paste(omicsList[[ sites_norm_index[i] ]][["dataType"]], "_normtoProteome",sep="")
+  drawHeatmaps(eset=omicsList[[ sites_norm_index[i] ]][["siteNorm"]], type=type_name) ;
+    
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",type_name, " ](", output_plots_subdir,"/heatmaps_",type_name,".pdf)", sep="")
+  output_links <- paste(output_links, add_link, sep=" | " )
+} }
+
+```
+Click to view static heatmaps plots: `r { output_links }`  
+
+---
+
+`r if(int_heatmap_section){"### Interactive Heatmap"}`
+```{r interactive_plots_qc, eval=int_heatmap_section}
+output_links<-"";
+
+for(i in 1:length(omicsList)){
+  interactiveHeatmap(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
+  
+  # Make output hyperlinks for markdown
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], "-All ](", output_plots_subdir,"/heatmap_all_",
+                    omicsList[[i]][["dataType"]],".html)", sep="");
+  output_links <- paste(output_links, add_link, sep=" | " );
+}
+
+```
+`r if(int_heatmap_section){"Click to view interactive heatmaps:"}`  `r if(int_heatmap_section){ output_links }`  
+
+---
+
+### Save Data
+```{r save_data_qc }
+
+# save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
+if(runDifferential==FALSE){  
+  for(i in 1:length(omicsList)){
+      saveFiles(data=omicsList[[i]], type=omicsList[[i]][["dataType"]]);
+  }
+}  
+
+# Save excel file summary for collaborators
+if(runDifferential==FALSE && saveXlsx==TRUE){    
+  wbOut <- createWorkbook()
+  
+  for(i in 1:length(omicsList)){
+    writeDataToSheets(wb=wbOut, eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]);
+  } 
+  
+  output_filename=file.path(output_path, paste(project_name, "_Summary.xlsx", sep=""))
+  saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
+}
+
+``` 
+
+---
