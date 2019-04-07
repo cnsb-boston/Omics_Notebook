@@ -7,6 +7,10 @@ output:
     theme: united
     toc: yes
     code_folding: hide
+    pandoc_args: [
+      "+RTS", "-K1024m",
+      "-RTS"
+      ]
 ---
 
 ========================================================
@@ -42,11 +46,11 @@ search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_
 ############################################
 
 source('Parameters.R')
+enrichment_map <- gsea_section; # only run enrichment map if interactive session
 
 ```
 
 ```{r libraries}
-
 # Make output subdirectories
 output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
 output_files_subdir <- paste(output_subdir,"Files", sep="/")
@@ -64,8 +68,10 @@ if(inherit_paths==TRUE) { .libPaths(libraries_path) }
 
 # Load pipeline libraries
 suppressPackageStartupMessages({
+library(R.utils)
 library(Biobase)
 library(limma)
+library(splines)
 library(knitr)
 library(ggplot2)
 library(ggrepel)
@@ -101,11 +107,10 @@ if(gsea_section){
 
 #library(sva) # combat/batch correction
 #library(hmdbQuery) # metabolite annotation info
-#library(MetaboAnalystR)
 })
 
 # Source function file
-source(file.path(notebook_dir,"notebookFunctions.R"))
+sourceDirectory(file.path(gsub("src","R", notebook_dir)))
 
 ```
 
@@ -121,7 +126,7 @@ source(file.path(notebook_dir,"notebookFunctions.R"))
 # omicsList[[i]][[5]] "eSet" is the working eset object
 # omicsList[[i]][[6]] "topVariable" is the index of the most variable features
 # omicsList[[i]][[7]] "fit" is the limmaFit output of eBayes
-# omicsList[[i]][[8]] "ratio" difference between samples when not enough replicates
+# omicsList[[i]][[8]]
 # omicsList[[i]][[9]] 
 # omicsList[[i]][[10]] "siteNorm" is site data normalized to protein groups
 # omicsList[[i]][[11]] "siteNorm_fit" is the limmaFit output of eBayes
@@ -141,6 +146,10 @@ prot_data_index <- c();   # index of all data with Protein (Uniprot IDs)
 prot_groups_index <- c(); # index of all Protein Groups Data (MQ)
 
 # Import annotation file
+if(!file.exists(annotation_filename)){
+  print(paste("Annotation file not found: ",annotation_filename,sep=""))
+  stop()    
+}
 annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
 contrastgroups <- gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3]))));
 annot<-annot[c(-1,-4),];
@@ -154,19 +163,13 @@ for (i in 1:(nrow(annot)-2) ){
   names(omicsList[[i]])[1] <- gsub("\\.","", make.names("dataType"));
   omicsList[[i]][2] <- make.names(annot[i+2,2]);
   names(omicsList[[i]])[2] <- "dataFormat";
-  if(omicsList[[i]][["dataFormat"]]=="Metabolites"){ metab_data_index <- c(metab_data_index, i)  };
+  if(grepl("Metabolites", omicsList[[i]][["dataFormat"]]) ){ metab_data_index <- c(metab_data_index, i)  };
   if(omicsList[[i]][["dataFormat"]]=="Phospho.Sites..MQ."){ phos_data_index <- c(phos_data_index, i)  };
-  if(omicsList[[i]][["dataFormat"]]=="Protein.Groups..MQ."){ prot_groups_index <- c(prot_groups_index, i) };
+  if(any(omicsList[[i]][["dataFormat"]] %in% c("Protein.Groups..MQ.", "Peptides..MQ.")) ){ prot_groups_index <- c(prot_groups_index, i) };
   if(grepl(".Sites..MQ.",omicsList[[i]][["dataFormat"]]) ){ sites_data_index <- c(sites_data_index, i)  };
   omicsList[[i]][[3]] <- annot[i+2,3];
   names(omicsList[[i]])[3] <- "filename";
 }
-
-# Load metabolite libraries
-if(length(metab_data_index) > 0){ suppressPackageStartupMessages({
-  library(MetaboAnalystR)
-  library(hmdbQuery)
-}) }
 
 # Format annotation table
 annot[3:nrow(annot),3] <- annot[3:nrow(annot),1];
@@ -198,12 +201,20 @@ for (i in 1:length(omicsList)){
 for (i in 1:length(omicsList)){
     
   if( grepl(".csv$", omicsList[[i]][[3]]) ) { file_ext_sep <- ","; } else { file_ext_sep <- "\t"; }
+  
+  if(!file.exists(omicsList[[i]][[3]])){
+    print(paste("File not found: ",omicsList[[i]][[3]],sep=""))
+    stop()
+  }
+  
   omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE,
                                                sep=file_ext_sep, check.names=FALSE));
   names(omicsList[[i]])[4] <- "RawData";
   
-  omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
-                                  data_format=omicsList[[i]][[2]], uniprot_annotation=query_web);
+  tryCatch({
+    omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
+                                    data_format=omicsList[[i]][[2]], uniprot_annotation=query_web);
+    }, error=function(e){print("Problem with input data format."); stop() })
   names(omicsList[[i]])[5] <- "eSet";
   #omicsList[[i]][[14]] <- omicsList[[i]][[5]] # use for debugging
     
@@ -212,6 +223,15 @@ for (i in 1:length(omicsList)){
   if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { mz_data_index <- c(mz_data_index, i) };
 }
 
+# load libraries if needed
+suppressPackageStartupMessages({
+if( length(phos_data_index)>0 ){
+  library(KSEAapp)
+}
+if( length(metab_data_index)>0 ){
+  library(MetaboAnalystR)
+}
+})
 ```
 
 ```{r global_options, echo=FALSE}
@@ -224,13 +244,9 @@ knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messa
 ```{r child=file.path(notebook_dir, 'Notebook_2_Diff.Rmd'), eval=runDifferential}
 ```
 
-```{r }
-#child=file.path(notebook_dir, 'Notebook_3_Enrch.Rmd'), eval=runDifferential}
+```{r child=file.path(notebook_dir, 'Notebook_3_Enrch.Rmd'), eval=runDifferential}
 ```
 
-```{r }
-#child=file.path(notebook_dir, 'Notebook_4_Integ.Rmd'), eval=runDifferential}
-```
 
 ---
 

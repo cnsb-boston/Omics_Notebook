@@ -1,0 +1,14 @@
+Species	MetLib
+C. elegans (6239)	cel_kegg
+Zebrafish (7955)	dre_kegg
+Zebrafish (7955)	dre_mtf
+Fruit Fly (7227)	dme_biocyc
+Fruit Fly (7227)	dme_kegg
+E. coli (511145)	eco_kegg
+Rat (10116)	rno_kegg
+Yeast (559292)	sce_biocyc
+Yeast (559292)	sce_kegg
+Human (9606)	hsa_biocyc
+Human (9606)	hsa_mfn
+Mouse (10090)	mmu_biocyc
+Mouse (10090)	mmu_kegg

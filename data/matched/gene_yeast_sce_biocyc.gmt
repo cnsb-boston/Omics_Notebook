@@ -1,0 +1,232 @@
+fatty acid activation	PWY-5143	FAA4	FAA2	FAA3	FAA1
+sulfate activation for sulfonation	PWY-5340	MET14	MET3
+homocysteine and cysteine interconversion	PWY-801	CYS3	CYS4
+p-aminobenzoate biosynthesis	PWY3O-1874	ABZ1	ABZ2
+3-dehydroquinate biosynthesis	PWY-6164	ARO3	ARO4
+4-hydroxybenzoate biosynthesis I (eukaryotes)	PWY-5754	
+4-hydroxybenzoate biosynthesis II (bacteria and fungi)	PWY-5755	
+hypusine biosynthesis	PWY-5905	LIA1	DYS1
+diphthamide biosynthesis	PWY-6482	DPH6
+alanine biosynthesis	ALANINE-SYN2-PWY	ALT2	ALT1
+arginine biosynthesis	ARGSYNBSUB-PWY	ARG3	ARG8	ARG2	ARG4	ARG1	CPA1	CPA2
+asparagine biosynthesis	ASPARAGINE-BIOSYNTHESIS	ASN2	ASN1
+aspartate biosynthesis	ASPBIO-PWY	PYC1	PYC2	AAT1	AAT2
+beta-alanine biosynthesis	PWY-5760	
+arginine degradation I (arginase pathway)	ARGASEDEG-PWY	CAR1	CAR2
+glutamate biosynthesis from glutamine	GLUGLNSYN-PWY	GLT1
+glutamate biosynthesis from ammonia	GLUTSYNIII-PWY	GDH3	GDH1
+glutamine biosynthesis	GLNSYN-PWY	GLN1
+glycine biosynthesis II	GLYCINE-SYN2-PWY	
+glycine biosynthesis from glyoxylate	GLYSYN-ALA-PWY	AGX1
+glycine biosynthesis from serine	GLYSYN-PWY	SHM1	SHM2
+glycine biosynthesis from threonine	GLYSYN-THR-PWY	
+histidine biosynthesis	HISTSYN-PWY	HIS2	HIS6	HIS1	HIS5	HIS3
+isoleucine biosynthesis	ILEUSYN-PWY	ILV1	ILV5	ILV2	ILV3	BAT2	BAT1
+leucine biosynthesis	LEUSYN-PWY	BAT2	BAT1	LEU4	LEU9
+lysine biosynthesis	LYSINE-AMINOAD-PWY	LYS20	LYS21	LYS12	LYS9	LYS1	LYS4
+methionine biosynthesis	PWY-702	THR1	MET6	SAM4	MHT1
+methionine salvage pathway	PWY3O-64	MDE1	UTR4	MRI1	MEU1	ADI1
+homoserine biosynthesis	HOMOSERSYN-PWY	HOM2	HOM3	HOM6
+homocysteine biosynthesis	PWY-5344	MET2
+citrulline biosynthesis	CITRULBIO-PWY	ARG3	PRO1	CAR2	CAR1	PRO2
+phenylalanine biosynthesis	PWY3O-4153	PHA2	ARO7
+arginine degradation VI (arginase 2 pathway)	ARG-PRO-PWY	PRO3	CAR1	CAR2
+proline biosynthesis	PROSYN-PWY	PRO3	PRO1	PRO2
+serine racemization	PWY-6196	DSD1
+serine biosynthesis from glyoxylate	PWY3O-230	SHM1	SHM2
+serine biosynthesis from 3-phosphoglycerate	SERSYN-PWY	SER1	SER2
+threonine biosynthesis from homoserine	HOMOSER-THRESYN-PWY	THR1	THR4
+tryptophan biosynthesis	TRPSYN-PWY	TRP2	TRP4	TRP1
+tyrosine biosynthesis	PWY3O-4120	ARO7	TYR1
+valine biosynthesis	VALSYN-PWY	ILV5	ILV2	ILV3	BAT2	BAT1
+acetaldehyde biosynthesis	PWY-6333	ADH1	ADH3	ADH2	ADH4	ADH5
+glycogen degradation	GLYCOCAT-PWY	MAL12	MAL32	PGM1	PGM2	GPH1	EMI2	GLK1
+dolichyl phosphate D-mannose biosynthesis	PWY3O-123	SEC53	PMI40	DPM1
+dolichyl glucosyl phosphate biosynthesis	PWY3O-1565	UGP1	PGM1	PGM2	ALG5
+glucose-6-phosphate biosynthesis	PWY3O-3827	EMI2	GLK1
+gluconeogenesis	GLUCONEO-YEAST-PWY	PGK1	FBA1	FBP1	PYC1	PYC2	PCK1	TDH2	TDH1	TDH3	MAE1	ERR3	ERR1	ERR2	ENO2	ENO1	MDH2	MDH1	MDH3	PGI1
+GDP-mannose biosynthesis	PWY-5659	SEC53	PMI40	PSA1	PGI1
+trehalose biosynthesis	TRESYN-PWY	TPS1	TPS2
+dolichyl-diphosphooligosaccharide biosynthesis	MANNOSYL-CHITO-DOLICHOL-BIOSYNTHESIS	ALG12	ALG1	ALG13	ALG11	ALG7	ALG5	ALG3	DIE2	DPM1	ALG6	ALG8
+chitosan biosynthesis	PWY3O-70	CDA1	CDA2
+glycogen biosynthesis	PWY-5067	UGP1	GLG2	GLG1	GLC3	GSY1	GSY2
+mevalonate pathway	PWY-922	ERG13	IDI1	MVD1	HMG1	HMG2	ERG8	ERG10	ERG12
+tetrapyrrole biosynthesis	PWY3O-50	HEM3	HEM1	HEM2	HEM4
+S-adenosyl-L-methionine biosynthesis	SAM-PWY	SAM2	SAM1
+coenzyme A biosynthesis	COA-PWY	CAB4	CAB5	CAB2
+lipoate biosynthesis and incorporation II	PWY0-1275	LIP5
+lipoate biosynthesis and incorporation I	PWY0-501	LIP5	LIP2
+NAD biosynthesis from 2-amino-3-carboxymuconate semialdehyde	PWY-5653	BNA6	QNS1
+nicotinate riboside salvage pathway I	PWY3O-224	
+nicotinate riboside salvage pathway II	PWY3O-236	URH1
+nicotinamide riboside salvage pathway I	PWY3O-4106	POF1
+NAD salvage pathway	PWY3O-4107	QNS1	PNC1
+nicotinamide riboside salvage pathway II	PWY3O-96	
+hexaprenyl diphosphate biosynthesis	HEXPPSYN-PWY-1	IDI1
+<i>trans, trans</i>-farnesyl diphosphate biosynthesis	PWY-5123	IDI1
+geranylgeranyldiphosphate biosynthesis	PWY-5120	
+siroheme biosynthesis	PWY-5194	
+heme biosynthesis	HEME-BIOSYNTHESIS-II	HEM14	HEM12	HEM13	HEM15
+ubiquinol-6 biosynthesis (eukaryotic)	PWY3O-19	COQ5	COQ2
+glutathione biosynthesis	GLUTATHIONESYN-PWY	GSH1	GSH2
+glutathione redox reactions I	PWY-4081	GLR1
+glutathione-glutaredoxin system	PWY3O-592	GLR1
+thioredoxin system	THIOREDOX-PWY	TRR2	TRR1
+tetrapyrrole biosynthesis II	PWY-5189	HEM3	HEM1	HEM2	HEM4
+biotin biosynthesis from 7-keto-8-aminopelargonate	PWY0-1507	BIO4	BIO2	BIO3
+flavin biosynthesis III (fungi)	PWY-6168	RIB7	RIB4	FAD1	RIB1	RIB5	RIB3	FMN1
+folate transformations	PWY-2201	SHM1	SHM2	FAU1	MTD1	MET12	MET13
+4-aminobenzoate biosynthesis	PWY-6543	ABZ1	ABZ2
+tetrahydrofolate salvage from 5,10-methenyltetrahydrofolate	PWY-6613	ADE8
+tetrahydrofolate biosynthesis	PWY-6614	FOL3	DFR1
+folate polyglutamylation	PWY3O-20	SHM1	SHM2	DFR1	MET12	MET13	FOL3	MET7	RMA1
+folate interconversions	PWY3O-697	CDC21	SHM1	SHM2	DFR1	MET12	MET13	MTD1
+6-hydroxymethyl-dihydropterin diphosphate biosynthesis I	PWY-6147	FOL2
+phosphopantothenate biosynthesis I	PANTO-PWY	PAN6	CAB1	ECM31	PAN5
+4-amino-2-methyl-5-diphosphomethylpyrimidine biosynthesis	PWY-6890	
+thiamin diphosphate biosynthesis IV (eukaryotes)	PWY-6908	PHO3	PHO5	PHO12	PHO11	DIA3	THI80
+thiazole biosynthesis III (eukaryotes)	PWY-6909	
+thiamin salvage III	PWY-6898	THI80
+hydroxymethylpyrimidine salvage	PWY-6910	
+pyridoxal 5'-phosphate salvage pathway	PLPSAL-PWY	PDX3	BUD16	BUD17
+indole-3-acetate biosynthesis V (bacteria and fungi)	PWY-5026	
+ethylene biosynthesis	PWY-6854	SOD2	SOD1	FRE8
+dolichol and dolichyl phosphate biosynthesis	PWY-6129	SEC59	RER2	SRT1	NUS1
+biotin-carboxyl carrier protein assembly	PWY0-1264	
+glycerol biosynthesis	PWY3O-48	GPP2	GPP1	GPD1	GPD2
+sphingolipid biosynthesis	SPHINGOLIPID-SYN-PWY	LAG1	LAC1	LCB1	LCB2	TSC10
+triglyceride biosynthesis	TRIGLSYN-YEAST-PWY	SLC1	ICT1	LOA1	LRO1	PAH1	APP1
+choline biosynthesis	PWY-3561	CPT1	SPO14	PCT1
+fatty acid elongation -- saturated	FASYN-ELONG-PWY-1	OAR1	CEM1
+fatty acid elongation	FASYN-ELONG2-PWY	CEM1	OAR1	TES1
+fatty acid biosynthesis initiation	PWY-5966	CEM1
+fatty acid biosynthesis (concise)	PWY-5970	
+very long chain fatty acid biosynthesis	PWY-7036	PHS1	TSC13	IFA38	ELO2	ELO3	ELO1
+oleate biosynthesis	PWY-5996	OLE1
+palmitate biosynthesis	PWY-5994	CEM1	OAR1	TES1
+palmitoleate biosynthesis	PWY3O-1801	
+stearate biosynthesis	PWY3O-355	CEM1	OAR1	TES1
+phosphatidylinositol phosphate biosynthesis	PWY3O-242	PIK1	LSB6	STT4	FAB1	PIS1	MSS4	VPS34	INP51	INP54
+phospholipid biosynthesis II (Kennedy pathway)	PWY3O-259	ECT1	EKI1
+phosphatidate biosynthesis I (the dihydroxyacetone pathway)	PWY3O-6407	AYR1	SLC1	ICT1	LOA1
+phosphatidate biosynthesis II (the glycerol-3-phosphate pathway)	PWY3O-6499	SLC1	ICT1	LOA1	GPD1	GPD2
+CDP-diacylglycerol biosynthesis	PWY-5667	SLC1	ICT1	LOA1	CDS1	TAM41
+cardiolipin biosynthesis	PWY-5269	GEP4	PGS1
+phosphatidylcholine biosynthesis V	PWY-6825	CHO2
+phospholipid biosynthesis (Kennedy pathway)	PWY3O-450	PCT1	CPT1	CKI1
+phosphatidylethanolamine biosynthesis I	PWY-5669	CHO1	PSD2	PSD1
+phosphatidylethanolamine biosynthesis II	PWY4FS-6	ECT1	EKI1
+zymosterol biosynthesis	PWY-6074	ERG24	ERG27	ERG26
+ergosterol biosynthesis	PWY-6075	ERG4	ERG6
+lanosterol biosynthesis	PWY-6132	ERG7
+dTMP <i>de novo</i> biosynthesis (mitochondrial)	PWY66-385	DFR1	CDC21	SHM1	SHM2
+5-aminoimidazole ribonucleotide biosynthesis I	PWY-6121	ADE6	ADE8	ADE4
+tRNA splicing	PWY-6689	TPT1
+superpathway of of purine nucleotides de novo biosynthesis	DENOVOPURINE3-PWY	RNR3	RNR4	RNR2	RNR1	ADE8	ADE1	ADE6	ADE4	ADE2	ADE13	GUK1	YNK1	GUA1	ADE12	IMD1	IMD4	IMD2	IMD3	FAP7	ADK1
+adenosine nucleotides <i>de novo</i> biosynthesis	PWY-6126	RNR3	RNR4	RNR2	RNR1	ADE13	YNK1	ADE12	FAP7	ADK1
+inosine-5'-phosphate biosynthesis	PWY-6124	ADE13	ADE2	ADE1
+salvage pathways of adenine, hypoxanthine and their nucleosides	PWY3O-2220	PNP1	HPT1	APT2	APT1	AAH1	AMD1	ADO1
+salvage pathways of guanine, xanthine and their nucleosides	PWY3O-743	GUD1	HPT1
+xanthine and xanthosine salvage	SALVPURINE2-PWY	PNP1
+adenine and adenosine salvage IV	PWY-6610	HPT1	AAH1	APT2	APT1
+adenine and adenosine salvage VI	PWY-6619	ADO1
+pyrimidine deoxyribonucleotides <i>de novo</i> biosynthesis	PWY0-166	RNR3	RNR4	RNR2	RNR1	CDC21	DUT1	CDC8	YNK1
+uridine-5'-phosphate biosynthesis	PWY-5686	URA10	URA5	URA3	URA4	CPA1	CPA2
+de novo biosynthesis of pyrimidine ribonucleotides	PYRIMID-RNTSYN-PWY	URA6	URA10	URA5	URA4	URA3	YNK1	URA8	URA7	CPA1	CPA2
+salvage pathways of pyrimidine ribonucleotides	PWY0-163	URK1	DAS2	FCY1	FUR1	CDD1	YNK1
+salvage pathways of pyrimidine deoxyribonucleotides	YEAST-SALV-PYRMID-DNTP	URH1
+epoxysqualene biosynthesis	PWY-5670	
+PRPP biosynthesis	PWY0-662	PRS1	PRS2	PRS4	PRS3	PRS5
+spermine and methylthioadenosine biosynthesis	ARGSPECAT-PWY	SPE2	SPE4
+UDP-N-acetylglucosamine biosynthesis	UDPNAGSYN-YEAST-PWY	GNA1	GFA1	QRI1	PCM1
+putrescine biosynthesis	PWY-46	SPE1
+spermidine and methylthioadenosine biosynthesis	BSUBPOLYAMSYN-PWY	SPE2	SPE3
+UDP-<i>N</i>-acetyl-D-glucosamine biosynthesis II	UDPNACETYLGALSYN-PWY	GNA1	GFA1	QRI1	PCM1
+inositol phosphate biosynthesis	PWY3O-402	ARG82	PLC1	IPK1	KCS1
+D-<i>myo</i>-inositol (1,4,5)-trisphosphate biosynthesis	PWY-6351	PLC1	PIS1	MSS4	PIK1	LSB6	STT4
+D-<i>myo</i>-inositol (1,3,4)-trisphosphate biosynthesis	PWY-6364	
+inositol pyrophosphates biosynthesis	PWY-6369	KCS1	IPK1
+<i>myo</i>-inositol biosynthesis	PWY-2301	INO1	INM1	INM2
+1D-<i>myo</i>-inositol hexakisphosphate biosynthesis I  (from Ins(1,4,5)P3)	PWY-6361	ARG82	IPK1
+4-aminobutyrate degradation	PWY-6536	UGA1	UGA2
+allantoin degradation to ureidoglycolate I (urea producing)	PWY-5697	DAL1	DAL2
+urea degradation	PWY-5703	
+(S,S)-butanediol degradation	PWY-6388	
+(R,R)-butanediol degradation	PWY3O-246	BDH1
+ethanol degradation I	ETOH-ACETYLCOA-ANA-PWY	ADH1	ADH3	ADH2	ADH4	ADH5
+ethanol degradation IV	PWY66-162	CTT1	CTA1	HFD1	ALD2	ALD3	ACS1	ACS2
+ethanol degradation II	PWY66-21	ADH1	ADH3	ADH2	ADH4	ADH5	HFD1	ALD2	ALD3	ACS1	ACS2
+glycerol degradation I	PWY-4261	GUT2	GUT1
+methylglyoxal catabolism	PWY-5386-1	GLO1	DLD1	GLO2	GLO4
+2-ketoglutarate dehydrogenase complex	PWY-5084	LPD1	KGD1	KGD2
+alanine degradation III	ALANINE-DEG3-PWY	ALT2	ALT1
+asparagine degradation	ASPARAGINE-DEG1-PWY	ASP3-1	ASP3-2	ASP3-3	ASP3-4	ASP1
+aspartate degradation II	MALATE-ASPARTATE-SHUTTLE-PWY	MDH2	MDH1	MDH3	AAT1	AAT2
+L-cysteine degradation II	LCYSDEG-PWY	CYS3
+glutamate degradation X	GLUDEG-I-PWY-1	GAD1	UGA1	UGA2
+glutamate degradation I	GLUTAMATE-DEG1-PWY	GDH2
+glutamine degradation I	GLUTAMINDEG-PWY	
+glycine cleavage	GLYCLEAV-PWY	GCV2	LPD1	GCV1
+isoleucine degradation II	PWY-5078	BAT2	BAT1	THI3	ADH1	ADH3	ADH2	ADH4	ADH5
+isoleucine degradation	PWY3O-4109	BAT2	BAT1	ADH1	ADH3	ADH2	ADH4	ADH5	THI3
+leucine degradation III	PWY-5076	BAT2	BAT1	ADH1	ADH3	ADH2	ADH4	ADH5
+leucine degradation	PWY3O-4112	BAT2	BAT1	ADH1	ADH3	ADH2	ADH4	ADH5
+methionine degradation I (to homocysteine)	METHIONINE-DEG1-PWY	SAM2	SAM1	SAH1
+phenylalanine degradation	PWY-5079	ADH1	ADH3	ADH2	ADH4	ADH5
+proline degradation	PROUT-PWY	
+L-serine degradation	SERDEG-PWY	SDL1
+threonine degradation IV	PWY-5436	
+threonine degradation	THREOCAT2-PWY	ILV1	STR2	CYS3
+tryptophan degradation VIII (to tryptophol)	PWY-5081	
+tryptophan degradation to 2-amino-3-carboxymuconate semialdehyde	PWY-5651	BNA1	BNA5	BNA4	BNA7
+tryptophan degradation I (via anthranilate)	TRPCAT-PWY	BNA7	BNA5
+tyrosine degradation	PWY3O-4108	ADH1	ADH3	ADH2	ADH4	ADH5
+valine degradation	PWY-5057	BAT2	BAT1	THI3	ADH1	ADH3	ADH2	ADH4	ADH5
+formaldehyde oxidation II (glutathione-dependent)	PWY-1801-YEAST	
+acetate conversion to acetyl-CoA	PWY0-1313	ACS1	ACS2
+pyruvate dehydrogenase complex	PYRUVDEHYD-PWY	LAT1	LPD1	PDA1	PDB1
+acetate formation from acetyl-CoA II	PWY-5535	
+periplasmic NAD degradation	PERIPLASMA-NAD-DEGRADATION	NPY1
+glutathione degradation	PWYQT-4432	
+D-mannose degradation	MANNCAT-PWY	PMI40
+fructose 1-phosphate degradation	PWY0-1314	
+fructose degradation	PWY3O-0	
+mannose degradation	PWY3O-1743	PMI40
+xylulose degradation	PWY3O-5	XKS1
+dehydro-D-arabinono-1,4-lactone biosynthesis	PWY3O-6	ARA2	ARA1	ALO1
+galactose degradation I (Leloir pathway)	PWY-6317	GAL1	GAL7
+sucrose degradation	SUCUTIL-PWY	SUC2
+trehalose degradation II (trehalase)	PWY0-1182	EMI2	GLK1	NTH1	NTH2	ATH1
+xylose metabolism	PWY3O-8	XYL2
+phospholipids degradation	LIPASYN-PWY-1	PLC1	SPO14
+sphingolipid recycling and degradation (yeast)	PWY-7119	DPL1	LCB5	LCB4
+sphingosine and sphingosine-1-phosphate metabolism	PWY3DJ-11470	
+fatty acid &beta;-oxidation I	FAO-PWY	ECI1	POT1	FAA4	FAA2	FAA3	FAA1
+fatty acid &beta;-oxidation III (unsaturated, odd number)	PWY-5137	ECI1
+fatty acid oxidation (non-cyclic)	YEAST-FAO-PWY	ECI1	POX1	FAA4	FAA2	FAA3	FAA1	POT1
+<i>S</i>-methyl-5'-thioadenosine degradation	PWY-6756	MEU1
+purine ribonucleosides degradation to ribose-1-phosphate	PWY0-1296	PNP1	PRM15
+pyrimidine ribonucleosides degradation II	PWY-6556	URH1	CDD1
+ammonia assimilation cycle I	PWY-6963	GLN1	GLT1
+thiosulfate disproportionation III (rhodanese)	PWY-5350	RDL2	TUM1
+xylitol degradation	LARABITOLUTIL-PWY	XKS1	XYL2
+sorbitol degradation	PWY-4101	SOR2	SOR1
+superoxide radicals degradation	DETOX1-PWY	SOD2	SOD1	CTT1	CTA1
+glyoxylate cycle	GLYOXYLATE-BYPASS	CIT1	CIT3	DAL7	MLS1	MDH2	MDH1	MDH3	ACO1
+chitin degradation to ethanol	PWY-7118	DAL7	MLS1	CDA1	CDA2	MAE1	ACH1	ADH1	ADH3	ADH2	ADH4	ADH5
+butanediol biosynthesis	PWY3O-661	BDH1
+acetoin biosynthesis I	PWY3O-335	ILV2
+acetoin biosynthesis III	PWY3O-440	
+(<i>R,R</i>)-butanediol biosynthesis	PWY-5951	BDH1
+(<i>S,S</i>)-butanediol biosynthesis	PWY-6390	
+pyruvate fermentation to ethanol II	PWY-5486	ADH1	ADH3	ADH2	ADH4	ADH5
+glycolysis III (glucokinase)	ANAGLYCOLYSIS-PWY	PGK1	PFK2	PFK1	PGI1	CDC19	PYK2	FBA1	TDH2	TDH1	TDH3	ERR3	ERR1	ERR2	ENO2	ENO1	TPI1	EMI2	GLK1
+glycolysis	GLYCOLYSIS-YEAST-PWY	PGK1	PFK2	PFK1	CDC19	PYK2	FBA1	PGI1	TDH2	TDH1	TDH3	ERR3	ERR1	ERR2	ENO2	ENO1	TPI1
+glycerol-3-phosphate shuttle	PWY-6118	GUT2	GPD1	GPD2
+pentose phosphate pathway (non-oxidative branch)	NONOXIPENT-PWY	TAL1	NQM1	RPE1	TKL1	TKL2	RKI1
+pentose phosphate pathway (oxidative branch)	OXIDATIVEPENT-YEAST-PWY	ZWF1	SOL3	SOL4
+aerobic respiration	PWY-3781	SDH1	SDH2	COX5B	COX6	COX3	COX9	COX7	COX8	COX5A	COX4	COX12	COX13	COX1	COX2
+aerobic respiration (linear view)	PWY3O-188	SDH1	SDH2	COX5B	COX6	COX3	COX9	COX7	COX8	COX5A	COX4	COX12	COX13	COX1	COX2
+TCA cycle, aerobic respiration	TCA-EUK-PWY	CIT1	CIT3	FUM1	ACO1	PYC1	PYC2	IDH1	IDH2	SDH1	SDH2	LSC1	LSC2	MDH2	MDH1	MDH3
+carnitine shuttle	PWY3O-4	YAT2	CAT2	YAT1
+		

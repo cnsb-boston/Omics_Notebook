@@ -1,0 +1,16 @@
+Species	GeneSet	Name
+Human (9606)	gene_human_hsa_biocyc.gmt	hsa_biocyc
+Human (9606)	gene_human_hsa_mfn.gmt	hsa_mfn
+Human (9606)	gene_expanded_human_hsa_biocyc.gmt	hsa_biocyc_expanded
+Human (9606)	gene_expanded_human_hsa_mfn.gmt	hsa_mfn_expanded
+Human (9606)	gene_targetSize_human_hsa_biocyc.gmt	hsa_biocyc_targetSize
+Human (9606)	gene_targetSize_human_hsa_mfn.gmt	hsa_mfn_targetSize
+Mouse (10090)	gene_mouse_mmu_biocyc.gmt	mmu_biocyc
+Mouse (10090)	gene_expanded_mouse_mmu_biocyc.gmt	mmu_biocyc_expanded
+Mouse (10090)	gene_targetSize_mouse_mmu_biocyc.gmt	mmu_biocyc_targetSize
+Fruit Fly (7227)	gene_fly_dme_biocyc.gmt	dme_biocyc
+Fruit Fly (7227)	gene_expanded_fly_dme_biocyc.gmt	dme_biocyc_expanded
+Fruit Fly (7227)	gene_targetSize_fly_dme_biocyc.gmt	dme_biocyc_targetSize
+Yeast (559292)	gene_yeast_sce_biocyc.gmt	sce_biocyc
+Yeast (559292)	gene_expanded_yeast_sce_biocyc.gmt	sce_biocyc_expanded
+Yeast (559292)	gene_targetSize_yeast_sce_biocyc.gmt	sce_biocyc_targetSize

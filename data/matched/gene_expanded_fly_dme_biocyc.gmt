@@ -1,0 +1,200 @@
+acetyl-CoA biosynthesis (from citrate)	PWY-5172	ATPCL	stum	CG10137	CG14253	CG13454	CG11486	l(1)G0020
+acetyl-CoA biosynthesis (from pyruvate)	PYRUVDEHYD-PWY	muc	E3	Pdha	Dmel\CG7024	Pdhb	CG7430	CG10494	CG6576	Atu
+TCA cycle variation III (eukaryotic)	PWY-5690	Fum1	Irp-1A	Irp-1B	Idh3b	Dmel\CG5028	l(1)G0156	SdhAL	SdhBL	SdhC	SdhA	SdhB	ScsbetaA	Mdh1	Dmel\CG10749	Mdh2	Dmel\CG10748	CG10748-RA	Xport-A	CG17999	CG9083	NULL	Tm2	CG2025	CG17290	Fas2	Fadd	CG16947	UQCR-C2	Glt	Chc	OstDelta	boca	Tcp-1eta	CG10425	Karybeta3	CG31729	Rpt6	Ost48	vnd	atl	CG2064	Pi3K68D	CG3008	CG12262	CG8258	Kap-alpha3	TER94	r	Sc2	PCB	CG4729	Sec63	betaCOP	Tapdelta	CG7834	Rab5	CG2065	ssp	CG12264	Cnx99A	Kr-h2	UQCR-6.4	SerRS	Sec61alpha	wal	Gp93	Tcp-1zeta	CG5525	Actn	Prm	Cyt-c1	RpLP0	Argk	MRP	SERCA	skap	Cyp12d1-p	Sucb	CG33303	Vps4	fax	RpS5a	Ranbp9	Past1	scf	Pih1D1	Nacalpha	CG5028	alpha-Spec	Gfat2	CG9467	CG5854	lic	Gp210	GluProRS	Cctgamma	EfTuM	RpS10b	CG1371	CG16817	bor	Pp2A-29B	Mpcp	Rpt1	fu	Spindly	CG13138	Mst89B	Cp38	CG3078	Sld5	CG15764	Vps39	Snap29	stc	CG15136	CG14036	Nha2	CG7787	MED6	CG1532	CG18789	Ccs	MtnA	Gbs-70E	CG9784	Mob2	Rbsn-5	Uba4	Cpr47Ea	CG7430	CG42788	CG9399	MED9	CG31156	CG8360	CG12126	Frq2	CG33213	Lim1	CG14499	Zif	Pura	betaggt-II	CG9014	kdn	fabp	regucalcin	CG2852	smt3	cib	Pgd	PHGPx	Phb2	RpS15Ab	Adh	eEF1delta	CG32219	Mf	GstS1	CG5174	Scp1	Gdi	Mhc	Rtnl1	capt	Sh3beta	CG14715	Nlp	scu	Prx2540-2	PCNA	ATPsynbeta	Pgk	Akap200	Pglym78	CG3226	Eb1	EF2	CG1910	Prosbeta5	awd	Calr	betaTub85D	CG2862	Fkbp14	FK506-bp2	Inos	CG8036	Mlc2	HisRS	Idh	up	Hop	Bacc	HmgD	l(1)G0255	CG10638	Chd64	Moe	Df31	CG6084	Gapdh1	CG11267	Acon	Rab11	Clic	CG34172	CG8993	ATPsynCF6	Mlc1	Pdi	Eno	EndoGI	Ald	Trx-2	CG4598	AnxB10	eIF-5A	Gpdh	Uch	yip2	RhoGDI	CG30382	Trxr-1	wupA	CG10863	GstE6	GstO3
+glycerol-3-phosphate shuttle	PWY-6118	Gpo1	Gpo3	Gpo2	Dmel\CG8046	Gpdh3	Gpdh1	CG31169-RB	Gpdh2	CG31169	gpdh	CG18427	Gpdh	PAN2	Poxm	CG18542	Adh	Tm2	Lsp2	apolpp	GstS1	Yp3	Act88F	Yp2	ATPsynB	CG14207	Tsf1	Mer	Gapdh1	Argk	Acon	wupA	fln	Eno	Actn	Prm	Pgk	Act79B	ATPsynF	ATPsynO	CG7920	Strn-Mlck	kdn	Pglym78	Mhc	Fer2LCH	Gapdh2	CG34172	GlyP	Mdh2	CG31343	CG16885	Nc73EF	COX4	CG6330	CG14589	CG2025	Scp1	Mlc2	Mf	up	CG5506	CG16826	Gpo-1	Gdh	ND-18	Cyt-c1	ND-PDSW	Fer1HCH	TpnC4	CG32473	CG9090	ATPsynCF6	CG10581	Ald	CG34205	CG5177	TpnC41C	Mlc1	CG5500	Cyt-c-p
+pyruvate fermentation to lactate	PWY-5481	Ldh	ImpL3	Rab5	Tspo	spidey	Tcp-1zeta	Droj2	Ost48	CG10425	Rab1	Rap2l	Gie	Rab2	Arf102F	CG17029	Mnt	NULL	Akt1	sima	Sucb	SERCA	CG12262	Cctgamma	CG2064	Hel25E	Chc	SsRbeta	PyK	blw	Sc2	cathD	KdelR	CG2065	Kr-h2	CG5885	CG11327	CG13510	UQCR-C2	CG1416	ATPsyngamma	Gp93	Tapdelta	GCS2beta	Rap1	CG15098	ox	Rpt6	Gale	CG7357	S6k	wal	Arf79F	CG33303	porin	OstDelta	Sec13	CG5854	Art8	skap	Mec2	Rpt1
+branched-chain &alpha;-keto acid dehydrogenase complex	PWY-5046	Dmel\CG17691	Dmel\CG8199	E3
+2-ketoglutarate dehydrogenase complex	PWY-5084	E3	CG32316-ORFB	Nc73EF	CG32316	CycG	Adh	CG13085	CG17450	Acon	Cyt-c1	CG32819	Mf	up	Mlc2	CG10075	NULL	CG4328	CG9090	sima	Scp1	CG2025	her	Gdh	osk	Actn	Tm2	Gpdh	wupA	ND-PDSW	Akt1
+aerobic respiration -- electron donor II	PWY-3781	UQCR-6.4	RFeSP	UQCR-11	UQCR-Q	Dmel\CG43206	SdhAL	SdhBL	SdhC	SdhA	SdhB	COX1	cype	levy	COX4	COI	COXI	COX7AL	COX5B	COX8	COX4L	Scox	COX5BL	CoI	COX6AL	COX5A	COX7C	cox1	Dmel\CG31644	jagn	Dmel\CG44296	coxI	COX7A	mt:CoIII	mt:CoI	mt:CoII	ND-B14.5AL	ND-18	ND-51L1	ND5	Sucb	MRP	UQCR-C2	CG6439	CG2064	Cyt-c1	Cnx99A	ine	skap	CG5028	wal	RPA3	CG10470	SerRS	Tapdelta	lic	Kr-h2	l(1)G0334	boca	CG11876	l(1)G0156	Mpcp	CG12262	CG33303	RpS10b	CG8258	OstDelta	spidey	UQCR-C1	Scp2	CG9121	sima	ox	Clp	Cpr92A	Sirt4	E5	CG4835	Grasp65	Egfr	UQCR-14	corolla	CG13138	Mst89B	Cp38	CG3078	Sld5	CG15764	Vps39	Snap29	stc	CG15136	CG14036	atl	Nha2	CG7787	MED6	CG1532	CG18789	Ccs	MtnA	Gbs-70E	CG9784	NULL	Mob2	Rbsn-5	Uba4	Cpr47Ea	CG7430	CG42788	CG9399	MED9	CG31156	CG8360	CG12126	Frq2	COX6B	yellow-g	Pdk1	S6k	obst-B	l(2)37Cc	Mlc2	Rab1	CG11790	CG5642	Ost48	CG13887	Tspo	CG5050	Adh	ATPsynCF6	Mst98Ca	ATPsynO	ATPsynF	GstS1	Mst98Cb	EbpIII	sxc	porin	Mlc1	Gpdh	CG34172	Tm2	opa	COX2	CG14710	rdx	dgt6	Pfdn1	Mlp84B	Eip75B	KFase	ValRS-m	cher	CG17826	ZnT41F	CG30089	Akt1	cib	CG5174	CG17163	fln	RpLP1	RpS28b	CG32700	RpL9	TpnC4	lwr	CG10869	CG9313	Nmd3	Act5C	CG9986	veil	CG8195	CG2070	CG9662	bbc	CG3164	CG16853	Sec61alpha	Sc2	Ranbp9	Past1	PMCA	Karybeta3	Surf4	Scamp	ATPsynB	SERCA	sun	CG31729	ZnT63C	CG11857	CG10425	CG7601	Rab7	Mec2	spir	CG2217	Gpo-1	Acon	Caper	kdn	Act88F	ND-49	ND-23	bowl
+aerobic respiration -- electron donors reaction list	AERESPDON-PWY	SdhAL	SdhBL	SdhC	SdhA	SdhB	ND-B14.5AL	ND-18	ND-51L1	ND5	CG13138	Mst89B	Cp38	CG3078	Sld5	CG15764	Vps39	Snap29	stc	CG15136	CG14036	atl	Nha2	CG7787	MED6	CG1532	CG18789	Ccs	MtnA	Gbs-70E	CG9784	NULL	Mob2	Rbsn-5	Uba4	Mpcp	Cpr47Ea	CG7430	CG42788	CG9399	MED9	CG31156	CG8360	CG12126	Frq2	Gpo-1	Acon	Caper	kdn	CG34172	Act88F	fln	Tm2	Mlc2	ND-49	GstS1	Adh	ND-23	Mlc1	Gpdh	bowl
+methyl-coenzyme M reduction to methane	METHFORM-PWY	
+pentose phosphate pathway (non-oxidative branch)	NONOXIPENT-PWY	CG2827-RA	Taldo	Rpe	Rpi	Sh3beta	Fkbp14	Prx2540-2	Moe	Pdi
+pentose phosphate pathway (partial)	P21-PWY	Rpe
+pentose phosphate pathway (oxidative branch)	OXIDATIVEPENT-PWY	Dmel\CG7140	Zw-RA	Zw	Pgd	Ndf	Treh	spn-B	fabp	capt	CG15818	CG17829	regucalcin	Prx2540-2	CG6084	CG10721	CG33671	Df31	CG33672	PCNA	Calr	Fkbp14	Eno	Inos	CG10638	awd	GstO3	Sh3beta	Nlp	Mdh2	Clic	smt3	PHGPx	Glo1	Trxr-1	Uch	EndoGI	CG14715	Chd64	Ald	CG2852	Moe	PHDP	Pdi	CG2862	AnxB10
+glycolysis I	GLYCOLYSIS	Pgk	Dmel\CG9961	fbp	Pfk-RB	Pfk	Pfk-RC	Dmel\CG11249	Dmel\CG2964	CG7069	Dmel\CG7069	Dmel\CG7362	PyK	Ald1	Ald-RI	Ald-RH	Ald	Pgi	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	tpi	Tpi	Adh	ftz-f1	Argk	chic	Pglym78	GlyP	regucalcin	Yp2	CG16826	Sh3beta	Lsp2	TER94	Prx2540-2	CG7430	CG14715	awd	scu	CG31343	Sec5	Moe	CG5506	Gpdh	CG2025	Mdh2	AnxB10	PHGPx	Hop	Uch	Scp1	Fkbp14	CG5500	CG32473	CG10638	CG4598	CG6707	trus	Cam	Mlp84B	sub	metl	Lam	betaTub56D	CG17139	sqd	CG17140	RpS24	Tango7	NULL	rictor	bs	S6k	sima	csw	AP-2mu	T-cp1	CG1461	Fadd	Aldh-III	Pi3K92E	UQCR-C2	CG33303	Ran	IKKbeta	atl	Raf	Dsor1	ksr	Akt1	PHDP	wal	Rtnl1	Egfr	melt	tud	CG9416	RASSF8	ImpL3	Ras85D	Eaf	CG14718	capt	CG30122	Tm2	Mhc	Chd64	Mf	CG1910	apolpp	GstS1	Yp3	CG13893	Nacalpha	Act88F	Picot	ATPsynCF6	Caf1-105	ft	kdn	VhaAC39-1	fln	Glo1	Pgd	Calr	FK506-bp2	PCNA	CG13510	Oda	bdg	up	Nlp	wupA	CG16817	Atg14	RhoGDI	EndoGI	CG15525	CG11656	CG14985	fabp	vir-1	Panx	Inos	Mlc2	Mlc1	Acon	Df31	Fer2LCH	Prm	CG2852	Bacc	CG34172	Actn	Act79B	Sod2	Gpo-1	CG14207	Spindly	CG8891	TpnC41C	CG5177	CG14567	GstO3	Src64B	ovo	Hr3	COX6B	eIF4G2	Sec31	Hsp60B	CG17233	CG1986	CG11581	CG11961	Mp20	PAN2	CG14820	CG11380	CG4603	NC2alpha	unc-119	Cpr47Ef	CG11505	Fas2	Sirt1	kra	ebo	CG10887	CG15153	Hsc70-2	betaTub85D	Parp	CG13074	CG8353	RpS15Ab	CG2540	CG3308	Mer	smt3	CG6084	CG8036	EF2	Ntf-2	Akap200	Nph	Prosbeta5	CG14864	14-3-3epsilon	eEF1delta	Hsc70Cb	porin	Cyp1	cv-c	CG2862	cib	GstE6	dUTPase	scf	Sod1	Sxl	CG7352	st	CG4853	Trx-2	CG11267	Gdi	Tctp	CG8993	yip2	ATPsynbeta	UGP	Trxr-1	RpS27A	eIF-5A	Pdi	CG30382	Hsp70Aa	antdh	dgt4	Syx6	grsm	Vsx2	Hsp83	Pez	Mapmodulin	Ubqn	CG15443	AhcyL1	Obp19d	sty	CG4835	Cht9	pr
+glycolysis III (Thermotoga)	ANAGLYCOLYSIS-PWY	Pgk	Dmel\CG9961	Pfk-RB	Pfk	Pfk-RC	Pgi	Dmel\CG11249	Dmel\CG2964	CG7069	Dmel\CG7069	Dmel\CG7362	PyK	Ald1	Ald-RI	Ald-RH	Ald	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	tpi	Tpi	Adh	ftz-f1	Argk	chic	Pglym78	GlyP	regucalcin	Yp2	CG16826	Sh3beta	Lsp2	TER94	Prx2540-2	CG7430	CG14715	awd	scu	CG31343	Sec5	Moe	CG5506	Gpdh	CG2025	Mdh2	AnxB10	PHGPx	Hop	Uch	Scp1	Fkbp14	CG5500	CG32473	CG10638	CG4598	trus	Cam	Mlp84B	Src64B	ovo	Hr3	COX6B	eIF4G2	sub	metl	Lam	betaTub56D	CG17139	sqd	CG17140	RpS24	Tango7	NULL	rictor	bs	S6k	sima	csw	AP-2mu	T-cp1	CG1461	Fadd	Aldh-III	Pi3K92E	UQCR-C2	CG33303	Ran	IKKbeta	atl	Raf	Dsor1	ksr	Akt1	PHDP	wal	Rtnl1	Egfr	melt	tud	CG9416	RASSF8	ImpL3	Ras85D	Eaf	CG14718	capt	CG30122	Tm2	Mhc	Chd64	Mf	CG1910	apolpp	GstS1	Yp3	CG13893	Nacalpha	Act88F	Picot	ATPsynCF6	Caf1-105	ft	kdn	VhaAC39-1	fln	Glo1	Pgd	Calr	FK506-bp2	PCNA	CG13510	Oda	bdg	up	Nlp	wupA	CG16817	Atg14	RhoGDI	EndoGI	CG15525	CG11656	CG14985	fabp	vir-1	Panx	Inos	Mlc2	Mlc1	Acon	Df31	Fer2LCH	Prm	CG2852	Bacc	CG34172	Actn	Act79B	Sod2	Gpo-1	CG14207	Spindly	CG8891	TpnC41C	CG5177	CG14567	GstO3	Sec31	Hsp60B	CG17233	CG1986	CG11581	CG11961	Mp20	PAN2	CG14820	CG11380	CG4603	NC2alpha	unc-119	Cpr47Ef	CG11505	Fas2	Sirt1	kra	ebo	CG10887	CG15153	Hsc70-2	betaTub85D	Parp	CG13074	CG8353	RpS15Ab	CG2540	CG3308	Mer	smt3	CG6084	CG8036	EF2	Ntf-2	Akap200	Nph	Prosbeta5	CG14864	14-3-3epsilon	eEF1delta	Hsc70Cb	porin	Cyp1	cv-c	CG6707	CG2862	cib	GstE6	dUTPase	scf	Sod1	Sxl	CG7352	st	CG4853	Trx-2	CG11267	Gdi	Tctp	CG8993	yip2	ATPsynbeta	UGP	Trxr-1	RpS27A	eIF-5A	Pdi	CG30382	Hsp70Aa	antdh	dgt4	Syx6	grsm	Vsx2	Hsp83	Pez	Mapmodulin	Ubqn	CG15443	AhcyL1	Obp19d	sty	CG4835	Cht9	pr
+glycolysis II	PWY-5484	Pgk	Dmel\CG9961	fbp	Pfk-RB	Pfk	Pfk-RC	Dmel\CG11249	Dmel\CG2964	CG7069	Dmel\CG7069	Dmel\CG7362	PyK	Ald1	Ald-RI	Ald-RH	Ald	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	tpi	Tpi	Adh	ftz-f1	Argk	chic	Pglym78	GlyP	regucalcin	Yp2	CG16826	Sh3beta	Lsp2	TER94	Prx2540-2	CG7430	CG14715	awd	scu	CG31343	Sec5	Moe	CG5506	Gpdh	CG2025	Mdh2	AnxB10	PHGPx	Hop	Uch	Scp1	Fkbp14	CG5500	CG32473	CG10638	CG4598	CG6707	trus	Cam	Mlp84B	sub	metl	Lam	betaTub56D	CG17139	sqd	CG17140	RpS24	Tango7	NULL	rictor	bs	S6k	sima	csw	AP-2mu	T-cp1	CG1461	Fadd	Aldh-III	Pi3K92E	UQCR-C2	CG33303	Ran	IKKbeta	atl	Raf	Dsor1	ksr	Akt1	PHDP	wal	Rtnl1	Egfr	melt	tud	CG9416	RASSF8	ImpL3	Ras85D	Eaf	CG14718	capt	CG30122	Tm2	Mhc	Chd64	Mf	CG1910	apolpp	GstS1	Yp3	CG13893	Nacalpha	Act88F	Picot	ATPsynCF6	Caf1-105	ft	kdn	VhaAC39-1	fln	Glo1	Pgd	Calr	FK506-bp2	PCNA	CG13510	Oda	bdg	up	Nlp	wupA	CG16817	Atg14	RhoGDI	EndoGI	CG15525	CG11656	CG14985	fabp	vir-1	Panx	Inos	Mlc2	Mlc1	Acon	Df31	Fer2LCH	Prm	CG2852	Bacc	CG34172	Actn	Act79B	Sod2	Gpo-1	CG14207	Spindly	CG8891	TpnC41C	CG5177	CG14567	GstO3	Sec31	Hsp60B	CG17233	CG1986	CG11581	CG11961	Mp20	PAN2	CG14820	CG11380	CG4603	NC2alpha	unc-119	Cpr47Ef	CG11505	Fas2	Sirt1	kra	ebo	CG10887	CG15153	Hsc70-2	betaTub85D	Parp	CG13074	CG8353	RpS15Ab	CG2540	CG3308	Mer	smt3	CG6084	CG8036	EF2	Ntf-2	Akap200	Nph	Prosbeta5	CG14864	14-3-3epsilon	eEF1delta	Hsc70Cb	porin	Cyp1	cv-c	CG2862	cib	GstE6	dUTPase	scf	Sod1	Sxl	CG7352	st	CG4853	Trx-2	CG11267	Gdi	Tctp	CG8993	yip2	ATPsynbeta	UGP	Trxr-1	RpS27A	eIF-5A	Pdi	CG30382	Hsp70Aa	antdh	dgt4	Syx6	grsm	Vsx2	Hsp83	Pez	Mapmodulin	Ubqn	CG15443	AhcyL1	Obp19d	sty	CG4835	Cht9	pr
+calcium transport I	PWY-6166	
+copper transport II	PWY-6137	
+sulfate activation for sulfonation	PWY-5340	
+sulfite oxidation IV	PWY-5326	
+thiosulfate disproportionation III (rhodanese)	PWY-5350	
+formaldehyde oxidation II (glutathione-dependent)	PWY-1801	Dmel\CG4390	CG4390-RB
+formaldehyde oxidation V (tetrahydrofolate pathway)	PWY-1722	
+paraoxon degradation	PWY-5490	
+methyl parathion degradation	PWY-5489	
+urate degradation to allantoin	PWY-5691	Dmel\CG30016	Uro	step	CG9269	obst-B	vir-1	her	Cpr56F	CG17777	CG31797	CG4810	Oda	Pex5	Sox14	CG13050
+glycogen degradation I	GLYCOCAT-PWY	Mal-A1	Mal-A2	Mal-A3	Pgm	GlyP	slam	atl	CG8229	NULL	SmydA-3	CG9014	Zasp52	par-1	Adh	CG4836	pAbp	Adhr	mei-W68	Cyp6a19	Trs33	CG7352	ci	Tektin-C	cpb	Ppn	Gapdh2	Lcp2	Rtnl1	Yp2	CG7231	Lsp2	Ubx	CG5500	Scp1	CG32473	CG16826	CG1894	Pgk	CG30497	Rbp4	Gpdh	Pglym78	Ald	Argk	CG31343	CG5506	Mms19
+glycogen degradation II	PWY-5941	Pgm	GlyP	Trs33	CG7352	ci	Tektin-C	atl	cpb	Ppn	Gapdh2	Lcp2	Rtnl1	Adh	Yp2	CG7231	Lsp2	Ubx	CG5500	Scp1	CG32473	CG16826	CG1894	Pgk	CG30497	Rbp4	Gpdh	Pglym78	Ald	Argk	CG31343	CG5506	Mms19
+wound-induced proteolysis I	PWY-5988	
+betanidin degradation	PWY-5461	Dmel\CG4009	cysu	CG6879	cd	Pxd	Pxt	Pxn	CG3225	ci	mRpL45	dgt6	Mst89B	CG11566	TBPH	Mhcl	resilin	CG13627	CG12607	CG8368	ft	sstn	CG15177	stg1	LpR2	CG6429	Rab26	Pi3K68D	Lectin-galC1	Glt
+sorbitol utilization	PWY-4101	
+N-acetylglucosamine degradation	GLUAMCAT-PWY	Oscillin	Dmel\CG17065	Tim8	nwk	4EHP	Gyf	PSR	CG11095	spheroide	CG5641
+&beta;-alanine betaine biosynthesis	PWY-4021	
+4-hydroxyproline degradation I	HYDROXYPRODEG-PWY	
+phenylalanine degradation I	PHENYLALANINE-DEG1-PWY	Pcd	Hn	Henna	2mit	tobi	Fas2	bocks	CG4116	Nurf-38	CG14053	Map60	CNMa	glo	ND-SGDH	CG7600	CG12256	jdp	Reph	mino	Nelf-E	Fer1HCH	fd59A	CG14245	ATPsynB	NULL	wisp	TwdlC	qkr58E-3	CG3645	spz4	SkpB	CG9135	Su(var)3-9	sgg	Sxl	cv-c	CG32428	kibra	CG8036	CG3625	TfAP-2	se	ND-19	Invadolysin	Vdup1	RpS19a	RhoGAP54D	osk	Ccp84Aa	CG14246	CG42446	Ccp84Ab	B9d1	Sema1a	CG13622	CG17931	CG13737
+isoleucine degradation I	ILEUDEG-PWY	cg1673	HIPP1	HP6	Ibf1	Su(var)205	CAP	CTCF	CG1910	pita	Cp38	Ibf2	pds5	CG10265	Cp190	mod(mdg4)	mip120	su(Hw)	CG2118	ADD1
+alanine degradation III	ALANINE-DEG3-PWY	
+valine degradation I	VALDEG-PWY	Dmel\CG15093	cg1673	HIPP1	Dmel\CG5044	CT16187	HP6	Ibf1	Su(var)205	CAP	CTCF	CG1910	pita	Cp38	Ibf2	pds5	CG10265	Cp190	mod(mdg4)	mip120	su(Hw)	CG2118	ADD1
+tyrosine degradation I	TYRFUMCAT-PWY	Faa	hgo	bru3	PhKgamma	gammaTub37C	CG32772	coro	CG8475	CG7766	CG11327
+homocysteine degradation	HOMOCYSDEGR-PWY	Cbs	term	Rho1
+glutamine degradation II	GLUTAMINEFUM-PWY	
+glutamine degradation I	GLUTAMINDEG-PWY	GLS	CG32086
+arginine degradation VI (arginase 2 pathway)	ARG-PRO-PWY	P5cr-2	P5cr	arg	Oat	opa	CycK	CG1635	CG7379	CG11275	NULL	Pms2
+citrulline-nitric oxide cycle	PWY-4983	Argl	Ass	Nos	NULL	Spf45
+arginine degradation X (arginine monooxygenase pathway)	ARGDEG-V-PWY	
+arginine degradation I (arginase pathway)	ARGASEDEG-PWY	arg	Oat	NULL	Pms2
+leucine degradation I	LEU-DEG2-PWY	l(2)04524	cg1673
+threonine degradation II	THREONINE-DEG2-PWY	
+glycine cleavage complex	GLYCLEAV-PWY	Dmel\CG3999	E3	151967_at
+L-cysteine degradation II	LCYSDEG-PWY	
+L-cysteine degradation I	CYSTEINE-DEG-PWY	Got1	Got2	Got2-RA	CG1218	CG7049	CG11777	Rae1	CG18789	Treh	Art8	BthD	CG18787	RpS21	Trx-2	CG1532	Sod1	Arc1	alpha-Est2	Ccs	Wdr82	sty	CG1129	CG7492	Cpr65Ea	Rtnl1	CG4998	CG14806	Nup93-1	Sap47
+tryptophan degradation to 2-amino-3-carboxymuconate semialdehyde	PWY-5651	cn	v	KFase	Pfdn6	Pfdn1	Pfdn5	COX5B	mgr
+proline degradation II	PWY-4561	
+proline degradation I	PROUT-PWY	
+glutamate degradation X	PWY-5766	Gdh	up	Acon	Argk	ATPsynB	Act79B	ATPsynD	Actn	CG9090	Nc73EF	ATPsynF	atl	CG2025	wupA	Tm2	CG15564	Rtnl1	kdn	Mf	ND-PDSW	Mlc2	Scp1	Adh	Prm	Mlc1	CG12006	Gpdh
+aspartate degradation II	MALATE-ASPARTATE-SHUTTLE-PWY	Mdh1	Dmel\CG10749	Mdh2	Dmel\CG10748	CG10748-RA	Got1	Got2	Got2-RA	CG33213	Lim1	CG14499	Zif	Pura	NULL	betaggt-II	CG9014	kdn	fabp	regucalcin	CG2852	smt3	cib	Pgd	PHGPx	Phb2	RpS15Ab	Adh	Actn	eEF1delta	CG32219	Mf	GstS1	CG5174	Scp1	Gdi	Mhc	Rtnl1	capt	Sh3beta	CG14715	Nlp	scu	Prx2540-2	TER94	Nacalpha	PCNA	ATPsynbeta	Tm2	Pgk	Akap200	Pglym78	Argk	CG3226	Eb1	EF2	CG1910	Prosbeta5	awd	Calr	betaTub85D	CG2862	Fkbp14	FK506-bp2	Inos	CG8036	Mlc2	HisRS	Idh	up	Hop	Bacc	HmgD	l(1)G0255	Fas2	CG10638	Chd64	Moe	Df31	CG6084	Gapdh1	CG11267	Acon	Rab11	Clic	CG34172	CG8993	ATPsynCF6	Mlc1	Pdi	Eno	EndoGI	Ald	Trx-2	CG4598	AnxB10	eIF-5A	Gpdh	Uch	yip2	RhoGDI	CG30382	Trxr-1	wupA	CG10863	GstE6	GstO3	CG1218	CG7049	CG11777	Rae1	CG18789	Treh	Art8	BthD	CG18787	RpS21	CG1532	Sod1	Arc1	alpha-Est2	Ccs	Wdr82	sty	CG1129	CG7492	Cpr65Ea	CG4998	CG14806	Nup93-1	Sap47
+methionine degradation I (to homocysteine)	METHIONINE-DEG1-PWY	Sam-S	M(2)21AB-RB	M(2)21AB-RG	Ahcy	AhcyL2	CG17107	CG17841	Gpo-1	Galphas	NULL	Pdk1	CG3209	ago	Rpn5	CG8539	DIP-alpha	E(var)3-9	foxo	CG4880	RpLP0-like	sals	Akt1	Eip71CD	Cctgamma	CG10510	CG11889	Xpd	RpL4	Arf51F	CG31800	CG5009	hid	AhcyL1	p53	CG14231	Phb2	Mabi	ssp	Mhcl	Efa6	CG7324	l(3)j2D3
+asparagine degradation I	ASPARAGINE-DEG1-PWY	Dmel\CG8526
+2-<I>O</I>-&alpha;-mannosyl-D-glycerate degradation	PWY0-1300	
+glucose and glucose-1-phosphate degradation	GLUCOSE1PMETAB-PWY	Pgm	Trs33	CG7352	ci	Tektin-C	atl
+UDP-galactose biosynthesis (salvage pathway from galactose using UDP-glucose)	GALACTMETAB-PWY	UGP	UGP-RE	Galk	Galt	CG10602	Treh	Dic1	NULL	CG5111	CG15676	kibra	Rpn11	Phb2	Eno	CG11327	rdx	CG11581	mbc	CG4835	Atpalpha	CG9986	intr	Chro	CG31550	TTLL3B	Sec24AB	bsh
+D-mannose degradation	MANNCAT-PWY	Mpi
+melibiose degradation	PWY0-1301	
+xylose degradation I	XYLCAT-PWY	
+trehalose degradation II (trehalase)	PWY0-1182	Treh	Dmel\CG6262	CG6262	CG14450	cm	Got1	grsm	CG1218	CG18787	Sod1	Zw	CG2091	Trx-2	E23	Rae1	HIP	Arc1	Art8	UGP	CG10672	CG4603	CG11777	Patsas	CG1532	CG18789	Irc	CG6218	CG14543	CG3544	Ccs	CG7049	CG18081	CG13893	RpS21
+lactose degradation III	BGALACT-PWY	Gal	Ect3	TBPH	CG15308	Nost	sip1	MetRS-m
+triacylglycerol degradation	LIPAS-PWY	dob	bmm	sala	Hsp26	eIF-4B
+phospholipases	LIPASYN-PWY	GXIVsPLA2	sPLA2	GIIIspla2	PLA2	Dmel\CG14507	CG14507-RC	Dmel\CG3009	Pld	sl	norpA	Plc21C	mRpS17	CG17107	Oda	Moe	hpo	RecQ4	Pvr	CG32432	Pi3K92E	Vamp7	Galphaq	slmb	inaD	trp	ball	ci
+anandamide degradation	PWY6666-1	
+sphingosine and sphingosine-1-phosphate metabolism	PWY3DJ-11470	CDase	bwa	par-6
+oleate &beta;-oxidation	PWY0-1337	
+fatty acid &beta;-oxidation I	FAO-PWY	HIPP1	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3	yip2	HP6	Ibf1	Su(var)205	CAP	CTCF	CG1910	pita	Cp38	Ibf2	pds5	CG10265	Cp190	mod(mdg4)	mip120	su(Hw)	CG2118	ADD1	CG31431	Cnx99A	Mpcp	Rtnl1	msk	fax	fabp	capt	Uch	CG2862	AnxB10	chic	scf	kdn	Moe	CG10638	Inos	Sh3beta	Fkbp14	Gdi	regucalcin	CG8036	CG14715	cib	awd	Mdh2	Nlp	swa	atl	Prx2540-2	Hsc70Cb	Hop	PHGPx	scu	CG7430	Calr	GstO3	EndoGI	CG2767	Eno
+fatty acid &alpha;-oxidation	PWY-2501	Aldh	150697_at	Dmel\CG31075	jbug	Tsr1	Raf	rictor	NULL	Chc	foxo	Gale	Tsc1	Pdk1	S6k	S6kII
+fatty acid &beta;-oxidation II (core pathway)	PWY-5136	HIPP1	yip2	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3	HP6	Ibf1	Su(var)205	CAP	CTCF	CG1910	pita	Cp38	Ibf2	pds5	CG10265	Cp190	mod(mdg4)	mip120	su(Hw)	CG2118	ADD1	fabp	capt	Uch	CG2862	AnxB10	chic	scf	kdn	Moe	CG10638	Inos	Sh3beta	Fkbp14	Gdi	regucalcin	CG8036	CG14715	cib	awd	Mdh2	Nlp	swa	atl	Prx2540-2	Hsc70Cb	Hop	PHGPx	scu	CG7430	Calr	GstO3	EndoGI	CG2767	Eno	CG31431	Cnx99A	Mpcp	Rtnl1	msk	fax
+glutaryl-CoA degradation	PWY-5177	
+superpathway of gluconate degradation	GLUCONSUPER-PWY	Rpi	Pgd	Ndf	fabp	capt	CG15818	CG17829	regucalcin	Prx2540-2	CG6084	CG10721	CG33671	Df31	CG33672	PCNA	Calr	Fkbp14	Eno	Inos	CG10638	awd	GstO3	Sh3beta	Nlp	Mdh2	Clic	smt3	PHGPx	Glo1	Trxr-1	Uch	EndoGI	CG14715	Chd64	Ald	CG2852	Moe	PHDP	Pdi	CG2862	AnxB10
+itaconate degradation	PWY-5749	ScsbetaG
+acetate conversion to acetyl-CoA	PWY0-1313	AcCoAS	CG2025	slmb	Vamp7
+mevalonate degradation	PWY-5074	
+methylmalonyl pathway	PROPIONMET-PWY	
+purine deoxyribonucleosides degradation	PWY0-1297	
+degradation of pyrimidine deoxyribonucleosides	PWY0-1298	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349
+degradation of pyrimidine ribonucleosides	PWY0-1295	Dmel\CG3788	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349
+&beta;-alanine biosynthesis III	PWY-3982	su(r)	CRMP	pyd3	CG11164	CG8778	NULL	Vsx2	Syt7	CG34401	ect	CG17127	l(3)07882	Sirt4	sty	Dhc64C	numb	Snr1	CycK	CG33017
+urate biosynthesis	PWY-5695	ras	veil	NT5E-2	CG6247	BcDNA:AT08275	CG6267	28575006	45550393	ry	CG2199	CG8152	CG13996	PCNA	SkpB	NULL	mei-W68	CG5787	par-1	Bacc	RpL5	COX7C	flw
+degradation of purine ribonucleosides	PWY0-1296	c62E-15	Dmel\CG16758	CG16760	Adgf-A	Adgf-C	Adgf-B	Adgf-A2	Adgf-E	Adgf-D
+salvage pathways of adenine, hypoxanthine, and their nucleosides	SALVADEHYPOX-PWY	Aprt	Adgf-A	Adgf-C	Adgf-B	Adgf-A2	Adgf-E	Adgf-D	ry	Sucb	CG13220	Tspo	MCTS1	Gmd	Rab7	TrpRS	flw
+dopamine degradation	PWY6666-2	Aldh	150697_at	Dmel\CG31075	jbug	Tsr1	Raf	rictor	NULL	Chc	foxo	Gale	Tsc1	Pdk1	S6k	S6kII
+allantoin degradation to ureidoglycolate II (ammonia producing)	PWY-5698	Dmel\CG6106
+allantoin degradation to ureidoglycolate I (urea producing)	PWY-5697	Dmel\CG6106
+oxidative ethanol degradation I	PWY66-21	Fbp2	Adh	Dmel\CG18814	Adhr	Aldh	150697_at	Dmel\CG31075	AcCoAS	betaTub85D	E(spl)m8-HLH	CG32219	Rab14	RpS15Ab	CG15754	gsb	Mf	Lsp2	Nplp2	up	Cyt-c1	Mlc2	Rtnl1	kdn	apolpp	CG42709	ovo	CG31343	Nc73EF	Cyt-c-p	Pgk	Mlc1	CG5500	Gpdh	Eno	wupA	Fer2LCH	CG5177	Mdh2	Rcd-1r	CG7920	CG34205	GstS1	Obp56d	Tm2	TpnC41C	CG5645	Act79B	Sec24AB	Scp1	Mal-A2	Tsf1	Gpo-1	PPO1	Argk	CG16826	GlyP	Yp3	Fer1HCH	Yp2	Prm	Gapdh2	Actn	CG16885	ND-PDSW	CG10581	Pglym78	Act88F	Mhc	CG5506	CG34172	c(3)G	ATPsyndelta	fln	CG32473	Acon	Gdh	COX4	Ald	Epac	CG14207	ND-18	Yp1	CG7409	Snm1	jbug	Tsr1	Raf	rictor	NULL	Chc	foxo	Gale	Tsc1	Pdk1	S6k	S6kII	CG2025	slmb	Vamp7
+oxidative ethanol degradation III	PWY66-162	Irc	Cat	Aldh	150697_at	Dmel\CG31075	AcCoAS	Treh	Vap33	Rel	Fadd	PGRP-LE	PGRP-LC	Yp2	CG16826	Tab2	CG31343	E2f2	CG5380	IKKbeta	imd	Tak1	CG11581	Diap2	key	jbug	Tsr1	Raf	rictor	NULL	Chc	foxo	Gale	Tsc1	Pdk1	S6k	S6kII	CG2025	slmb	Vamp7
+methylglyoxal degradation I	PWY-5386	Glo1	tzn	CG2852	CG14715	Sh3beta	Fkbp14	CG2004	Pgd	CG10638	fabp	Ntf-2	Uch	GstO3	EndoGI	Ald	AnxB10	CG9624	CG31029	CycG	NULL	YL-1
+glutathione-mediated detoxification	PWY-4061	GstE11	GstD9	GstD10	GstT1	AIMP3	GstD11	GstE10	Mgstl	gfzf	GstE3	GstE1	GstE13	GstE9	GstE12	GstT3	Gdap1	GstE8	GstE2	eEF1gamma	Dmel\CG33178	GstE7	GstE4	GstE5	GstT2	GstE6	GstD5	GstD6	GstS1	GstD2	GstD4	GstD7	GstE14	l(3)72Dp	l(3)72Dr	CG5757	CG5642	GstD1	REPTOR	Fkbp14	rols	Uch	scu	CG1354	Prx2540-2	RhoGDI	MetRS	RagA-B	Rca1	HIP	atl	CG14641	her	tamo	GATAe	CG8128	CG2025	DNApol-iota	NULL	sba	kermit	CG10914	CG11964	ATPsynbeta	FER	cnc	CG17486	Fpps	CG15602	CG8206	RpL15	betaTub56D	CG12081	Trl	RpS8	Cchl	Pex6	CycE	CG18003	Antp	Vha36-1	Sec31	ix	CG5626	Hsp70Aa	Hsp68	ref(2)P	jdp	Hsp22	Hsp23	Hsp27	CycB	Pak	mad2	rux	Akt1	koi	CanA1	Pp2B-14D	CG13339	Cpr76Ba	CG10638	dUTPase	Fim	CG13887	smt3	Nacalpha	Sh3beta	Calr	Moe	CG6084	capt	AnxB10	eEF1delta	Chd64	Nlp	regucalcin	PCNA	Eb1	fabp	Mdh2	CG5174	Akap200	Hop	Gdi	CG16817	CG4598	GstO3	Pdi	Eno	Pbp45	Acon	Gpo-1	Strn-Mlck	ATPsyndelta	Adh	COX4	Tm1	Mlc2	kdn	COX5A	Sema1a	danr	Gpdh	fln	Ald	TpnC4	CG6330	CG34172	wupA	Mhc	spi	Tm2	Mlc1	ND-18	Act88F	Fibp	CG3226
+heme degradation	PWY-5874	
+removal of superoxide radicals	DETOX1-PWY	Sod2	Ccs	Dmel\CG5948	Sod1	Sod3	Irc	Cat	CG2021	CG1635	CG6084	Uch	Eno	Ald	CG1532	CG18789	Hsf	Zasp52	BthD	gish	CG18787	CG18081	CG1218	Treh	Got1	CG4603	Wdr82	Art8	CG1129	CG11777	dos	Arc1	RpS21	NULL	CG7049	SdhA	CG6432	Trx-2	FK506-bp2	CG8993	CG3630	cib	CG7737	imd	fabp	DUBAI	P32	Df31	regucalcin	CG7492	Ntf-2	PGRP-LE	mtSSB	Taf5	PGRP-LC	CG10638	CG4278	sstn	smt3	Rel	Zpr1	CG2862	Nlp	CG2852	Tango2	key	Tab2	Calr	Cyp1	Pdi	CG4570	Dredd	CG14715	Chd64	CG10214	IKKbeta	Diap2	Tak1	Trxr-1	awd	Sh3beta	Fadd	AnxB10	GalNAc-T2	PGAP5	ATPsynbeta	CG11961	CG8128	CycK	Nopp140	mnb	ptc	CG15800	CG13511	Rox8	Cpr64Ad	CG13840	CG9184	S6KL	png	CG13678	CG9572	CG13373	CG14744	akirin	RecQ4	Mst84Da	CG3918	CG1324	squ	shv	CG17777	CG9588	CG12607	RPA2	cher	CG13066	bsh	CG16772	CG13731	Mad	CG13857	rux	CG34205	dap	grp	CG13587	pie	CG8541	CG13045	CG32354	CG9986	noc	Vap33	Yp2	CG16826	CG31343	E2f2	CG5380	CG11581
+glutamate dependent acid resistance	PWY0-1305	Gad1	CG13175	NULL	CG33964	CG7191	CG9986
+fatty acid activation	PWY-5143	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3	CG31431	Cnx99A	Mpcp	Rtnl1	msk	fax
+tRNA charging pathway	TRNA-CHARGING-PWY	AspRS	beta-PheRS	alpha-PheRS	PheRS-m	HisRS	AsnRS-m	AsnRS	Aats-gln	TyrRS	TyrRS-m	CysRS-m	CysRS	ArgRS-m	ArgRS	IleRS	IleRS-m	ValRS-m	GluRS-m	LeuRS-m	SerRS-m	SerRS	MetRS	MetRS-m	Dmel\CG10802	AlaRS-m	AlaRS	LysRS	Aats-lys-RC	GlyRS	ThrRS	TrpRS-m	TrpRS	CG4853	AIMP2	MRP	Cyp12d1-p	Atg5	GluProRS	Pen	AIMP1	sima	Cnx99A	GlnRS	Pms2	Fen1	Smn	NULL	toy	cep290	mts	PSR	Hsp60A	ATPsynbeta	Mdh2	betaTub85D	S6k	UQCR-C2	Akt1	Sucb	CG1416	Tcp-1zeta	sav	Rpt1	Zasp66	eIF-4B	RpL19	CG9986	Taf12	Hsp23	betaCOP	l(2)efl	COX5B	vir-1	Mp20	Pi3K68D	CG3008	boca	CG12264	CG2064	CG17765	UQCR-6.4	CG18301	Kap-alpha3	Vps4	CG3902	TER94	CG33303	Glt	FASN1	r	Past1	Tcp-1eta	Mpcp	CG8258	CG9467	bor	Pp2A-29B	CG12262	Cctgamma	OstDelta	skap	l(1)G0156	CG16817	wal	PHDP	CG5525	EfTuM	CG1371	Gfat2	Chc	CG5854	AIMP3	Nost	Pfdn5	Ect3	cpb	wts	fj	CG8155	Sry-alpha	CG17637	Rpt4	Psa	spidey	Aprt	Sec61alpha	Kr-h2
+2-methylbutyrate biosynthesis	PWY-5109	HIPP1	HP6	Ibf1	Su(var)205	CAP	CTCF	CG1910	pita	Cp38	Ibf2	pds5	CG10265	Cp190	mod(mdg4)	mip120	su(Hw)	CG2118	ADD1
+PRPP biosynthesis I	PWY0-662	Dmel\CG2246	Dmel\CG6767
+trehalose biosynthesis I	TRESYN-PWY	CG5171-RC	Tps1	Dmel\CG5177	Dmel\CG5171	snama	zormin	NULL	CG43729	CG12256	cv-c	Nup93-1	Su(var)3-9	Sap47	Cpr47Ef
+<i>myo</i>-inositol biosynthesis	PWY-2301	Inos	IMP	Dmel\CG17029	Dmel\CG17026	Dmel\CG17027	CG17028-RA	capt	Sh3beta	Calr	awd	Akap200	TER94	smt3	Pgd	regucalcin	FK506-bp2	chic	flr	CG8888	CG5174	fabp	cnk	Hsc70Cb	CG11807	CG7430	Nacalpha	Bacc	scu	dod	CG8036	CG6084	cib	Df31	CG1910	Prx2540-2	Eb1	CG14715	Fim	Moe	CG32549	yki	EF2	Uch	CG2862	Spindly	PCNA	fax	CG6543	Pdi	yip2	CG10638	CG2852	PHGPx	RpS10b	Snx3	Eno	CG10420	EndoGI	CG5355	Chd64	Nlp	Mdh2	AnxB10	eEF1delta	eIF-5A	ft	CG8891	CG16817	Fkbp14	ds	scf	GstO3	Ald	CG4598	RhoGDI
+mevalonate pathway	PWY-922	Hmgs	Mvd	Hmgcr	Hmgcr-RA	CG16804	NULL	jbug	PSR	Atg4a	nwk	CG4407	Lst8	exu	CG3344	CG11504	Tango2	CG8654	CG32698	Pglym78	mts	Ote	Cyp9f2	fal	CG10880	Vha55	Tap42	Hsp60A	Cyp6a13	ND-75	CG10420	bocks	CG6712	MRG15	igl	CG8814	dnk	Fer1HCH	Cct2	Vha26	CG8026	SPE	CG10585	CG10347	Cyp6d4	ICA69
+beta-carboline biosynthesis	PWY-5877	Ddc	CG2199	CG34168	CG44774	Cp16	lsn	CG6933	Khc	CG14764	CG31140	mxt	NULL	CG13339	CG15706	CkIIalpha	RpS7	CG32647	Ef1alpha48D	noc
+betaxanthin biosynthesis (via dopamine)	PWY-5403	Ddc	CG2199	CG34168	CG44774	Cp16	lsn	CG6933	Khc	CG14764	CG31140	mxt	NULL	CG13339	CG15706	CkIIalpha	RpS7	CG32647	Ef1alpha48D	noc
+phenylethanol biosynthesis	PWY-5751	Fbp2	Adh	Dmel\CG18814	Adhr	betaTub85D	E(spl)m8-HLH	CG32219	Rab14	RpS15Ab	CG15754	gsb	Mf	Lsp2	Nplp2	up	Cyt-c1	Mlc2	Rtnl1	kdn	apolpp	CG42709	ovo	CG31343	Nc73EF	Cyt-c-p	Pgk	Mlc1	CG5500	Gpdh	Eno	wupA	Fer2LCH	CG5177	Mdh2	Rcd-1r	CG7920	CG34205	GstS1	Obp56d	Tm2	TpnC41C	CG5645	Act79B	Sec24AB	Scp1	Mal-A2	Tsf1	Gpo-1	PPO1	Argk	CG16826	GlyP	Yp3	Fer1HCH	Yp2	Prm	Gapdh2	Actn	CG16885	ND-PDSW	CG10581	Pglym78	Act88F	Mhc	CG5506	CG34172	c(3)G	ATPsyndelta	fln	CG32473	Acon	Gdh	COX4	Ald	Epac	CG14207	ND-18	Yp1	CG7409	Snm1
+5-aminoimidazole ribonucleotide biosynthesis I	PWY-6121	ade2	CG2867	Prat2	Prat	CG17819	Spx	CG9961	CG5734	NULL	Mps1	nej	CG3332	RhoGAP68F	Pak
+pyrimidine ribonucleotides interconversion	PWY-5687	awd	nmdyn-D6	nmdyn-D7	Dmel\CG15547	Dmel\CG14221	Dak1	CTPsyn	Dlc90F	CG13962	CG1986	fabp	Sh3beta	regucalcin	CG14715	cib	Bacc	Nacalpha	dod	chic	CG8036	Pgd	CG1910	TpnC25D	CG15818	CG32100	kdn	capt	Vhl	FK506-bp2	Cyp1	ATPsynbeta	CG6084	scu	Prosalpha4	Rtnl1	Myo10A	Df31	smt3	CG8993	TER94	CG5674	Prx2540-2	Sod1	Ntf-2	Eb1	Hsc70Cb	l(2)37Cb	eIF-5A	PHGPx	Hop	CG16817	Snx3	NULL	EF2	Inos	CG5445	DNaseII	Akap200	comm3	RpS21	Ald	Trx-2	Tctp	RhoGDI	AnxB10	Sema1a	Cam	14-3-3epsilon	CG7372	CG30339	CG8117	CG15141	CG5355	CG2852	CG4598	ZIPIC	Jupiter	Calr	Arfrp1	CG10265	scf	yip2	CG2862	CG11267	GstO3	CG7430	Pglym78	Mdh2	CG30382	CG7054	zip	Moe	HmgD	ATPsynCF6	PCNA	CG8891	Eaf6	Pgk	Hsp60A	Fkbp14	PHDP	Act57B	Pdi	Trxr-1	Eno	Uch	EndoGI	Sgf11	CG10638	Mip	Chd64	14-3-3zeta	Nlp	sob	ERp60	eEF1delta	CG9813	Cpr73D	spartin	CG13955	CG17230	CG8132	Coop	CtBP	NiPp1	Blos2	CG3528	ttm50	RpS2	Vta1
+de novo biosynthesis of pyrimidine deoxyribonucleotides	PWY0-166	RnrS	RnrL	Ts	dUTPase	awd	nmdyn-D6	nmdyn-D7	Dmel\CG15547	Dmel\CG14221	Tsc1	CG9723	ktub	ft	NULL	msb1l	CG15080	CG9083	koi	frm	r-l	Acp29AB	c(3)G	CG11275	Pex14	H2.0	Adk2	Act5C	CG5174	regucalcin	FKBP59	capt	vari	Nacalpha	Prx2540-2	PHGPx	RpS27A	CG10638	GstE6	GstO3	Prosalpha7	AnxB10	eEF1delta	Fkbp14	Usp39	CG10576	GV1	Sec5	Eno	Sh3beta	Nlp	Dlc90F	CG13962	CG1986	fabp	CG14715	cib	Bacc	dod	chic	CG8036	Pgd	CG1910	TpnC25D	CG15818	CG32100	kdn	Vhl	FK506-bp2	Cyp1	ATPsynbeta	CG6084	scu	Prosalpha4	Rtnl1	Myo10A	Df31	smt3	CG8993	TER94	CG5674	Sod1	Ntf-2	Eb1	Hsc70Cb	l(2)37Cb	eIF-5A	Hop	CG16817	Snx3	EF2	Inos	CG5445	DNaseII	Akap200	comm3	RpS21	Ald	Trx-2	Tctp	RhoGDI	Sema1a	Cam	14-3-3epsilon	CG7372	CG30339	CG8117	CG15141	CG5355	CG2852	CG4598	ZIPIC	Jupiter	Calr	Arfrp1	CG10265	scf	yip2	CG2862	CG11267	CG7430	Pglym78	Mdh2	CG30382	CG7054	zip	Moe	HmgD	ATPsynCF6	PCNA	CG8891	Eaf6	Pgk	Hsp60A	PHDP	Act57B	Pdi	Trxr-1	Uch	EndoGI	Sgf11	Mip	Chd64	14-3-3zeta	sob	ERp60	CG9813	Cpr73D	spartin	CG13955	CG17230
+salvage pathways of pyrimidine ribonucleotides	PWY0-163	l(2)k01209	Uck	Dak1	Dmel\CG3788	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349	awd	nmdyn-D6	nmdyn-D7	Dmel\CG15547	Dmel\CG14221	Cda5	Prp3	Sem1	Sk2	kri	GAPcenA	CG1513	Ask1	phyl	NULL	CG9986	CG7818	CG5376	RpS29	CG10494	CG10650	CG4908	RanGAP	AIF	CG9205	Rab30	CG1603	az2	cert	rdgB	CG8132	Dlc90F	CG13962	CG1986	fabp	Sh3beta	regucalcin	CG14715	cib	Bacc	Nacalpha	dod	chic	CG8036	Pgd	CG1910	TpnC25D	CG15818	CG32100	kdn	capt	Vhl	FK506-bp2	Cyp1	ATPsynbeta	CG6084	scu	Prosalpha4	Rtnl1	Myo10A	Df31	smt3	CG8993	TER94	CG5674	Prx2540-2	Sod1	Ntf-2	Eb1	Hsc70Cb	l(2)37Cb	eIF-5A	PHGPx	Hop	CG16817	Snx3	EF2	Inos	CG5445	DNaseII	Akap200	comm3	RpS21	Ald	Trx-2	Tctp	RhoGDI	AnxB10	Sema1a	Cam	14-3-3epsilon	CG7372	CG30339	CG8117	CG15141	CG5355	CG2852	CG4598	ZIPIC	Jupiter	Calr	Arfrp1	CG10265	scf	yip2	CG2862	CG11267	GstO3	CG7430	Pglym78	Mdh2	CG30382	CG7054	zip	Moe	HmgD	ATPsynCF6	PCNA	CG8891	Eaf6	Pgk	Hsp60A	Fkbp14	PHDP	Act57B	Pdi	Trxr-1	Eno	Uch	EndoGI	Sgf11	CG10638	Mip	Chd64	14-3-3zeta	Nlp	sob	ERp60	eEF1delta	CG9813	Cpr73D	spartin	CG13955	CG17230
+salvage pathways of pyrimidine deoxyribonucleotides	PWY0-181	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349
+uridine-5'-phosphate biosynthesis	PWY-5686	
+inosine-5'-phosphate biosynthesis II	PWY-6124	AdSL	REPTOR-BP	CG5642	Sos	UbcE2M
+salvage pathways of guanine, xanthine, and their nucleosides	SALVPURINE2-PWY	c62E-15	Dmel\CG16758	CG16760
+glutaminyl-tRNA<sup>gln</sup> biosynthesis via transamidation	PWY-5921	gatA-RA	gatA
+asparaginyl-tRNA<sup>asn</sup> biosynthesis via transamidation	PWY490-4	
+hypusine biosynthesis	PWY-5905	nero	Dmel\CG8005
+asparagine biosynthesis III	ASPARAGINESYN-PWY	AsnS	Fas2
+alanine biosynthesis III	PWY0-1021	Qtzl
+alanine biosynthesis II	ALANINE-SYN2-PWY	
+serine biosynthesis	SERSYN-PWY	aay	PH4alphaNE2	sstn
+aspartate biosynthesis	ASPARTATESYN-PWY	Got1	Got2	Got2-RA	CG1218	CG7049	CG11777	Rae1	CG18789	Treh	Art8	BthD	CG18787	RpS21	Trx-2	CG1532	Sod1	Arc1	alpha-Est2	Ccs	Wdr82	sty	CG1129	CG7492	Cpr65Ea	Rtnl1	CG4998	CG14806	Nup93-1	Sap47
+glycine biosynthesis I	GLYSYN-PWY	Shmt
+glycine biosynthesis III	GLYSYN-ALA-PWY	
+glycine biosynthesis IV	GLYSYN-THR-PWY	
+glutamate biosynthesis II	GLUTAMATE-SYN2-PWY	Gdh	up	Acon	Argk	ATPsynB	Act79B	ATPsynD	Actn	CG9090	Nc73EF	ATPsynF	atl	CG2025	wupA	Tm2	CG15564	Rtnl1	kdn	Mf	ND-PDSW	Mlc2	Scp1	Adh	Prm	Mlc1	CG12006	Gpdh
+glutamate biosynthesis III	GLUTSYNIII-PWY	
+glutamate biosynthesis I	GLUTSYN-PWY	
+arginine biosynthesis IV	ARGININE-SYN4-PWY	Oat	Argl	Gdh	Ass	NULL	Pms2	up	Acon	Argk	ATPsynB	Act79B	ATPsynD	Actn	CG9090	Nc73EF	ATPsynF	atl	CG2025	wupA	Tm2	CG15564	Rtnl1	kdn	Mf	ND-PDSW	Mlc2	Scp1	Adh	Prm	Mlc1	CG12006	Gpdh
+cysteine biosynthesis II	CYSTEINE-SYN2-PWY	Cbs	term	Rho1
+&beta;-alanine biosynthesis IV	PWY-5155	b
+isoleucine biosynthesis from threonine	ILEUSYN-PWY	cg1673
+proline biosynthesis III	PWY-3341	P5cr-2	P5cr	Oat	opa	CycK	CG1635	CG7379	CG11275	NULL	Pms2
+proline biosynthesis II	PROLINE-SYN2-PWY	Gdh	P5cr-2	P5cr	up	Acon	Argk	ATPsynB	Act79B	ATPsynD	Actn	CG9090	Nc73EF	ATPsynF	atl	CG2025	wupA	Tm2	CG15564	Rtnl1	kdn	Mf	ND-PDSW	Mlc2	Scp1	Adh	Prm	Mlc1	CG12006	Gpdh	opa	CycK	CG1635	CG7379	CG11275
+tyrosine biosynthesis IV	PWY-6134	Hn	Henna	CG4116	Nurf-38	CG14053	Map60	CNMa	glo	ND-SGDH	CG7600	CG12256	jdp	Reph	mino	Nelf-E	Fer1HCH	fd59A	CG14245	ATPsynB	NULL	wisp	TwdlC	qkr58E-3	CG3645	spz4	SkpB	CG9135	Su(var)3-9	sgg	Sxl	cv-c	CG32428	kibra	CG8036	CG3625	TfAP-2	se	ND-19	Invadolysin	Vdup1	RpS19a	RhoGAP54D	osk	Ccp84Aa	CG14246	CG42446	Ccp84Ab	B9d1	Sema1a	CG13622	CG17931	CG13737
+glutamine biosynthesis I	GLNSYN-PWY	Gs2	Gs2-RC	Gs1	ci	CG32486	CG32819	CG8568	sstn	CG17450	CG7737	Rbp4	CG43427	msi	Synd	RabX1	Rim2	CG8204	HIP	CG5044	Clic	CG32631	Amyrel	Dronc
+<i>S</i>-adenosyl-L-methionine cycle	PWY-5041	Sam-S	M(2)21AB-RB	M(2)21AB-RG	Ahcy	AhcyL2	CG17107	CG17841	Gpo-1	Galphas	NULL	Pdk1	CG3209	ago	Rpn5	CG8539	DIP-alpha	E(var)3-9	foxo	CG4880	RpLP0-like	sals	Akt1	Eip71CD	Cctgamma	CG10510	CG11889	Xpd	RpL4	Arf51F	CG31800	CG5009	hid	AhcyL1	p53	CG14231	Phb2	Mabi	ssp	Mhcl	Efa6	CG7324	l(3)j2D3
+selenocysteine biosynthesis II (archaea and eukaryotes)	PWY-6281	SerRS-m	SerRS	Sps2	SelD	vir-1	Mp20	Pi3K68D	Cnx99A	MRP	CG3008	boca	CG12264	CG2064	CG17765	UQCR-6.4	CG18301	Sucb	Kap-alpha3	AspRS	Vps4	CG3902	TER94	CG33303	Glt	FASN1	r	Tcp-1zeta	Past1	Tcp-1eta	betaCOP	Mpcp	CG8258	CG9467	Pen	bor	Pp2A-29B	GluProRS	CG12262	Cctgamma	OstDelta	skap	l(1)G0156	CG16817	Cyp12d1-p	wal	PHDP	CG5525	EfTuM	CG1371	TrpRS	Gfat2	Chc	CG5854	CG14543	CG2371	SmydA-3	NULL	CG6660	Blm	CG14667	Arc42	CG11839	Mical	r-l	CG1910	Sry-beta	Clic	CG4860
+histamine biosynthesis	PWY-6173	Hdc	EndoA	CG14113
+spermine biosynthesis	ARGSPECAT-PWY	SamDC	Sms	eyg	Spt
+spermidine biosynthesis	BSUBPOLYAMSYN-PWY	SamDC	SpdS	eyg	Spt	Rtnl1	Drep1	GlnRS
+UDP-<i>N</i>-acetyl-D-glucosamine biosynthesis II	UDPNACETYLGALSYN-PWY	Gnpnat	CG1969-RB	Gfat2	Gfat1	mmy	nst	Raf	ksr	CG12262	Vps4	CG5854	skap	l(1)G0156	Rpt6	Rpn1	Pp2A-29B	Gp93	MRP	spidey	PCB	Pdk1	CG33303	Cnx99A	OstDelta	cathD	Ranbp9	UQCR-C2	Mcm7	Cp1	Pi3K68D	sima	Sucb	Mec2	Cctgamma	FASN1	Hel25E	CG12264	grk	prc	Akt1	Cyp12d1-p	wal	betaCOP	Chc	r	Rab5	Tcp-1zeta	SerRS	CG1371	SERCA	Vha68-2	Mpcp	CG8258	GluProRS	EfTuM	Rpt1	rb	CG6569	MFS16	step	eIF-4a	beta-Spec	betaggt-II	Rtnl1
+putrescine biosynthesis III	PWY-46	Odc2	Odc1	nmd	CG12116
+serotonin and melatonin biosynthesis	PWY-6030	Ddc	AANAT1	CG2199	CG34168	CG44774	Cp16	lsn	CG6933	Khc	CG14764	CG31140	mxt	NULL	CG13339	CG15706	CkIIalpha	RpS7	CG32647	Ef1alpha48D	noc
+catecholamine biosynthesis	PWY66-301	ple	Skeletor	olf413	Dmel\CG5235	Ddc	CG14684	MED19	S6KL	Nup107	Sdc	Plap	hb	mei-S332	Prp3	smg	CG5112	CG11380	mld	CG6175	RpS30	Catsup	NULL	CG7824	CG3342	cactin	Ubi-p5E	CG11700	Map60	Asciz	Rca1	Kdm2	TFAM	CG2199	CG34168	CG44774	Cp16	lsn	CG6933	Khc	CG14764	CG31140	mxt	CG13339	CG15706	CkIIalpha	RpS7	CG32647	Ef1alpha48D	noc
+S-adenosylmethionine biosynthesis	SAM-PWY	Sam-S	M(2)21AB-RB	M(2)21AB-RG	CG17107	CG17841	Gpo-1	Galphas	NULL	Pdk1	CG3209	ago	Rpn5	CG8539	DIP-alpha	E(var)3-9	foxo	CG4880	RpLP0-like	sals	Akt1	Eip71CD	Cctgamma	CG10510	CG11889	Xpd	RpL4
+acyl carrier protein metabolism	PWY-6012	
+heme biosynthesis II	HEME-BIOSYNTHESIS-II	Ppox	Updo	Coprox	FeCh	Hrs	COX6B	p53	Jafrac2	Myo10A	dl	Diap2	mtDNA-helicase
+NAD phosphorylation and dephosphorylation	NADPHOS-DEPHOS-PWY	Dmel\CG8080	CT19307	CG30346	CG6152	Dmel\CG6145
+NAD salvage pathway III	PWY3O-4106	
+NAD biosynthesis from 2-amino-3-carboxymuconate semialdehyde	PWY-5653	Nadsyn
+heptaprenyl diphosphate biosynthesis	PWY-5807	
+geranylgeranyldiphosphate biosynthesis	PWY-5120	
+trans,trans-farnesyl diphosphate biosynthesis	PWY-5123	Fpps	CG17134	Neos	Act5C	GstE1	vas	mtSSB	Rae1
+lipoate biosynthesis and incorporation II	PWY0-1275	
+lipoate salvage and modification	PWY0-522	
+coenzyme A biosynthesis	COA-PWY	fbl	Dmel\CG5828	Dpck	Ppcs	Ppcdc	tsr	CG1126	Nup153	fu
+thioredoxin pathway	THIOREDOX-PWY	SelT	Trxr-1	Trxr-2	Eno	Moe	Fkbp14	Ntf-2	CG6084	Trx-2	Chd64	CG2862	hfp	CG42565	Calr	AnxB10	regucalcin	Pgd	Ho	CG7430	cl	Prx2540-2	CG8036	Df31	CG2852	Nlp	LpR1	awd	CG10638	Sod1	Mdh2	Tango2	CG14715	NULL	Phb2	Rpn11	CG7639	Pdi	CG4570	GstO3	CG8993	CG31358
+glutathione biosynthesis	GLUTATHIONESYN-PWY	Gclm	Gclc	Gss2	Efa6	CG14853	SmB
+glutathione redox reactions I	PWY-4081	
+glutathione redox reactions II	GLUT-REDOX-PWY	
+tetrahydrobioprein biosynthesis II	PWY-5664	Pu	pr	atl	mxt	Catsup	drongo	Bacc	CG6279	Jafrac2	grsm	Ttd14	Pez	AhcyL1	Mapmodulin	grk	Tpi	bsk
+tetrahydrobioprein biosynthesis I	PWY-5663	Sptr	Pu	pr	atl	mxt	Catsup	drongo	Bacc	CG6279	Jafrac2	grsm	Ttd14	Pez	AhcyL1	Mapmodulin	grk	Tpi	bsk
+formylTHF biosynthesis I	1CMET2-PWY	Ts	Shmt	Dhfr	H2.0	Epac	Rbp4	vg	CG11999
+folate transformations	PWY-2201	Shmt	Mthfs	CG34424-RA
+folate polyglutamylation I	PWY-2161	Fpgs	Shmt
+folate polyglutamylation II	PWY-2161B	Fpgs	l(3)72Dp	l(3)72Dr
+tetrapyrrole biosynthesis II	PWY-5189	l(3)02640	Alas	Pbgs	Rh2	CSN1a	chn	CG8414	tsh	Adat1	Ilp7	Sgt	GEFmeso	CG2116	CG11334	Utx	CG7987	CG13405	CG42369	CG9130	S6kII	CG16972	Patronin	CG13175	Uba1	CG32086	APP-BP1	NULL	CG33964	Tim17a2	CG1635
+CMP-KDO biosynthesis I	PWY-1269	
+glycogen biosynthesis II (from UDP-D-Glucose)	PWY-5067	UGP	UGP-RE	Gyg	CG6904-RA	GlyS	CG10602	Treh	Dic1	NULL	CG5111	CG15676	kibra	Rpn11	Phb2	Eno	beat-Ia	CG15631	Tk	org-1	CG7206	CG13996	CG7033	E(spl)m8-HLH	atl	CG17162	p38b	Myo10A	Atg8a	sima	CG13131	CG5613	robo3
+dolichyl-diphosphooligosaccharide biosynthesis	MANNOSYL-CHITO-DOLICHOL-BIOSYNTHESIS	dAlg13	CG10166-RA	wol
+gluconeogenesis	GLUCONEO-PWY	Pgk	Dmel\CG9961	Ald1	Ald-RI	Ald-RH	Ald	Menl-2	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	Mdh1	Dmel\CG10749	Mdh2	Dmel\CG10748	CG10748-RA	Pgi	fbp	Adh	ftz-f1	Argk	chic	Pglym78	GlyP	regucalcin	Yp2	CG16826	Sh3beta	Lsp2	TER94	Prx2540-2	CG7430	CG14715	awd	scu	CG31343	Sec5	Moe	CG5506	Gpdh	CG2025	AnxB10	PHGPx	Hop	Uch	Scp1	Fkbp14	CG5500	CG32473	CG10638	CG4598	Eaf	CG14718	PHDP	capt	CG30122	Tm2	Mhc	Chd64	Mf	CG1910	apolpp	GstS1	Yp3	CG13893	Nacalpha	Act88F	Picot	ATPsynCF6	Caf1-105	ft	kdn	VhaAC39-1	fln	Glo1	Pgd	Calr	FK506-bp2	PCNA	CG13510	Oda	bdg	up	Nlp	wupA	CG16817	Atg14	RhoGDI	EndoGI	CG15525	CG11656	CG14985	fabp	vir-1	Panx	Inos	Mlc2	Mlc1	Acon	Df31	Fer2LCH	Prm	CG2852	Bacc	CG34172	Actn	Act79B	Sod2	Gpo-1	CG14207	Spindly	CG8891	TpnC41C	CG5177	CG14567	GstO3	NULL	Sec31	Hsp60B	CG17233	CG1986	CG11581	CG11961	Mp20	PAN2	CG14820	CG11380	CG4603	NC2alpha	unc-119	Cpr47Ef	CG11505	Fas2	Sirt1	kra	ebo	CG10887	bs	CG15153	Hsc70-2	betaTub85D	Parp	CG13074	CG8353	RpS15Ab	CG2540	CG3308	Mer	smt3	CG6084	CG8036	EF2	Ntf-2	Akap200	Nph	Prosbeta5	CG14864	14-3-3epsilon	eEF1delta	Hsc70Cb	porin	Cyp1	cv-c	atl	CG6707	CG2862	cib	GstE6	dUTPase	scf	Sod1	Sxl	CG7352	st	CG4853	Trx-2	CG11267	Gdi	Tctp	CG8993	yip2	ATPsynbeta	UGP	Trxr-1	RpS27A	eIF-5A	Pdi	CG30382	CG33213	Lim1	CG14499	Zif	Pura	betaggt-II	CG9014	Phb2	CG32219	CG5174	Rtnl1	CG3226	Eb1	HisRS	Idh	HmgD	l(1)G0255	Rab11	Clic	CG10863	Src64B	ovo	Hr3	COX6B	eIF4G2
+GDP-L-fucose biosynthesis I (from GDP-D-mannose)	PWY-66	Gmer	Gmd	Aprt
+GDP-glucose biosynthesis	PWY-5661	Pgm	BG:DS00797.2	Dmel\CG9008	Trs33	CG7352	ci	Tektin-C	atl
+GDP-D-rhamnose biosynthesis	GDPRHAMSYN-PWY	Gmd	Aprt
+GDP-mannose biosynthesis II	PWY-5659	Mpi	Pgi	Src64B	ovo	Hr3	COX6B	eIF4G2
+CMP-<i>N</i>-acetylneuraminate biosynthesis I (eukaryotes)	PWY-6138	Csas
+GDP-mannose metabolism	MANGDPMET-PWY	Mpi
+L-carnitine biosynthesis	PWY-6100	Dmel\CG4335
+ceramide biosynthesis	PWY3DJ-12	lace	ghi	meigo	CG32758	GCS2beta	RpS27A	CG6126	CG4287	Hsc70-4	Vha13	RpL31	dhd	Spt-I	CG9986	RpS16	cid	Ubi-p63E
+sphingomyelin metabolism	PWY3DJ-11281	Dmel\CG3376	CG3376-RA	alphaSmase	aSMase	Dmel\CG15533
+wax esters biosynthesis II	PWY-5885	
+triacylglycerol biosynthesis	TRIGLSYN-PWY	mino	Agpat2	Agpat1	Lpin	wun2	laza	mod(mdg4)	wun	Hn	mtm	CG4853	CG15109	Rtnl1	rl	flw	Hsp67Ba	krz	z	Chi	ND-ACP	TwdlY	Zasp52	4E-T	mago	Sara	CG7202	CG7099	Cpr72Ea	smt3	slx1	CG11164	CG12645	HIPP1	Cp190	Trl	TwdlV	TwdlB	Cda5	Npc2a	Src64B	CG8569	CG3011	CG8854	CG9572	CG11138	Gld	CG10527	east	E(spl)m7-HLH	Hsp70Aa	Hsp70Ba	CG15356	NULL	CG12607	CG6415	CG16817	TwdlW	CG10265	yellow-d2	Ras85D	lwr	lds	ADD1	Rpn3	su(Hw)	Top2	ATPsynF	CG15529	TwdlG	cher	shep	Tango9	Hsp70Bbb	rump	Topors	fs(1)h
+acyl-CoA hydrolysis	PWY-5148	
+choline biosynthesis III	PWY-3561	Pld	Pcyt1	Pcyt2	Moe	hpo	RecQ4
+zymosterol biosynthesis	PWY-6074	
+phosphatidylcholine biosynthesis	PWY3O-450	Pcyt1	Pcyt2
+phosphatidylethanolamine biosynthesis II	PWY4FS-6	eas	Hsp27	CG8993	RpS3	CG12321
+phosphatidyl-ethanolamine biosynthesis	PWY-5669	Pisd	CG5991-RB
+CDP-diacylglycerol biosynthesis	PWY-5667	Agpat2	Agpat1	mino	CdsA-RA	Cds	CdsA	Hn	mtm	Ost48	Scamp	Surf4	OstDelta	Sc2	CG11753	be	CG11857	CG31729	Tango9	Sec61alpha
+cardiolipin biosynthesis II	PWY-5269	Dmel\CG7718
+fatty acids biosynthesis (yeast)	PWY-5970	
+very long chain fatty acid biosynthesis	PWY-5080	HIPP1	HP6	Ibf1	Su(var)205	CAP	CTCF	CG1910	pita	Cp38	Ibf2	pds5	CG10265	Cp190	mod(mdg4)	mip120	su(Hw)	CG2118	ADD1
+fatty acid biosynthesis initiation II	PWY-5966	
+oleate biosynthesis II (animals)	PWY-5996	Desat1	CG30480	PK2-R1	CG14005	CG2064	PAN2	AstC-R1	CG13526	SERCA	Akt1
+&gamma;-linolenate biosynthesis II (animals)	PWY-6000	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3	CG31431	Cnx99A	Mpcp	Rtnl1	msk	fax
+4-hydroxyphenylpyruvate biosynthesis	PWY-5886	
+4-hydroxybenzoate biosynthesis I (eukaryotes)	PWY-5754	
+		
