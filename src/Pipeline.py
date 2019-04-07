@@ -101,7 +101,7 @@ class GUI(tk.Frame):
     isIntHM.grid(column=4, row=6, pady=(10,10), sticky=tk.W)
     
     showSampleName_state = tk.BooleanVar()
-    showSampleName_state.set(False)
+    showSampleName_state.set(True)
     showSampleName = ttk.Checkbutton(self, text="Show Names", var=showSampleName_state)
     showSampleName.grid(column=2, row=7, pady=(0,10), sticky=tk.W)
     
@@ -111,7 +111,7 @@ class GUI(tk.Frame):
     isIntVl.grid(column=4, row=7, pady=(0,10), sticky=tk.W)
 
     runEnrichr_state = tk.BooleanVar()
-    runEnrichr_state.set(False)
+    runEnrichr_state.set(True)
     runEnrichr = ttk.Checkbutton(self, text="Run EnrichR", var=runEnrichr_state)
     runEnrichr.grid(column=1, row=10, pady=(10,0), sticky=tk.W)
     
@@ -120,10 +120,10 @@ class GUI(tk.Frame):
     runGSEA = ttk.Checkbutton(self, text="Run GSEA", var=runGSEA_state)
     runGSEA.grid(column=2, row=10, pady=(10,0), sticky=tk.W)
     
-    useSiteNorm_state = tk.BooleanVar()
-    useSiteNorm_state.set(False)
-    useSiteNorm = ttk.Checkbutton(self, text="Normalize Sites to Proteome", var=useSiteNorm_state)
-    useSiteNorm.grid(column=3, row=10,columnspan=1, pady=(10,0), sticky=tk.W)
+    #useSiteNorm_state = tk.BooleanVar()
+    #useSiteNorm_state.set(False)
+    #useSiteNorm = ttk.Checkbutton(self, text="Normalize Sites to Proteome", var=useSiteNorm_state)
+    #useSiteNorm.grid(column=3, row=10,columnspan=1, pady=(10,0), sticky=tk.W)
     
     incShinyNorm_state = tk.BooleanVar()
     incShinyNorm_state.set(False) # adjust when working
@@ -135,14 +135,14 @@ class GUI(tk.Frame):
     normMethod_lbl = tk.Label(self, text="Normalization Method:")
     normMethod_lbl.grid(column=2, row=12, sticky=tk.E)
     normMethod = ttk.Combobox(self)
-    normMethod['values']=('loess', 'quantile', 'none')
+    normMethod['values']=('loess', 'quantile', 'median', 'z transform', 'none')
     normMethod.current(0)
     normMethod.grid(column=3, row=12)
 
     species_lbl = tk.Label(self, text="Species:")
     species_lbl.grid(column=0, row=15, pady=(30,0), sticky=tk.E)
     species = ttk.Combobox(self)
-    species['values']=('Human', 'Mouse', 'Other')
+    species['values']=('Human (9606)', 'Mouse (10090)','Other')#, 'Yeast (559292)', 'E. coli (511145)','Zebrafish (7955)', 'C. elegans (6239)', 'Fruit Fly (7227)','Rat (10116)')
     species.current(0)
     species.grid(column=1, row=15, pady=(30,0))
 
@@ -212,28 +212,31 @@ class GUI(tk.Frame):
       outputfile.write("working_dir <- '" + analysis_dir + "'; # Directory for analysis and where data is \n")
       outputfile.write("annotation_filename <- '" + str(tk.StringVar(self, value=nameAnn).get()) + "';\n")
 
+      outputfile.write("query_web <- " + str(queryWeb_state.get()).upper() + ";\n")
+      outputfile.write("show_names <- " + str(showSampleName_state.get()).upper() + ";\n")
+      outputfile.write("map_color <- '" + str(heatcolors.get()) + "';\n")
+      
+      outputfile.write("zero_percent <- " + str(cutoff_zero_val.get()) + ";\n")
+      outputfile.write("norm_method <- '" + str(normMethod.get()) + "';\n")
+      outputfile.write("shinyNorm <- " + str(incShinyNorm_state.get()).upper() +  ";\n")
+      
       outputfile.write("saveXlsx <- " + str(runXlsx_state.get()).upper() + ";\n")
+      outputfile.write("runDifferential <- " + str(incDifferential_state.get()).upper() + ";\n")
+      outputfile.write("adjpcutoff <- " + str(cutoff_fdr_val.get()) + ";\n")
+      
       outputfile.write("enrichr_section <- " + str(runEnrichr_state.get()).upper() + ";\n")
       outputfile.write("gsea_section <- " + str(runGSEA_state.get()).upper() + ";\n")
-      outputfile.write("use_site_norm <- " + str(useSiteNorm_state.get()).upper() + ";\n")
-      outputfile.write("query_web <- " + str(queryWeb_state.get()).upper() + ";\n")
-      outputfile.write("int_heatmap_section <- " + str(isIntHM_state.get()).upper() + ";\n")
-      outputfile.write("int_volcano_section <- " + str(isIntVl_state.get()).upper() + ";\n")
-      outputfile.write("show_names <- " + str(showSampleName_state.get()).upper() + ";\n")
-      
-      outputfile.write("map_color <- '" + str(heatcolors.get()) + "';\n")
+      outputfile.write("gsea_combined <- TRUE;\n")
       outputfile.write("species <- '" + str(species.get()) + "';\n")
-      outputfile.write("norm_method <- '" + str(normMethod.get()) + "';\n")
-      outputfile.write("txtFolder <- " + str(txtFolder.get()).upper() + ";\n")
-      outputfile.write("notebook_dir <- '" + dir_path + "';\n")
-      outputfile.write("runDifferential <- " + str(incDifferential_state.get()).upper() + ";\n")
-      outputfile.write("shinyNorm <- " + str(incShinyNorm_state.get()).upper() +  ";\n")
-
       outputfile.write("enrichmentmap_p_val <- " + str(enrichmentmap_p_val.get()) + ";\n")
       outputfile.write("enrichmentmap_q_val <- " + str(enrichmentmap_q_val.get()) + ";\n")
-    
-      outputfile.write("zero_percent <- " + str(cutoff_zero_val.get()) + ";\n")
-      outputfile.write("adjpcutoff <- " + str(cutoff_fdr_val.get()) + ";\n")
+      outputfile.write("use_site_norm <- FALSE ;\n")# + str(useSiteNorm_state.get()).upper() + ";\n")
+      
+      outputfile.write("int_heatmap_section <- " + str(isIntHM_state.get()).upper() + ";\n")
+      outputfile.write("int_volcano_section <- " + str(isIntVl_state.get()).upper() + ";\n")
+      outputfile.write("txtFolder <- " + str(txtFolder.get()).upper() + ";\n")
+      
+      outputfile.write("notebook_dir <- '" + dir_path + "';\n") 
       outputfile.write("inherit_paths <- " + inherit_paths +  ";\n")
       outputfile.write("libraries_path <- '" + libraries_path +  "';\n")
       outputfile.write("pandoc_path <- '" + pandoc_path +  "';\n")

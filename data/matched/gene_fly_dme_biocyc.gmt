@@ -1,0 +1,200 @@
+acetyl-CoA biosynthesis (from citrate)	PWY-5172	ATPCL
+acetyl-CoA biosynthesis (from pyruvate)	PYRUVDEHYD-PWY	muc	E3	Pdha	Dmel\CG7024	Pdhb
+TCA cycle variation III (eukaryotic)	PWY-5690	Fum1	Irp-1A	Irp-1B	Idh3b	Dmel\CG5028	l(1)G0156	SdhAL	SdhBL	SdhC	SdhA	SdhB	ScsbetaA	Mdh1	Dmel\CG10749	Mdh2	Dmel\CG10748	CG10748-RA
+glycerol-3-phosphate shuttle	PWY-6118	Gpo1	Gpo3	Gpo2	Dmel\CG8046	Gpdh3	Gpdh1	CG31169-RB	Gpdh2	CG31169	gpdh	CG18427	Gpdh
+pyruvate fermentation to lactate	PWY-5481	Ldh	ImpL3
+branched-chain &alpha;-keto acid dehydrogenase complex	PWY-5046	Dmel\CG17691	Dmel\CG8199	E3
+2-ketoglutarate dehydrogenase complex	PWY-5084	E3	CG32316-ORFB	Nc73EF	CG32316
+aerobic respiration -- electron donor II	PWY-3781	UQCR-6.4	RFeSP	UQCR-11	UQCR-Q	Dmel\CG43206	SdhAL	SdhBL	SdhC	SdhA	SdhB	COX1	cype	levy	COX4	COI	COXI	COX7AL	COX5B	COX8	COX4L	Scox	COX5BL	CoI	COX6AL	COX5A	COX7C	cox1	Dmel\CG31644	jagn	Dmel\CG44296	coxI	COX7A	mt:CoIII	mt:CoI	mt:CoII	ND-B14.5AL	ND-18	ND-51L1	ND5
+aerobic respiration -- electron donors reaction list	AERESPDON-PWY	SdhAL	SdhBL	SdhC	SdhA	SdhB	ND-B14.5AL	ND-18	ND-51L1	ND5
+methyl-coenzyme M reduction to methane	METHFORM-PWY	
+pentose phosphate pathway (non-oxidative branch)	NONOXIPENT-PWY	CG2827-RA	Taldo	Rpe	Rpi
+pentose phosphate pathway (partial)	P21-PWY	Rpe
+pentose phosphate pathway (oxidative branch)	OXIDATIVEPENT-PWY	Dmel\CG7140	Zw-RA	Zw	Pgd	Ndf
+glycolysis I	GLYCOLYSIS	Pgk	Dmel\CG9961	fbp	Pfk-RB	Pfk	Pfk-RC	Dmel\CG11249	Dmel\CG2964	CG7069	Dmel\CG7069	Dmel\CG7362	PyK	Ald1	Ald-RI	Ald-RH	Ald	Pgi	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	tpi	Tpi
+glycolysis III (Thermotoga)	ANAGLYCOLYSIS-PWY	Pgk	Dmel\CG9961	Pfk-RB	Pfk	Pfk-RC	Pgi	Dmel\CG11249	Dmel\CG2964	CG7069	Dmel\CG7069	Dmel\CG7362	PyK	Ald1	Ald-RI	Ald-RH	Ald	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	tpi	Tpi
+glycolysis II	PWY-5484	Pgk	Dmel\CG9961	fbp	Pfk-RB	Pfk	Pfk-RC	Dmel\CG11249	Dmel\CG2964	CG7069	Dmel\CG7069	Dmel\CG7362	PyK	Ald1	Ald-RI	Ald-RH	Ald	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	tpi	Tpi
+calcium transport I	PWY-6166	
+copper transport II	PWY-6137	
+sulfate activation for sulfonation	PWY-5340	
+sulfite oxidation IV	PWY-5326	
+thiosulfate disproportionation III (rhodanese)	PWY-5350	
+formaldehyde oxidation II (glutathione-dependent)	PWY-1801	Dmel\CG4390	CG4390-RB
+formaldehyde oxidation V (tetrahydrofolate pathway)	PWY-1722	
+paraoxon degradation	PWY-5490	
+methyl parathion degradation	PWY-5489	
+urate degradation to allantoin	PWY-5691	Dmel\CG30016	Uro
+glycogen degradation I	GLYCOCAT-PWY	Mal-A1	Mal-A2	Mal-A3	Pgm	GlyP
+glycogen degradation II	PWY-5941	Pgm	GlyP
+wound-induced proteolysis I	PWY-5988	
+betanidin degradation	PWY-5461	Dmel\CG4009	cysu	CG6879	cd	Pxd	Pxt	Pxn
+sorbitol utilization	PWY-4101	
+N-acetylglucosamine degradation	GLUAMCAT-PWY	Oscillin	Dmel\CG17065
+&beta;-alanine betaine biosynthesis	PWY-4021	
+4-hydroxyproline degradation I	HYDROXYPRODEG-PWY	
+phenylalanine degradation I	PHENYLALANINE-DEG1-PWY	Pcd	Hn	Henna
+isoleucine degradation I	ILEUDEG-PWY	cg1673	HIPP1
+alanine degradation III	ALANINE-DEG3-PWY	
+valine degradation I	VALDEG-PWY	Dmel\CG15093	cg1673	HIPP1	Dmel\CG5044	CT16187
+tyrosine degradation I	TYRFUMCAT-PWY	Faa	hgo
+homocysteine degradation	HOMOCYSDEGR-PWY	Cbs
+glutamine degradation II	GLUTAMINEFUM-PWY	
+glutamine degradation I	GLUTAMINDEG-PWY	GLS
+arginine degradation VI (arginase 2 pathway)	ARG-PRO-PWY	P5cr-2	P5cr	arg	Oat
+citrulline-nitric oxide cycle	PWY-4983	Argl	Ass	Nos
+arginine degradation X (arginine monooxygenase pathway)	ARGDEG-V-PWY	
+arginine degradation I (arginase pathway)	ARGASEDEG-PWY	arg	Oat
+leucine degradation I	LEU-DEG2-PWY	l(2)04524	cg1673
+threonine degradation II	THREONINE-DEG2-PWY	
+glycine cleavage complex	GLYCLEAV-PWY	Dmel\CG3999	E3	151967_at
+L-cysteine degradation II	LCYSDEG-PWY	
+L-cysteine degradation I	CYSTEINE-DEG-PWY	Got1	Got2	Got2-RA
+tryptophan degradation to 2-amino-3-carboxymuconate semialdehyde	PWY-5651	cn	v	KFase
+proline degradation II	PWY-4561	
+proline degradation I	PROUT-PWY	
+glutamate degradation X	PWY-5766	Gdh
+aspartate degradation II	MALATE-ASPARTATE-SHUTTLE-PWY	Mdh1	Dmel\CG10749	Mdh2	Dmel\CG10748	CG10748-RA	Got1	Got2	Got2-RA
+methionine degradation I (to homocysteine)	METHIONINE-DEG1-PWY	Sam-S	M(2)21AB-RB	M(2)21AB-RG	Ahcy	AhcyL2
+asparagine degradation I	ASPARAGINE-DEG1-PWY	Dmel\CG8526
+2-<I>O</I>-&alpha;-mannosyl-D-glycerate degradation	PWY0-1300	
+glucose and glucose-1-phosphate degradation	GLUCOSE1PMETAB-PWY	Pgm
+UDP-galactose biosynthesis (salvage pathway from galactose using UDP-glucose)	GALACTMETAB-PWY	UGP	UGP-RE	Galk	Galt
+D-mannose degradation	MANNCAT-PWY	Mpi
+melibiose degradation	PWY0-1301	
+xylose degradation I	XYLCAT-PWY	
+trehalose degradation II (trehalase)	PWY0-1182	Treh	Dmel\CG6262	CG6262
+lactose degradation III	BGALACT-PWY	Gal	Ect3
+triacylglycerol degradation	LIPAS-PWY	dob	bmm
+phospholipases	LIPASYN-PWY	GXIVsPLA2	sPLA2	GIIIspla2	PLA2	Dmel\CG14507	CG14507-RC	Dmel\CG3009	Pld	sl	norpA	Plc21C
+anandamide degradation	PWY6666-1	
+sphingosine and sphingosine-1-phosphate metabolism	PWY3DJ-11470	CDase	bwa
+oleate &beta;-oxidation	PWY0-1337	
+fatty acid &beta;-oxidation I	FAO-PWY	HIPP1	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3	yip2
+fatty acid &alpha;-oxidation	PWY-2501	Aldh	150697_at	Dmel\CG31075
+fatty acid &beta;-oxidation II (core pathway)	PWY-5136	HIPP1	yip2	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3
+glutaryl-CoA degradation	PWY-5177	
+superpathway of gluconate degradation	GLUCONSUPER-PWY	Rpi	Pgd	Ndf
+itaconate degradation	PWY-5749	ScsbetaG
+acetate conversion to acetyl-CoA	PWY0-1313	AcCoAS
+mevalonate degradation	PWY-5074	
+methylmalonyl pathway	PROPIONMET-PWY	
+purine deoxyribonucleosides degradation	PWY0-1297	
+degradation of pyrimidine deoxyribonucleosides	PWY0-1298	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349
+degradation of pyrimidine ribonucleosides	PWY0-1295	Dmel\CG3788	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349
+&beta;-alanine biosynthesis III	PWY-3982	su(r)	CRMP	pyd3
+urate biosynthesis	PWY-5695	ras	veil	NT5E-2	CG6247	BcDNA:AT08275	CG6267	28575006	45550393	ry
+degradation of purine ribonucleosides	PWY0-1296	c62E-15	Dmel\CG16758	CG16760	Adgf-A	Adgf-C	Adgf-B	Adgf-A2	Adgf-E	Adgf-D
+salvage pathways of adenine, hypoxanthine, and their nucleosides	SALVADEHYPOX-PWY	Aprt	Adgf-A	Adgf-C	Adgf-B	Adgf-A2	Adgf-E	Adgf-D	ry
+dopamine degradation	PWY6666-2	Aldh	150697_at	Dmel\CG31075
+allantoin degradation to ureidoglycolate II (ammonia producing)	PWY-5698	Dmel\CG6106
+allantoin degradation to ureidoglycolate I (urea producing)	PWY-5697	Dmel\CG6106
+oxidative ethanol degradation I	PWY66-21	Fbp2	Adh	Dmel\CG18814	Adhr	Aldh	150697_at	Dmel\CG31075	AcCoAS
+oxidative ethanol degradation III	PWY66-162	Irc	Cat	Aldh	150697_at	Dmel\CG31075	AcCoAS
+methylglyoxal degradation I	PWY-5386	Glo1	tzn
+glutathione-mediated detoxification	PWY-4061	GstE11	GstD9	GstD10	GstT1	AIMP3	GstD11	GstE10	Mgstl	gfzf	GstE3	GstE1	GstE13	GstE9	GstE12	GstT3	Gdap1	GstE8	GstE2	eEF1gamma	Dmel\CG33178	GstE7	GstE4	GstE5	GstT2	GstE6	GstD5	GstD6	GstS1	GstD2	GstD4	GstD7	GstE14	l(3)72Dp	l(3)72Dr
+heme degradation	PWY-5874	
+removal of superoxide radicals	DETOX1-PWY	Sod2	Ccs	Dmel\CG5948	Sod1	Sod3	Irc	Cat
+glutamate dependent acid resistance	PWY0-1305	Gad1
+fatty acid activation	PWY-5143	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3
+tRNA charging pathway	TRNA-CHARGING-PWY	AspRS	beta-PheRS	alpha-PheRS	PheRS-m	HisRS	AsnRS-m	AsnRS	Aats-gln	TyrRS	TyrRS-m	CysRS-m	CysRS	ArgRS-m	ArgRS	IleRS	IleRS-m	ValRS-m	GluRS-m	LeuRS-m	SerRS-m	SerRS	MetRS	MetRS-m	Dmel\CG10802	AlaRS-m	AlaRS	LysRS	Aats-lys-RC	GlyRS	ThrRS	TrpRS-m	TrpRS
+2-methylbutyrate biosynthesis	PWY-5109	HIPP1
+PRPP biosynthesis I	PWY0-662	Dmel\CG2246	Dmel\CG6767
+trehalose biosynthesis I	TRESYN-PWY	CG5171-RC	Tps1	Dmel\CG5177	Dmel\CG5171
+<i>myo</i>-inositol biosynthesis	PWY-2301	Inos	IMP	Dmel\CG17029	Dmel\CG17026	Dmel\CG17027	CG17028-RA
+mevalonate pathway	PWY-922	Hmgs	Mvd	Hmgcr	Hmgcr-RA	CG16804
+beta-carboline biosynthesis	PWY-5877	Ddc
+betaxanthin biosynthesis (via dopamine)	PWY-5403	Ddc
+phenylethanol biosynthesis	PWY-5751	Fbp2	Adh	Dmel\CG18814	Adhr
+5-aminoimidazole ribonucleotide biosynthesis I	PWY-6121	ade2	CG2867	Prat2	Prat
+pyrimidine ribonucleotides interconversion	PWY-5687	awd	nmdyn-D6	nmdyn-D7	Dmel\CG15547	Dmel\CG14221	Dak1	CTPsyn
+de novo biosynthesis of pyrimidine deoxyribonucleotides	PWY0-166	RnrS	RnrL	Ts	dUTPase	awd	nmdyn-D6	nmdyn-D7	Dmel\CG15547	Dmel\CG14221
+salvage pathways of pyrimidine ribonucleotides	PWY0-163	l(2)k01209	Uck	Dak1	Dmel\CG3788	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349	awd	nmdyn-D6	nmdyn-D7	Dmel\CG15547	Dmel\CG14221
+salvage pathways of pyrimidine deoxyribonucleotides	PWY0-181	BcDNA:LP03131	Dmel\CG8353	Dmel\CG8349
+uridine-5'-phosphate biosynthesis	PWY-5686	
+inosine-5'-phosphate biosynthesis II	PWY-6124	AdSL
+salvage pathways of guanine, xanthine, and their nucleosides	SALVPURINE2-PWY	c62E-15	Dmel\CG16758	CG16760
+glutaminyl-tRNA<sup>gln</sup> biosynthesis via transamidation	PWY-5921	gatA-RA	gatA
+asparaginyl-tRNA<sup>asn</sup> biosynthesis via transamidation	PWY490-4	
+hypusine biosynthesis	PWY-5905	nero	Dmel\CG8005
+asparagine biosynthesis III	ASPARAGINESYN-PWY	AsnS
+alanine biosynthesis III	PWY0-1021	Qtzl
+alanine biosynthesis II	ALANINE-SYN2-PWY	
+serine biosynthesis	SERSYN-PWY	aay
+aspartate biosynthesis	ASPARTATESYN-PWY	Got1	Got2	Got2-RA
+glycine biosynthesis I	GLYSYN-PWY	Shmt
+glycine biosynthesis III	GLYSYN-ALA-PWY	
+glycine biosynthesis IV	GLYSYN-THR-PWY	
+glutamate biosynthesis II	GLUTAMATE-SYN2-PWY	Gdh
+glutamate biosynthesis III	GLUTSYNIII-PWY	
+glutamate biosynthesis I	GLUTSYN-PWY	
+arginine biosynthesis IV	ARGININE-SYN4-PWY	Oat	Argl	Gdh	Ass
+cysteine biosynthesis II	CYSTEINE-SYN2-PWY	Cbs
+&beta;-alanine biosynthesis IV	PWY-5155	b
+isoleucine biosynthesis from threonine	ILEUSYN-PWY	cg1673
+proline biosynthesis III	PWY-3341	P5cr-2	P5cr	Oat
+proline biosynthesis II	PROLINE-SYN2-PWY	Gdh	P5cr-2	P5cr
+tyrosine biosynthesis IV	PWY-6134	Hn	Henna
+glutamine biosynthesis I	GLNSYN-PWY	Gs2	Gs2-RC	Gs1
+<i>S</i>-adenosyl-L-methionine cycle	PWY-5041	Sam-S	M(2)21AB-RB	M(2)21AB-RG	Ahcy	AhcyL2
+selenocysteine biosynthesis II (archaea and eukaryotes)	PWY-6281	SerRS-m	SerRS	Sps2	SelD
+histamine biosynthesis	PWY-6173	Hdc
+spermine biosynthesis	ARGSPECAT-PWY	SamDC	Sms
+spermidine biosynthesis	BSUBPOLYAMSYN-PWY	SamDC	SpdS
+UDP-<i>N</i>-acetyl-D-glucosamine biosynthesis II	UDPNACETYLGALSYN-PWY	Gnpnat	CG1969-RB	Gfat2	Gfat1	mmy	nst
+putrescine biosynthesis III	PWY-46	Odc2	Odc1
+serotonin and melatonin biosynthesis	PWY-6030	Ddc	AANAT1
+catecholamine biosynthesis	PWY66-301	ple	Skeletor	olf413	Dmel\CG5235	Ddc
+S-adenosylmethionine biosynthesis	SAM-PWY	Sam-S	M(2)21AB-RB	M(2)21AB-RG
+acyl carrier protein metabolism	PWY-6012	
+heme biosynthesis II	HEME-BIOSYNTHESIS-II	Ppox	Updo	Coprox	FeCh
+NAD phosphorylation and dephosphorylation	NADPHOS-DEPHOS-PWY	Dmel\CG8080	CT19307	CG30346	CG6152	Dmel\CG6145
+NAD salvage pathway III	PWY3O-4106	
+NAD biosynthesis from 2-amino-3-carboxymuconate semialdehyde	PWY-5653	Nadsyn
+heptaprenyl diphosphate biosynthesis	PWY-5807	
+geranylgeranyldiphosphate biosynthesis	PWY-5120	
+trans,trans-farnesyl diphosphate biosynthesis	PWY-5123	Fpps
+lipoate biosynthesis and incorporation II	PWY0-1275	
+lipoate salvage and modification	PWY0-522	
+coenzyme A biosynthesis	COA-PWY	fbl	Dmel\CG5828	Dpck	Ppcs	Ppcdc
+thioredoxin pathway	THIOREDOX-PWY	SelT	Trxr-1	Trxr-2
+glutathione biosynthesis	GLUTATHIONESYN-PWY	Gclm	Gclc	Gss2
+glutathione redox reactions I	PWY-4081	
+glutathione redox reactions II	GLUT-REDOX-PWY	
+tetrahydrobioprein biosynthesis II	PWY-5664	Pu	pr
+tetrahydrobioprein biosynthesis I	PWY-5663	Sptr	Pu	pr
+formylTHF biosynthesis I	1CMET2-PWY	Ts	Shmt	Dhfr
+folate transformations	PWY-2201	Shmt	Mthfs	CG34424-RA
+folate polyglutamylation I	PWY-2161	Fpgs	Shmt
+folate polyglutamylation II	PWY-2161B	Fpgs	l(3)72Dp	l(3)72Dr
+tetrapyrrole biosynthesis II	PWY-5189	l(3)02640	Alas	Pbgs
+CMP-KDO biosynthesis I	PWY-1269	
+glycogen biosynthesis II (from UDP-D-Glucose)	PWY-5067	UGP	UGP-RE	Gyg	CG6904-RA	GlyS
+dolichyl-diphosphooligosaccharide biosynthesis	MANNOSYL-CHITO-DOLICHOL-BIOSYNTHESIS	dAlg13	CG10166-RA	wol
+gluconeogenesis	GLUCONEO-PWY	Pgk	Dmel\CG9961	Ald1	Ald-RI	Ald-RH	Ald	Menl-2	anon-WO0140519.132	Gapdh2	Gapdh1	Eno	Mdh1	Dmel\CG10749	Mdh2	Dmel\CG10748	CG10748-RA	Pgi	fbp
+GDP-L-fucose biosynthesis I (from GDP-D-mannose)	PWY-66	Gmer	Gmd
+GDP-glucose biosynthesis	PWY-5661	Pgm	BG:DS00797.2	Dmel\CG9008
+GDP-D-rhamnose biosynthesis	GDPRHAMSYN-PWY	Gmd
+GDP-mannose biosynthesis II	PWY-5659	Mpi	Pgi
+CMP-<i>N</i>-acetylneuraminate biosynthesis I (eukaryotes)	PWY-6138	Csas
+GDP-mannose metabolism	MANGDPMET-PWY	Mpi
+L-carnitine biosynthesis	PWY-6100	Dmel\CG4335
+ceramide biosynthesis	PWY3DJ-12	lace	ghi
+sphingomyelin metabolism	PWY3DJ-11281	Dmel\CG3376	CG3376-RA	alphaSmase	aSMase	Dmel\CG15533
+wax esters biosynthesis II	PWY-5885	
+triacylglycerol biosynthesis	TRIGLSYN-PWY	mino	Agpat2	Agpat1	Lpin	wun2	laza	mod(mdg4)	wun
+acyl-CoA hydrolysis	PWY-5148	
+choline biosynthesis III	PWY-3561	Pld	Pcyt1	Pcyt2
+zymosterol biosynthesis	PWY-6074	
+phosphatidylcholine biosynthesis	PWY3O-450	Pcyt1	Pcyt2
+phosphatidylethanolamine biosynthesis II	PWY4FS-6	eas
+phosphatidyl-ethanolamine biosynthesis	PWY-5669	Pisd	CG5991-RB
+CDP-diacylglycerol biosynthesis	PWY-5667	Agpat2	Agpat1	mino	CdsA-RA	Cds	CdsA
+cardiolipin biosynthesis II	PWY-5269	Dmel\CG7718
+fatty acids biosynthesis (yeast)	PWY-5970	
+very long chain fatty acid biosynthesis	PWY-5080	HIPP1
+fatty acid biosynthesis initiation II	PWY-5966	
+oleate biosynthesis II (animals)	PWY-5996	Desat1
+&gamma;-linolenate biosynthesis II (animals)	PWY-6000	Acsl	bgm	Fatp1	Dmel\CG3961	Fatp3
+4-hydroxyphenylpyruvate biosynthesis	PWY-5886	
+4-hydroxybenzoate biosynthesis I (eukaryotes)	PWY-5754	
+		
