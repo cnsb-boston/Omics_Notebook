@@ -20,8 +20,8 @@
 #' @export
 
 makeEset <- function(data, annotate, type, log_transform=TRUE,
-                     data_format, uniprot_annotation=TRUE) {
-  
+                     data_format, uniprot_annotation=TRUE, outputpath=output_plots_path) {
+  # For MaxQuant formats, remove potential contaminants and reverse hits
   if( grepl(".MQ.", data_format) ){
     if ( ("Potential.contaminant" %in% colnames(data)) ){
       if( "+" %in%  data[,"Potential.contaminant"] ) {
@@ -32,7 +32,7 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
         data <- data[data[,"Reverse"]!='+',]; #remove reverse
     } }
   }
-  
+  # Get and format Sample Names from annotation
   annotate[,"SampleName"] <- make.names(annotate[,"SampleName"] ); #format sample names
   annotate[,type] <- make.names(annotate[,type] ); # data column headers
   
@@ -45,6 +45,16 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
                                                         unlist(gregexpr(';', x["Majority.protein.IDs"]))[1]-1)
       } else {x["Majority.protein.IDs"]} } );
   }
+  if (data_format=='Peptides..MQ.'){
+    # pull out sample intensity values based on annotation
+    data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
+    # parse out protein namea
+    data[,"Protein"] <- apply(data, 1, function(x) {
+      if(grepl(';', x["Proteins"])){ substr(x["Proteins"], 0, 
+                                                        unlist(gregexpr(';', x["Proteins"]))[1]-1)
+      } else {x["Proteins"]} } );
+  }
+  # Get data for MaxQuant Sites format
   if( grepl("Sites..MQ.", data_format) ){
     if( "+" %in%  data[,"Diagnostic.peak"] ) { data <- data[ data[,"Diagnostic.peak"]!='+',]; } #remove diagnostic features
     data <- data[ data[,"Localization.prob"]>=0.70 ,]; #filter low probability features
@@ -69,8 +79,9 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
       else {x["Protein"]} } );
   }
   
+  sample_column_names <- colnames(data[, which(colnames(data) %in% annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ) ])
   if( data_format=="Generic" ){
-    data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
+    data.matrix <- as.matrix(data[, sample_column_names ]);
 
   }
   
@@ -91,6 +102,8 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     
   }
   
+  drawRange(matrix=data.matrix, file_name = type, outputpath = outputpath )
+  
   # log2 Intensity Values
   if(log_transform){ data.matrix <- log2(data.matrix+1); }
   
@@ -110,7 +123,6 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
   }
   # make feature identifiers/rownames
   if( "Gene" %in% colnames(data) ){
-    
     if( "Protein" %in% colnames(data) ){
       data[,"feature_identifier"] <- make.unique( paste(data[,"Gene"], data[,"Protein"], sep="_" ) );
     } else if( "Transcript" %in% colnames(data) ){
@@ -118,23 +130,23 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     } else {
       data[,"feature_identifier"] <- make.unique( data[,"Gene"] );
     }
-    
   } else {
     data[,"feature_identifier"] <- make.unique( make.names(data[,1]) ); # take the first column as feature ID if nothing else is found.
     #data[,"Gene"] <- data[,"feature_identifier"] ;
   }
   
+  data.matrix[is.na(data.matrix)] <- 0
+  
   # Make column and row names for data matrix
-  colnames(data.matrix) <- annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),"SampleName"]
+  colnames(data.matrix) <- annotate[which(annotate[,type] %in% sample_column_names), "SampleName"]
   rownames(data.matrix) <- data[,"feature_identifier"]
   
   # make expression set object
   eset <- ExpressionSet(assayData=data.matrix)
 
-  fData(eset) <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
-                                    collapse='|'), colnames(data)) ];
-  pData(eset) <- cbind(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),],
-                       colnames(exprs(eset)));
+  fData(eset) <- data[, which(!(colnames(data) %in% sample_column_names)) ];
+  pData(eset) <- cbind(annotate[ which(annotate[,type] %in% sample_column_names),],
+                       colnames(exprs(eset)) );
 
   #if( !("Gene" %in% colnames(fData(eset))) ){ pData(eset)$Gene <- rownames(eset) }
   rownames(pData(eset)) <- colnames(data.matrix)
@@ -145,5 +157,7 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
 #                                                         unlist(gregexpr('=', x["Majority.protein.IDs"]))[2]+1,
 #                                                         unlist(gregexpr('=', x["Majority.protein.IDs"]))[3]-3) )
 }
+
+
 
 

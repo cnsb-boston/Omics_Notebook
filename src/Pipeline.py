@@ -10,10 +10,10 @@
 ############################################
 
 # R libraries path
-libraries_path = '/project/cnsbomic/Tools/R3.5'
+libraries_path = '/project/cnsbomic/Tools/R3.6'
 
 # Pandoc path
-pandoc_path = '/usr/local/apps/rstudio-0.98.1103/rstudio-0.98.1103/bin/pandoc'
+#pandoc_path = '/share/pkg.7/rstudio/1.2.1335/install/bin/pandoc/pandoc'
 
 # GSEA .jar file path
 gsea_jar = "/project/cnsbomic/Tools/gsea-3.0.jar"
@@ -87,7 +87,7 @@ class GUI(tk.Frame):
 
     queryWeb_state = tk.BooleanVar()
     queryWeb_state.set(True)
-    queryWeb = ttk.Checkbutton(self, text="Query Web", var=queryWeb_state)
+    queryWeb = ttk.Checkbutton(self, text="Query Uniprot", var=queryWeb_state)
     queryWeb.grid(column=2, row=6, pady=(10,10), sticky=tk.W)
 
     runXlsx_state = tk.BooleanVar()
@@ -100,10 +100,10 @@ class GUI(tk.Frame):
     isIntHM = ttk.Checkbutton(self, text="Interactive Heatmap", var=isIntHM_state)
     isIntHM.grid(column=4, row=6, pady=(10,10), sticky=tk.W)
     
-    showSampleName_state = tk.BooleanVar()
-    showSampleName_state.set(True)
-    showSampleName = ttk.Checkbutton(self, text="Show Names", var=showSampleName_state)
-    showSampleName.grid(column=2, row=7, pady=(0,10), sticky=tk.W)
+    #showSampleName_state = tk.BooleanVar()
+    #showSampleName_state.set(True)
+    #showSampleName = ttk.Checkbutton(self, text="Show Names", var=showSampleName_state)
+    #showSampleName.grid(column=2, row=7, pady=(0,10), sticky=tk.W)
     
     isIntVl_state = tk.BooleanVar()
     isIntVl_state.set(True)
@@ -120,75 +120,92 @@ class GUI(tk.Frame):
     runGSEA = ttk.Checkbutton(self, text="Run GSEA", var=runGSEA_state)
     runGSEA.grid(column=2, row=10, pady=(10,0), sticky=tk.W)
     
-    #useSiteNorm_state = tk.BooleanVar()
-    #useSiteNorm_state.set(False)
-    #useSiteNorm = ttk.Checkbutton(self, text="Normalize Sites to Proteome", var=useSiteNorm_state)
-    #useSiteNorm.grid(column=3, row=10,columnspan=1, pady=(10,0), sticky=tk.W)
+    #runGSEAcombined_state = tk.BooleanVar()
+    #runGSEAcombined_state.set(True)
+    #runGSEAcombined = ttk.Checkbutton(self, text="GSEA Combined", var=runGSEAcombined_state)
+    #runGSEAcombined.grid(column=3, row=10, pady=(10,0), sticky=tk.W)
+    
+    allcomparisons_state = tk.BooleanVar()
+    allcomparisons_state.set(True)
+    allcomparisons = ttk.Checkbutton(self, text="All Comparisons (if False, All to First)", var=allcomparisons_state)
+    allcomparisons.grid(column=1, row=7, columnspan=1, pady=(10,10), sticky=tk.W)
+    
+    useSiteNorm_state = tk.BooleanVar()
+    useSiteNorm_state.set(False)
+    useSiteNorm = ttk.Checkbutton(self, text="Use Sites Normalized to Proteome", var=useSiteNorm_state)
+    useSiteNorm.grid(column=3, row=11,columnspan=2, pady=(10,10), sticky=tk.W)
     
     incShinyNorm_state = tk.BooleanVar()
     incShinyNorm_state.set(False) # adjust when working
     incShinyNorm = ttk.Checkbutton(self, text="Interactive Normalization", var=incShinyNorm_state, state=tk.DISABLED)
-    incShinyNorm.grid(column=1, row=12, sticky=tk.W)
+    incShinyNorm.grid(column=1, row=14, sticky=tk.W)
 
     normMethod_lbl2 = tk.Label(self, text="When not using interactive normalization:")
-    normMethod_lbl2.grid(column=2, row=11, columnspan=2 ,pady=(40,0), sticky=tk.E)
+    normMethod_lbl2.grid(column=2, row=12, columnspan=2 ,pady=(40,0), sticky=tk.E)
     normMethod_lbl = tk.Label(self, text="Normalization Method:")
-    normMethod_lbl.grid(column=2, row=12, sticky=tk.E)
+    normMethod_lbl.grid(column=2, row=14, sticky=tk.E)
     normMethod = ttk.Combobox(self)
     normMethod['values']=('loess', 'quantile', 'median', 'z transform', 'none')
     normMethod.current(0)
-    normMethod.grid(column=3, row=12)
+    normMethod.grid(column=3, row=14)
 
     species_lbl = tk.Label(self, text="Species:")
-    species_lbl.grid(column=0, row=15, pady=(30,0), sticky=tk.E)
+    species_lbl.grid(column=0, row=16, pady=(30,0), sticky=tk.E)
     species = ttk.Combobox(self)
-    species['values']=('Human (9606)', 'Mouse (10090)','Other')#, 'Yeast (559292)', 'E. coli (511145)','Zebrafish (7955)', 'C. elegans (6239)', 'Fruit Fly (7227)','Rat (10116)')
+    species['values']=('Human (9606)', 'Mouse (10090)','Other', 'Yeast (559292)', 'E. coli (511145)','Zebrafish (7955)', 'C. elegans (6239)', 'Fruit Fly (7227)','Rat (10116)')
     species.current(0)
-    species.grid(column=1, row=15, pady=(30,0))
+    species.grid(column=1, row=16, pady=(30,0))
 
     heatcolors_lbl = tk.Label(self, text="Heatmap color scale:")
-    heatcolors_lbl.grid(column=0, row=16, pady=(0,10))
+    heatcolors_lbl.grid(column=0, row=17, pady=(0,10))
     heatcolors = ttk.Combobox(self)
     heatcolors['values']=('viridis', 'RdYlBu', 'RdBu')
     heatcolors.current(0)
-    heatcolors.grid(column=1, row=16, pady=(0,10))
+    heatcolors.grid(column=1, row=17, pady=(0,10))
 
     # NUMERIC ENTRIES
     vcmd = (self.register(self.onValidate), '%d','%i','%P','%s','%S','%v','%V','%W')
 
     emapVar_lbl = tk.Label(self, text="EnrichmentMap Parameters:")
-    emapVar_lbl.grid(column=3, columnspan=1, sticky=tk.W, row=17, pady=(20,0))
+    emapVar_lbl.grid(column=3, columnspan=1, sticky=tk.W, row=18, pady=(20,0))
     
     emapVar_p_lbl = tk.Label(self, text="P Value:")
-    emapVar_p_lbl.grid(column=2, row=18, sticky=tk.E)
+    emapVar_p_lbl.grid(column=2, row=19, sticky=tk.E)
     emapVar_p_start = tk.StringVar(self)
     emapVar_p_start.set("0.05")
     enrichmentmap_p_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=emapVar_p_start, validate='all', validatecommand=vcmd)
-    enrichmentmap_p_val.grid(column=3, row=18)
+    enrichmentmap_p_val.grid(column=3, row=19)
 
     emapVar_q_lbl = tk.Label(self, text="Q Value:")
-    emapVar_q_lbl.grid(column=2, row=19, sticky=tk.E)
+    emapVar_q_lbl.grid(column=2, row=20, sticky=tk.E)
     emapVar_q_start = tk.StringVar(self)
     emapVar_q_start.set("0.30")
     enrichmentmap_q_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=emapVar_q_start, validate='all', validatecommand=vcmd)
-    enrichmentmap_q_val.grid(column=3, row=19)
+    enrichmentmap_q_val.grid(column=3, row=20)
 
     cutoff_lbl = tk.Label(self, text="Cut Offs:")
-    cutoff_lbl.grid(column=0, columnspan=1, row=17, pady=(20,0))
+    cutoff_lbl.grid(column=0, columnspan=1, row=18, pady=(20,0))
     
     cutoff_zero_lbl = tk.Label(self, text="Zero Value Filter:")
-    cutoff_zero_lbl.grid(column=2, row=14, sticky=tk.E)
+    cutoff_zero_lbl.grid(column=2, row=15, sticky=tk.E)
     cutoff_zero_start = tk.StringVar(self)
     cutoff_zero_start.set("0.70")
-    cutoff_zero_val = tk.Spinbox(self, from_=0.01, to=1.00, increment=0.01, textvariable=cutoff_zero_start, validate='all', validatecommand=vcmd)
-    cutoff_zero_val.grid(column=3, row=14)
+    cutoff_zero_val = tk.Spinbox(self, from_=0.00, to=1.00, increment=0.01, textvariable=cutoff_zero_start, validate='all', validatecommand=vcmd)
+    cutoff_zero_val.grid(column=3, row=15)
 
     cutoff_fdr_lbl = tk.Label(self, text="FDR:")
-    cutoff_fdr_lbl.grid(column=0, row=18, sticky=tk.E)
+    cutoff_fdr_lbl.grid(column=0, row=19, sticky=tk.E)
     cutoff_fdr_start = tk.StringVar(self)
     cutoff_fdr_start.set("0.05")
     cutoff_fdr_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=cutoff_fdr_start, validate='all', validatecommand=vcmd)
-    cutoff_fdr_val.grid(column=1, row=18)
+    cutoff_fdr_val.grid(column=1, row=19)
+    
+    cutoff_percent_lbl = tk.Label(self, text="Top %:")
+    cutoff_percent_lbl.grid(column=0, row=20, sticky=tk.E)
+    cutoff_percent_start = tk.StringVar(self)
+    cutoff_percent_start.set("0.010")
+    cutoff_percent_val = tk.Spinbox(self, from_=0.001, to=0.50, increment=0.001, textvariable=cutoff_percent_start, validate='all', validatecommand=vcmd)
+    cutoff_percent_val.grid(column=1, row=20)
     
     txtFolder_lbl = tk.Label(self, text="txt Folder report:")
     txtFolder_lbl.grid(column=0, row=24, pady=(20,0), sticky=tk.E)
@@ -213,7 +230,7 @@ class GUI(tk.Frame):
       outputfile.write("annotation_filename <- '" + str(tk.StringVar(self, value=nameAnn).get()) + "';\n")
 
       outputfile.write("query_web <- " + str(queryWeb_state.get()).upper() + ";\n")
-      outputfile.write("show_names <- " + str(showSampleName_state.get()).upper() + ";\n")
+      #outputfile.write("show_names <- " + str(showSampleName_state.get()).upper() + ";\n")
       outputfile.write("map_color <- '" + str(heatcolors.get()) + "';\n")
       
       outputfile.write("zero_percent <- " + str(cutoff_zero_val.get()) + ";\n")
@@ -223,14 +240,17 @@ class GUI(tk.Frame):
       outputfile.write("saveXlsx <- " + str(runXlsx_state.get()).upper() + ";\n")
       outputfile.write("runDifferential <- " + str(incDifferential_state.get()).upper() + ";\n")
       outputfile.write("adjpcutoff <- " + str(cutoff_fdr_val.get()) + ";\n")
+      outputfile.write("sig_percent <- " + str(cutoff_percent_val.get()) + ";\n")
       
       outputfile.write("enrichr_section <- " + str(runEnrichr_state.get()).upper() + ";\n")
       outputfile.write("gsea_section <- " + str(runGSEA_state.get()).upper() + ";\n")
-      outputfile.write("gsea_combined <- TRUE;\n")
+      #outputfile.write("gsea_combined <- "+ str(runGSEAcombined_state.get()).upper() + ";\n")
+      outputfile.write("all_comparisons <- "+ str(allcomparisons_state.get()).upper() + ";\n")
+      
       outputfile.write("species <- '" + str(species.get()) + "';\n")
       outputfile.write("enrichmentmap_p_val <- " + str(enrichmentmap_p_val.get()) + ";\n")
       outputfile.write("enrichmentmap_q_val <- " + str(enrichmentmap_q_val.get()) + ";\n")
-      outputfile.write("use_site_norm <- FALSE ;\n")# + str(useSiteNorm_state.get()).upper() + ";\n")
+      outputfile.write("use_site_norm <- " + str(useSiteNorm_state.get()).upper() + ";\n")
       
       outputfile.write("int_heatmap_section <- " + str(isIntHM_state.get()).upper() + ";\n")
       outputfile.write("int_volcano_section <- " + str(isIntVl_state.get()).upper() + ";\n")
@@ -239,7 +259,7 @@ class GUI(tk.Frame):
       outputfile.write("notebook_dir <- '" + dir_path + "';\n") 
       outputfile.write("inherit_paths <- " + inherit_paths +  ";\n")
       outputfile.write("libraries_path <- '" + libraries_path +  "';\n")
-      outputfile.write("pandoc_path <- '" + pandoc_path +  "';\n")
+      #outputfile.write("pandoc_path <- '" + pandoc_path +  "';\n")
       outputfile.write("gsea_jar <- '" + gsea_jar +  "';\n")
 
       outputfile.close()

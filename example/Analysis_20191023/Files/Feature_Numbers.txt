@@ -1,0 +1,16 @@
+Proteomics: 7439 features detected in raw data. 
+
+Proteomics: 7214 features detected in filtered data. 
+
+Phospho: 6637 features detected in raw data. 
+
+Phospho: 5785 features detected in filtered data. 
+
+Met_Neg: 1495 features detected in raw data. 
+
+Met_Neg: 1495 features detected in filtered data. 
+
+Met_Pos: 2574 features detected in raw data. 
+
+Met_Pos: 2574 features detected in filtered data. 
+

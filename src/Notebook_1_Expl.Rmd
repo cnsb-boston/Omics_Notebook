@@ -18,44 +18,29 @@ if(txtFolder){
 
 ---
 
-### Boxplot and Distribution
-```{r boxplots_QC_and_norm, fig.width=12, fig.height=4}
+### Data Normalization
+```{r normalization, fig.width=12, fig.height=4}
+
+pca_output <- vector("list", length(omicsList) )
 output_links<-"";
 
 for(i in 1:length(omicsList)){
   if(length(zero_percent)==1){use_zero<-zero_percent}else{use_zero<-zero_percent[i]}
   if(length(norm_method)==1){use_norm<-norm_method}else{use_norm<-norm_method[i]}
   
-  omicsList[[i]][[5]] <-intensityNorm(eset=omicsList[[i]][[5]], # for testing normalization, change to "eset=omicsList[[i]][[14]]" if 14 defined in Notebook.Rmd
+  if(debug_opt){ index<-14 } else { index <- 5 }
+  omicsList[[i]][[5]] <-intensityNorm(eset=omicsList[[i]][[index]],
                                       type=omicsList[[i]][[1]], 
                                       data_format=omicsList[[i]][["dataFormat"]],
                                       norm=norm_method, cutoff=zero_percent)
   
   # Make output hyperlinks for markdown
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], ": Boxplot/Dist. ](", output_plots_subdir,
                     "/boxplot_histogram_",omicsList[[i]][["dataType"]],".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
-}
-
-for(i in 1:length(omicsList)){
-    print(paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[4]])," features detected in raw data.",sep=""))
-    print(paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[5]])," features detected in filtered data.",sep=""))
-}
-
-```
-Click to view full size images: `r { output_links }`  
-
----
-
-### PCA Plots
-```{r PCA_plots, fig.width=12, fig.height=4}
-output_links<-"";
-pca_output <- vector("list", length(omicsList) )
-
-for(i in 1:length(omicsList)){
   
   # Batch correction
-  if("Batch" %in% colnames(pData(omicsList[[i]][["eSet"]]))) { try({
+  if("Batch" %in% colnames(pData(omicsList[[i]][["eSet"]])) & !("Met" %in% omicsList[[i]][["dataFormat"]])) { try({
     suppressPackageStartupMessages({require(sva) });
     suppressMessages({ suppressWarnings({
     omicsList[[i]][[12]] <- omicsList[[i]][["eSet"]]
@@ -66,27 +51,38 @@ for(i in 1:length(omicsList)){
     batch = pheno$Batch
   
     modcombat = model.matrix(~1, data=pheno)
-    combat_edata = ComBat(dat=edata, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=TRUE)
+    combat_edata = ComBat(dat=edata, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=FALSE)
     combat_eset = ExpressionSet(assayData=combat_edata)
     pData(combat_eset) = pData(omicsList[[i]][["eSet"]])
     fData(combat_eset) = fData(omicsList[[i]][["eSet"]])
     })})
     omicsList[[i]][["eSet"]] <- combat_eset
-    tmp<-drawPCA(eset=omicsList[[i]][["prebatch_eset"]], type=paste(omicsList[[i]][["dataType"]],"_precorrection", sep=""), show_sample_names=show_names);
+    tmp<-drawPCA(eset=omicsList[[i]][["prebatch_eset"]], type=paste(omicsList[[i]][["dataType"]],"_precorrection", sep=""));
   }) }
   
   # PCA plots
-  pca_output[[i]] <- drawPCA(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]], show_sample_names=show_names)
+  pca_output[[i]] <- drawPCA(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
   
   # Make output hyperlinks for markdown
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  add_link <- paste("[ ",omicsList[[i]][["dataType"]], ": PCA ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
+  output_links <- paste(output_links, "  \n", sep="" )
 }
+
+print_report <- c();
+for(i in 1:length(omicsList)){
+    print_report <- c(print_report, paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[4]])," features detected in raw data. \n",sep=""),
+                      paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[5]])," features detected in filtered data. \n",sep="") )
+}
+
+cat(print_report)
+writeLines(print_report, con=file.path(output_files_path, "Feature_Numbers.txt"))
 
 grid.arrange(grobs=pca_output, ncol=2)
 
 ```
-Click to view full size images: `r { output_links }`  
+Click to view full size images:  
+`r { output_links }`  
 
 ---
 
@@ -101,7 +97,7 @@ if( length(gene_data_index) > 1 ){
     gene_list[[i]] <- fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene
     names(gene_list)[i] <- omicsList[[ gene_data_index[i] ]][["dataType"]]
   }
-  drawVenn(gene_list, "Genes")
+  drawVenn(item_list=gene_list, item_name="Genes")
   add_link <- paste("[ Genes ](", output_plots_subdir,"/VennDiagram_Genes.pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
 }
@@ -138,6 +134,19 @@ if( length(mz_data_index) > 1 ){
 
 output_links <-"";
 
+# If there's a directory called "Subset_Lists" make feature lists based on text files
+subset_genes=FALSE;
+if( dir.exists("Subset_Lists") ){ try({
+  filelist <- list.files(path=file.path("Subset_Lists"), pattern="*.txt")
+  subset_genes <- vector("list", length=length(filelist))
+  names(subset_genes) <- gsub("*.txt", "", filelist)
+  
+  for( i in 1:length(filelist)){
+    subset_genes[i] <- unique(list(scan(file.path("Subset_Lists", filelist[i]), what="", sep=" " ) ))
+  }
+}) }
+
+# Correlation for "Genes"
 if(length(gene_data_index)>1){ try({
   item_name <- "Gene"
   data_index <- gene_data_index
@@ -151,11 +160,12 @@ if(length(gene_data_index)>1){ try({
     gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
     names(gene_values)[i] <- omicsList[[ data_index[i] ]][["dataType"]]
   }
-  drawXYCorr(item_list=gene_values, item_name=item_name);
-  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,".pdf)", sep="") ;
+  drawXYCorr(item_list=gene_values, item_name=item_name, subset_genes=subset_genes);
+  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,"_.pdf)", sep="") ;
   output_links <- paste(output_links, add_link, sep=" | " )
 }) }
 
+# Correlation for "Protein"
 if(length(prot_data_index)>1){ try({
   item_name <- "Protein"
   data_index <- prot_data_index
@@ -170,7 +180,7 @@ if(length(prot_data_index)>1){ try({
     names(gene_values)[i] <- omicsList[[ data_index[i] ]][["dataType"]]
   }
   drawXYCorr(item_list=gene_values, item_name=item_name);
-  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,".pdf)", sep="");
+  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,"_.pdf)", sep="");
   output_links <- paste(output_links, add_link, sep=" | " )
 }) }
 
@@ -186,6 +196,7 @@ if(length(prot_data_index)>1){ try({
 output_links <-"";
 
 for(i in 1:length(omicsList)){ try({
+  if(length(unique(pData(omicsList[[i]][["eSet"]])$Group))>1){
   gene_values <- data.frame(t(exprs(omicsList[[i]][["eSet"]])))
   gene_values$Group <- pData(omicsList[[i]][["eSet"]])$Group
   gene_values <- aggregate(. ~ Group, gene_values, mean)
@@ -204,8 +215,9 @@ for(i in 1:length(omicsList)){ try({
   file_name <- omicsList[[i]][["dataType"]]
   item_name <- "Groups"
   drawXYCorr(item_list=item_list, item_name=item_name, file_name=file_name);
-  add_link <- paste("[ ",file_name,"Sample Groups Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,"_",file_name,".pdf)", sep="");
+  add_link <- paste("[ ",file_name," ](",output_plots_subdir,"/Correlation_Plots_",item_name,"_",file_name,".pdf)", sep="");
   output_links <- paste(output_links, add_link, sep=" | " )
+  }
 }  ) }
 
 ```
@@ -287,6 +299,18 @@ for(i in 1:length(sites_norm_index)){
 `r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){"Site to Proteome Normalization:"}`
 `r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){ output_links }`
 
+```{r add_site_norm, eval=use_site_norm}
+
+for(i in 1:length(sites_norm_index)){try({
+  start_length <- length(omicsList) + 1
+  omicsList[[start_length]] <- omicsList[[ sites_norm_index[i] ]]
+  omicsList[[start_length]][["eSet"]] <- omicsList[[start_length]][["siteNorm"]] 
+  omicsList[[start_length]][["dataType"]] <- paste(omicsList[[start_length]][["dataType"]], "_normToProt", sep="")
+  gene_data_index <- c(gene_data_index, start_length)
+}) }
+
+```
+
 ---
 
 ### Variation Plots, Filtering
@@ -319,18 +343,21 @@ if( length(omicsList)>1 ){ for(i in 2:length(omicsList) ){
 }}
 
 plot <- ggplot(CVs, aes(x=CV, fill=Dataset)) + geom_density(alpha=0.2)+ theme_bw() + 
-    labs(title=paste("Coefficient of Variation Plot", sep=''),
-         x="Coefficient of Variation (%)");
+    labs(title=paste("Coefficient of Variation Plot \n ", sep=''),
+         x="Coefficient of Variation (%)", y="Frequency");
 
 output_filename<-file.path(output_plots_path, paste("CV_Plot",".pdf", sep=""))
-pdf(output_filename, width=4, height=3)
-print(plot)
-suppressWarnings(print(plot+ scale_x_continuous(limits=c(0, 20))) )
+pdf(output_filename, width=3, height=3)
+print(plot+theme(legend.position="none"))
+suppressWarnings(print(plot+ scale_x_continuous(limits=c(0, 20))+theme(legend.position="none")) )
+suppressWarnings(print(plot+ scale_x_continuous(limits=c(0, 10))+theme(legend.position="none")) )
+grid.arrange(g_legend(plot))
 dev.off()
 
 avg <- aggregate( CVs[,"CV"], list(CVs[,"Dataset"]), mean) 
 colnames(avg) <- c("Dataset", "Average CV")
 print(avg)
+write.table(avg, file=file.path(output_files_path, "Average_CV.txt"), quote=F, sep="\t")
 
 add_link <- paste("[ CV Plot ](", output_plots_subdir,"/CV_Plot",".pdf) ", sep="");
 output_links <- paste(output_links, add_link, sep="  \n" );
@@ -345,24 +372,43 @@ Click below to view SD vs Mean and Pairs plots: `r { output_links }`
 ```{r heatmaps_qc}
 output_links<-"";
 
+# If there's a directory called "Subset_Lists" make feature lists based on text files
+subset_genes=FALSE;
+if( dir.exists("Subset_Lists") ){ try({
+  filelist <- list.files(path=file.path("Subset_Lists"), pattern="*.txt")
+  subset_genes <- vector("list", length=length(filelist))
+  names(subset_genes) <- gsub("*.txt", "", filelist)
+  
+  for( i in 1:length(filelist)){
+    subset_genes[i] <- unique(list(scan(file.path("Subset_Lists", filelist[i]), what="", sep=" " ) ))
+  }
+}) }
+
 # Heatmaps
 for(i in 1:length(omicsList)){ try({
-  drawHeatmaps(eset=omicsList[[i]][["eSet"]], emat_top=omicsList[[i]][["topVariable"]], type=omicsList[[i]][["dataType"]]);
-    
+  subset_rows=FALSE;
+  if( class(subset_genes)!="logical" ){ try({
+    subset_rows <- vector("list", length(subset_genes))
+    names(subset_rows) <- names(subset_genes)
+    for( j in 1:length(subset_genes) ){
+      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+        subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[which(fData(omicsList[[i]][["eSet"]])$Gene %in% subset_genes[[j]] )]
+      }
+      if( length(subset_rows[[j]])==0 ){
+        subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ grep( paste(subset_genes[[j]], collapse="|"),
+                                                                      rownames(exprs(omicsList[[i]][["eSet"]])) ) ]
+      }
+    }
+  },silent=T) }
+  # Draw the heatmaps and sace the Complex Heatmap object
+  map_out <- drawHeatmaps(eset=omicsList[[i]][["eSet"]], emat_top=omicsList[[i]][["topVariable"]],
+                          type=omicsList[[i]][["dataType"]], subset=subset_rows);
+  saveRDS(map_out, file=file.path(output_files_path, paste("Heatmap_",omicsList[[i]][["dataType"]],".RDS",sep="")) )
+  
   # Make output hyperlinks for markdown
   add_link <- paste("[ ",omicsList[[i]][["dataType"]], " ](", output_plots_subdir,"/heatmaps_",omicsList[[i]][["dataType"]],".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
 }) }
-
-# Heatmaps if sites data normalized to proteome
-if(length(sites_norm_index)>0){ for(i in 1:length(sites_norm_index)){ try({
-  type_name <- paste(omicsList[[ sites_norm_index[i] ]][["dataType"]], "_normtoProteome",sep="")
-  drawHeatmaps(eset=omicsList[[ sites_norm_index[i] ]][["siteNorm"]], type=type_name) ;
-    
-  # Make output hyperlinks for markdown
-  add_link <- paste("[ ",type_name, " ](", output_plots_subdir,"/heatmaps_",type_name,".pdf)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
-}) } }
 
 ```
 Click to view static heatmaps plots: `r { output_links }`  
@@ -374,6 +420,7 @@ Click to view static heatmaps plots: `r { output_links }`
 output_links<-"";
 
 for(i in 1:length(omicsList)){
+  # Make the interactive heatmap
   interactiveHeatmap(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]]);
   
   # Make output hyperlinks for markdown
@@ -392,7 +439,21 @@ for(i in 1:length(omicsList)){
 
 # save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
 for(i in 1:length(omicsList)){
-  saveFiles(data=omicsList[[i]], type=omicsList[[i]][["dataType"]]);
+  subset_rows=FALSE;
+  if( class(subset_genes)!="logical" ){ try({
+    subset_rows <- vector("list", length(subset_genes))
+    names(subset_rows) <- names(subset_genes)
+    for( j in 1:length(subset_genes) ){
+      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+        subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[which(fData(omicsList[[i]][["eSet"]])$Gene %in% subset_genes[[j]] )]
+      }
+      if( length(subset_rows[[j]])==0 ){
+        subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ grep( paste(subset_genes[[j]], collapse="|"), 
+                                                                      rownames(exprs(omicsList[[i]][["eSet"]])) ) ]
+      }
+    }
+  }, silent=TRUE) }
+  saveFiles(data=omicsList[[i]], type=omicsList[[i]][["dataType"]], subset=subset_rows);
 }  
 
 # Save excel file summary for collaborators
@@ -400,7 +461,8 @@ if(saveXlsx==TRUE){
   wbOut <- createWorkbook()
   
   for(i in 1:length(omicsList)){
-    writeDataToSheets(wb=wbOut, eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]);
+    eSet=omicsList[[i]][["eSet"]][,order(pData(omicsList[[i]][["eSet"]])$Group)]
+    writeDataToSheets(wb=wbOut, eset=eSet, type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]);
   } 
   
   output_filename=file.path(output_path, paste(project_name, "_Summary.xlsx", sep=""))
@@ -410,3 +472,4 @@ if(saveXlsx==TRUE){
 ``` 
 
 ---
+

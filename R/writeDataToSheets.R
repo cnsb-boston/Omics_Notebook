@@ -15,7 +15,10 @@
 #' @examples
 #' 
 #' @export
-writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map_color, type){
+writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map_color, type,
+                              coef_index=NULL, time_index=NULL, contrast_strings=NULL){
+  
+  eset <- eset[,order(pData(eset)$Group)]
   
   # Make colors for sample names
   annotLab <- data.frame(Group = factor(pData(eset)$Group));
@@ -25,9 +28,24 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   
   if (class(limmaFit)!="NULL"){
     # Create table for each coefficient
-    DiffList <- vector("list", (ncol(limmaFit$coefficients)) )
-    for(i in 1:length(DiffList) ) {
-      DiffList[[i]] = topTable(limmaFit, adjust.method="BH", n=Inf, sort.by='p', coef=i)[,c("P.Value","adj.P.Val","logFC")]
+    if(class(coef_index)!="NULL"){
+      DiffList <- vector("list", length(coef_index) )
+    } else {
+      DiffList <- vector("list", (ncol(limmaFit$coefficients)) )
+      coef_index <- 1:(ncol(limmaFit$coefficients))
+    }
+    if(class(coef_index)!="NULL" & class(time_index)!="NULL"){
+      if(time_index>0){
+        DiffList_T <- topTable(limmaFit, adjust.method="BH", n=Inf, coef=coef_index)
+      } else {
+        DiffList_T <- NULL
+      }
+    }
+    if(length(DiffList)>1){
+      DiffList_F <- topTable(limmaFit, adjust.method="BH", n=Inf)
+    }
+    for(i in 1:length(coef_index) ) {
+      DiffList[[i]] = topTable(limmaFit, adjust.method="BH", n=Inf, sort.by='p', coef=coef_index[i])[,c("P.Value","adj.P.Val","logFC")]
     }
     # Match the row order to the first contrast
     eset <- eset[match(rownames(DiffList[[1]]),rownames(eset)),]
@@ -53,13 +71,13 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   formatted_table<-""
   if ( "feature_identifier" %in% colnames(fData(eset)) ) {  
     formatted_table <- data.frame( fData(eset)[,c("feature_identifier")],emat_sel )
-    names <- c("Feature", colnames(eset)  )
+    names <- c("Feature", colnames(exprs(eset))  )
   } else if ( "Gene" %in% colnames(fData(eset)) ) {  
     formatted_table <- data.frame( fData(eset)[,c("Gene")],emat_sel )
-    names <- c("Gene", colnames(eset)  )
+    names <- c("Gene", colnames(exprs(eset))  )
   } else { 
     formatted_table <- data.frame(  rownames(exprs(eset)),emat_sel )
-    names <- c("Feature", colnames(eset)  )
+    names <- c("Feature", colnames(exprs(eset))  )
   }
   col_widths <- c(20, rep(4, ncol(eset)));
   
@@ -106,10 +124,28 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
       names <- c(names, "P.Value","adj.P.Val","logFC");
       col_widths<-c(col_widths, 8,8,8);
     } 
+    if(length(DiffList)>1){ try({
+      DiffList_F <- DiffList_F[match(rownames(DiffList[[1]]),rownames(DiffList_F)),];
+      formatted_table <- data.frame(formatted_table, DiffList_F[,"F"])
+      names <- c(names, "F-Statistic");
+      col_widths<-c(col_widths, 8);
+    }) }
+    try({ if(class(DiffList_T)!="NULL"){
+      DiffList_T <- DiffList_T[match(rownames(DiffList[[1]]),rownames(DiffList_T)),];
+      formatted_table <- data.frame(formatted_table, DiffList_T[,"F"])
+      names <- c(names, "F-Statistic:Time Trajectory");
+      col_widths<-c(col_widths, 8);
+    } }, silent=T)
   }else if ( any( grepl("logfc_", colnames(fData(eset))) )){
     formatted_table <- data.frame(formatted_table, fData(eset)[,grepl("logfc_", colnames(fData(eset)) )]); 
     names <- c(names, colnames(fData(eset))[grepl("logfc_", colnames(fData(eset)) )])
     col_widths <- c(col_widths, rep(8, sum(grepl("logfc_", colnames(fData(eset)) ) )))
+  }
+  
+  if ( any( grepl("mummichogID_", colnames(fData(eset))) )){
+    formatted_table <- data.frame(formatted_table, fData(eset)[,grepl("mummichogID_", colnames(fData(eset)) )]); 
+    names <- c(names, colnames(fData(eset))[grepl("mummichogID_", colnames(fData(eset)) )])
+    col_widths <- c(col_widths, rep(8, sum(grepl("mummichogID_", colnames(fData(eset)) ) )))
   }
   
   if ( "Uniprot_Function" %in% colnames(fData(eset)) ){ 
@@ -152,22 +188,33 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
     formatted_table <- data.frame(formatted_table, fData(eset)[,c("identifier")] ); 
     names <- c(names,"identifier"); col_widths<-c(col_widths, 16);
   }
+  
+  if ( "Sequence" %in% colnames(fData(eset)) ){ 
+    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Sequence")] ); 
+    names <- c(names,"Sequence"); col_widths<-c(col_widths, 16);
+  }
+  
+  if ( "Proteins" %in% colnames(fData(eset)) ){ 
+    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Proteins")] ); 
+    names <- c(names,"Proteins"); col_widths<-c(col_widths, 16);
+  }
+  
+  # Add phospho site probabilities and data
+  try({ 
+    if(grepl("Sites", data_format)) { 
+      formatted_table <- data.frame(formatted_table, fData(eset)[,"Localization.prob"],
+                                    fData(eset)[,grep("Probabilities", colnames(fData(eset)))],
+                                    paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep=""),
+                                    fData(eset)[,"Sequence.window"] ) 
+      names <- c(names, "Localization Probability","Site Probabilities", "Amino Acid", "Peptide Sequence")
+      col_widths <- c(col_widths, 16, 16, 16, 16)
+    }
+  })
 
   formatted_table<- data.frame(formatted_table, exprs(eset) );  
   names <- c(names,colnames(eset) );
   col_widths <- c(col_widths, rep(4, ncol(eset)));
   
-  # Add phospho site probabilities and data
-  try({ 
-    if("Sites..MQ." %in% data_format) { 
-      formatted_table <- data.frame(formatted_table, fData(eset)[,"Localization.prob"],
-                                          fData(eset)[,grep("Probabilities", colnames(fData(eset)))],
-                                          paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep=""),
-                                          fData(eset)[,"Sequence.window"] ) 
-      names <- c(names, "Localization Probability","Site Probabilities", "Amino Acid", "Peptide Sequence")
-      col_widths <- c(col_widths, 16, 16, 16, 16)
-    }
-  })
   
   formatted_table <- data.frame(formatted_table, stringsAsFactors=FALSE)
   colnames(formatted_table) <-  make.unique(toupper(names));
@@ -205,10 +252,13 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=( length(names) - ncol(eset) + 1 ), stack=TRUE)
   
   # Add contrast titles
+  if(class(contrast_strings)=="NULL"){
+    contrast_strings <- colnames(limmaFit$coefficients)
+  }
   if(length(DiffList)>0) { for(i in 1:length(DiffList)){
     startCol<- col_index + 1 + (3*(i-1))
     mergeCells(wb=wb, sheet=stName, rows=1, cols=startCol:(startCol+2) )
-    writeData(wb=wb, sheet=stName, x=colnames(limmaFit$coefficients)[i], xy=c(startCol,1))
+    writeData(wb=wb, sheet=stName, x=contrast_strings[i], xy=c(startCol,1))
     addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=startCol, stack=TRUE)
   } }
   

@@ -29,7 +29,7 @@ getUniprotAnnotation <- function(IDs){
   IDs_unique <- IDs[!duplicated(IDs)] #get unique IDs
   
   # Query uniprot server 100 entries at a time
-  for (i in 1: (length(IDs_unique) %/% 100)  ){
+  for (i in 1: (length(IDs_unique) %/% 100)  ){ try({
     info_url<-paste("https://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
                     "&query=accession%3A",paste(IDs_unique[ (1 + 100*(i-1)) : (100*i) ], collapse="+OR+accession%3A"), sep="")
     if(url.exists(info_url)==TRUE){
@@ -40,7 +40,8 @@ getUniprotAnnotation <- function(IDs){
       } }
     }
     Sys.sleep(2)
-  }
+  }) }
+  try({
   info_url<-paste("https://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
                   "&query=accession%3A",paste(IDs_unique[ ((length(IDs) %/% 100)*100) : (((length(IDs_unique) %/% 100)*100) + (length(IDs_unique) %% 100))],
                                               collapse="+OR+accession%3A"), sep="")
@@ -51,6 +52,7 @@ getUniprotAnnotation <- function(IDs){
                                                     annotUniprot <- rbind(annotUniprot, info_annot) }
     } }
   }
+  })
   annotUniprot <- annotUniprot[-1,] #remove first row (NAs)
   
   # make data frame corresponding to original ID list

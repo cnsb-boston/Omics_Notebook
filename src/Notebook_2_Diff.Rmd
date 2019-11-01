@@ -3,19 +3,34 @@
 ### Limma
 ```{r limma}
 
-# Make all contrasts between groups
+# Make contrasts between groups
 contrast_strings <- c();
-for (j in 1:(length(contrastgroups)-1)){
-  for (k in (j+1):length(contrastgroups)){
-    contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[j], sep=''));
-}  }
+if(all_comparisons == TRUE){
+  for (j in 1:(length(contrastgroups)-1)){
+    for (k in (j+1):length(contrastgroups)){
+      contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[j], sep=''));
+  }  }
+} else {
+  for (k in 2:length(contrastgroups)){
+      contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[1], sep=''));
+  } 
+}
 num_contrasts <- length(contrast_strings);
+loop_list <- 1:num_contrasts
 
 time_index <- 0;
 if("TimeSeries" %in% colnames(annot)){ 
   time_index<- length(unique(annot[,"TimeSeries"]))-2;
   time_start <- 3+time_index
   time_end<- 2+(time_index*2)
+  loop_list<- time_start:time_end
+  new_strings <- c()
+  for ( k in 1:length(contrast_strings)){
+    for( l in 1:time_index){
+      new_strings <- c(new_strings, paste(contrast_strings[k], "_Time_", l, sep=""))
+    }
+  }
+  contrast_strings <- c(new_strings, contrast_strings)
 }
 
 if(num_contrasts>1 | time_index>0){ statistic_index <- "F";
@@ -23,48 +38,50 @@ if(num_contrasts>1 | time_index>0){ statistic_index <- "F";
 
 ##########################################################
 
-runLimma <- function(eset, .contrast_strings=contrast_strings, .time_index=time_index){
+# Limma for DE
+for(i in 1:length(omicsList)){ try({
+  eset <- omicsList[[i]][["eSet"]]
   IsThereTime <- FALSE; 
   # Create a model matrix and lmFit based on group - For more complex models, edit the following code in this chunk.
-  if(.time_index>0 ){ try({
-    f <- factor(pData(eset)$Group)#, levels=unique(pData(eset)$Group)); 
-    X <- ns(as.numeric(pData(eset)$TimeSeries), df=(.time_index))
-    design <- model.matrix(~f*X);
+  if(time_index>0 ){ try({
+    eset<- eset[,which(pData(eset)$Group %in% contrastgroups)]
+    f <- factor(pData(eset)$Group, levels=unique(contrastgroups)); 
+    Time <- ns(as.numeric(pData(eset)$TimeSeries), df=(time_index))
+    design <- model.matrix(~f*Time);
     fit1 <- lmFit( eset, design);
     fit1 <- eBayes(fit1);
     IsThereTime <- TRUE
   }) }
     
   if(IsThereTime == FALSE){
-    f <- factor(pData(eset)$Group)#, levels=unique(pData(eset)$Group)); 
-    design <- model.matrix(~ 0 + f);
-    colnames(design) <- make.names(levels(f));
-    fit1 <- lmFit( eset, design);
-    contrast_matrix <- makeContrasts(contrasts=.contrast_strings, levels=design);
+    if("Pairs" %in% colnames(pData(eset)) ){
+      f <- factor(pData(eset)$Group)
+      p <- factor(pData(eset)$Pairs)
+      design <- model.matrix(~p+f);
+      fit1 <- lmFit( eset, design);
+      fit1 <- eBayes(fit1);
+      
+      loop_list <- (length(levels(p))+1): ncol(design)
+      contrast_strings <- colnames(design)[loop_list]
+    } else {
+      f <- factor(pData(eset)$Group)#, levels=unique(pData(eset)$Group)); 
+      design <- model.matrix(~ 0 + f);
+      colnames(design) <- make.names(levels(f));
+      fit1 <- lmFit( eset, design);
+      contrast_matrix <- makeContrasts(contrasts=contrast_strings, levels=design);
      
-    fit1 <- contrasts.fit(fit1, contrast_matrix);
-    fit1 <- eBayes(fit1);
+      fit1 <- contrasts.fit(fit1, contrast_matrix);
+      fit1 <- eBayes(fit1);
+    }
   }
   # Summary of the fit
   #end_col <- ncol(topTable(fit1, adjust="BH"))
   #start_col <- end_col - (3+length(contrast_list))
   #print(topTable(fit1, adjust="BH")[,seq(start_col, end_col)])
   
-  return(fit1);
-}
-
-# Limma for DE
-for(i in 1:length(omicsList)){ try({
-  omicsList[[i]][[7]] <- runLimma(eset=omicsList[[i]][["eSet"]]);
+  omicsList[[i]][[7]] <- fit1
   names(omicsList[[i]])[7] <- "fit";
 }) } 
-
-# Limma for DE w/ Site Data Normalized to Proteome
-if(length(sites_norm_index)>0 & use_site_norm){ 
-  for(i in 1:length(sites_norm_index)){ try({
-    omicsList[[ sites_norm_index[i] ]][[11]] <- runLimma(eset=omicsList[[ sites_norm_index[i] ]][["siteNorm"]] )
-    names(omicsList[[ sites_norm_index[i] ]])[11] <- "siteNorm_fit";
-}) } }
 
 ##########################################################
 # Calculate log fold change in case limma fails
@@ -97,6 +114,7 @@ output_contrast_path <- file.path(working_dir, output_contrast_subdir)
 output_contrast_path_files <- file.path(output_contrast_path, "files")
 if( dir.exists(output_contrast_path) == FALSE ) { dir.create(output_contrast_path) }
 if( dir.exists(output_contrast_path_files) == FALSE ) { dir.create(output_contrast_path_files) }
+
 ```
 
 ---
@@ -107,31 +125,41 @@ output_links<-"";
 
 # Volcano plots
 for(i in 1:length(omicsList)){
-  if(class(omicsList[[i]][["fit"]])=='MArrayLM' & time_index==0){
-    for(c in 1:num_contrasts){
+  if(class(omicsList[[i]][["fit"]])=='MArrayLM'){
+    subset_rows=FALSE;
+    if( class(subset_genes)!="logical" ){ try({
+      subset_rows <- vector("list", length(subset_genes))
+      names(subset_rows) <- names(subset_genes)
+      for( j in 1:length(subset_genes) ){
+        if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+          subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[which(fData(omicsList[[i]][["eSet"]])$Gene %in% subset_genes[[j]] )]
+        }
+        if( length(subset_rows[[j]])==0 ){
+          subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ grep( paste(subset_genes[[j]], collapse="|"), 
+                                                                      rownames(exprs(omicsList[[i]][["eSet"]])) ) ]
+        }
+      }
+    }, silent=TRUE) }
+    
+    for(c in 1:length(loop_list)){
+      sig_cutoff <- round(sig_percent*nrow(omicsList[[i]][["eSet"]]), digits=0)
       # For the data set and coefficient, make the summary table and name
-      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
+      top_rows <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c], p.value=adjpcutoff) );
+      title_add <- paste("FDR<", adjpcutoff, sep="")
+      if (length(top_rows)< sig_cutoff ){ 
+        top_rows <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c]))[1:sig_cutoff];
+        title_add <- paste("Top ", (sig_percent*100), "%", sep="")
+      }
+    
+      # For the data set and coefficient, make the summary table and name
+      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c]);
       type_name <- paste(omicsList[[i]][["dataType"]],contrast_strings[c], sep="_");
     
       # run Volcan function
-      drawVolcano(top_sum, type=type_name);
+      drawVolcano(dat=top_sum, type=type_name, subset_rows=subset_rows, title_add=title_add, top_rows=top_rows);
     
       # Make output hyperlinks for markdown
-      add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/volcano_",type_name,".pdf)", sep="")
-      output_links <- paste(output_links, add_link, sep=" | " )   
-    }
-  }
-  if(class(omicsList[[i]][["fit"]])=='MArrayLM' & time_index>0){
-    for(c in time_start:time_end){
-      # For the data set and coefficient, make the summary table and name
-      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
-      type_name <- paste(omicsList[[i]][["dataType"]],"TimePoint",c, sep="_");
-    
-      # run Volcan function
-      drawVolcano(top_sum, type=type_name);
-    
-      # Make output hyperlinks for markdown
-      add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/volcano_",type_name,".pdf)", sep="")
+      add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name, "_volcano",".pdf)", sep="")
       output_links <- paste(output_links, add_link, sep=" | " )   
     }
   }
@@ -140,6 +168,21 @@ for(i in 1:length(omicsList)){
 
 # MD Plot
 for(i in 1:length(omicsList)){
+    subset_rows=FALSE;
+    if( class(subset_genes)!="logical" ){ try({
+      subset_rows <- vector("list", length(subset_genes))
+      names(subset_rows) <- names(subset_genes)
+      for( j in 1:length(subset_genes) ){
+        if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+          subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[which(fData(omicsList[[i]][["eSet"]])$Gene %in% subset_genes[[j]] )]
+        }
+        if( length(subset_rows[[j]])==0 ){
+          subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ grep( paste(subset_genes[[j]], collapse="|"), 
+                                                                      rownames(exprs(omicsList[[i]][["eSet"]])) ) ]
+        }
+      }
+  }, silent=TRUE) }
+  
   for(c in 1:length(logfc_index) ){ try({
     # For the data set and coefficient, make the summary table and name
     top_sum <- data.frame(logFC= fData(omicsList[[i]][["eSet"]])[,logfc_index[c]],
@@ -151,10 +194,10 @@ for(i in 1:length(omicsList)){
     type_name <- paste(omicsList[[i]][["dataType"]],logfc_index[c], sep="_");
     
     # run Volcan function
-    drawMDPlot(top_sum, type=type_name);
+    drawMDPlot(dat=top_sum, type=type_name, subset_rows=subset_rows);
     
     # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/MDplot_",type_name,".pdf)", sep="")
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_MDplot",".pdf)", sep="")
     output_links <- paste(output_links, add_link, sep=" | " )   
   }) }
   output_links <- paste(output_links, "  \n", sep="" );
@@ -172,15 +215,20 @@ output_links<-"";
 
 # DE heatmaps for contrasts
 for(i in 1:length(omicsList)){
-  if(class(omicsList[[i]][["fit"]])=='MArrayLM' & time_index==0){
-  for(c in 1:num_contrasts){ try({
+  sig_cutoff <- round(sig_percent*nrow(omicsList[[i]][["eSet"]]), digits=0)
+  if(class(omicsList[[i]][["fit"]])=='MArrayLM'){
+  for(c in 1:length(loop_list)){ try({
     # For the data set and coefficient, make the summary table and name
-    top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c, p.value=adjpcutoff) );
-    if (length(top_sum)<100){ top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=100, sort.by='p', coef=c) ); }
+    top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c], p.value=adjpcutoff) );
+    title_add <- paste("FDR<", adjpcutoff, sep="")
+    if (length(top_sum)< sig_cutoff ){ 
+      top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c]))[1:sig_cutoff];
+      title_add <- paste("Top ", (sig_percent*100), "%", sep="")
+    }
     type_name <- paste(omicsList[[i]][["dataType"]],contrast_strings[c], sep="_");
     
     # run heatmap function
-    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
+    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, title_add=title_add);
     
     if(num_contrasts>1) {
         drawHeatmaps(eset=omicsList[[i]][["eSet"]][,pData(omicsList[[i]][["eSet"]])$Group %in% unlist(strsplit(contrast_strings[c], "-")) ],
@@ -188,44 +236,23 @@ for(i in 1:length(omicsList)){
     }
     
     # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
-    if(num_contrasts>1){ add_link <- paste(add_link, " | [ ",type_name, "_subgroup ](", output_contrast_subdir,"/heatmaps_",type_name,"_subgroup.pdf) \n", sep=""); }
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_heatmaps",".pdf)", sep="")
+    if(num_contrasts>1){ 
+      add_link <- paste(add_link, " | [ ",type_name, "_subgroup ](", output_contrast_subdir,"/heatmaps_",
+                        type_name,"_subgroup.pdf) \n", sep=""); }
     output_links <- paste(output_links, add_link, sep=" | " ); 
     
-  }) } } else if(class(omicsList[[i]][["fit"]])=='MArrayLM' & time_index>0){ try({
-     for(c in time_start:time_end){
-      # For the data set and coefficient, make the summary table and name
-      top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c, p.value=adjpcutoff) );
-      if (length(top_sum)<100){ top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=100, sort.by='p', coef=c) ); }
-      type_name <- paste(omicsList[[i]][["dataType"]],"TimePoint",c, sep="_");
-    
-      drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
-    
-      # Make output hyperlinks for markdown
-      add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
-      output_links <- paste(output_links, add_link, sep=" | " )   
-    }
-      # For the data set and coefficient, make the summary table and name
-      top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F', coef=time_start:time_end, p.value=adjpcutoff) );
-      if (length(top_sum)<100){ top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=100, sort.by='F', coef=time_start:time_end,) ); }
-      type_name <- paste(omicsList[[i]][["dataType"]],"Time_Course_Overall", sep="_");
-    
-      drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
-    
-      # Make output hyperlinks for markdown
-      add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
-      output_links <- paste(output_links, add_link, sep=" | " )   
-    
-  }) } else {
+  }) } } else {
   for(c in 1:length(logfc_index) ){ try({  
-    top_sum <- rownames( exprs(omicsList[[i]][["eSet"]])[order( abs(fData(omicsList[[i]][["eSet"]])[,logfc_index[c]]), decreasing=TRUE),] )[1:100]
+    top_sum <- rownames( exprs(omicsList[[i]][["eSet"]])[order( abs(fData(omicsList[[i]][["eSet"]])[,logfc_index[c]]), decreasing=TRUE),] )[1:sig_cutoff]
     type_name <- paste(omicsList[[i]][["dataType"]],contrast_strings[c], "logFC", sep="_");
+    title_add <- paste("Top ", (sig_percent*100), "%", sep="")
     
     # run heatmap function
-    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
+    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, title_add=title_add);
     
     # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_heatmaps",".pdf)", sep="")
     output_links <- paste(output_links, add_link, sep=" | " ); 
   }) }
   }
@@ -233,62 +260,56 @@ for(i in 1:length(omicsList)){
 }
 
 # Heatmaps for MaxFC and F statistic
+if(statistic_index=="F"){
 for(i in 1:length(omicsList)){
-  if(class(omicsList[[i]][["fit"]])=='MArrayLM' & statistic_index=="F"){ try({
+  sig_cutoff <- round(sig_percent*nrow(omicsList[[i]][["eSet"]]), digits=0)
+  if(class(omicsList[[i]][["fit"]])=='MArrayLM' ){ try({
     top_sum <- rownames( topTableF(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F', p.value=adjpcutoff) );
-    if (length(top_sum)<100){ top_sum <- rownames( topTableF(omicsList[[i]][["fit"]], adjust="BH", n=100, sort.by='F' ) ); }
+    title_add <- paste("FDR<", adjpcutoff, sep="")
+    if (length(top_sum)<sig_cutoff){ 
+      top_sum <- rownames( topTableF(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F' ) )[1:sig_cutoff];
+      title_add <- paste("Top ", (sig_percent*100), "%", sep="")
+    }
     type_name <- paste(omicsList[[i]][["dataType"]], "_","F-statistic", sep="");
     
     # run heatmap function
-    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
+    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, title_add=title_add);
     
     # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_heatmaps",".pdf)", sep="")
     output_links <- paste(output_links, add_link, sep=" | " ); 
   }) }
   if(class(omicsList[[i]][["fit"]])=='MArrayLM' & time_index>0){ try({
     top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf,coef=time_start:time_end, p.value=adjpcutoff) );
-    if (length(top_sum)<100){ top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=100, coef=time_start:time_end ) ); }
+    title_add <- paste("FDR<", adjpcutoff, sep="")
+    if (length(top_sum)<sig_cutoff){
+      top_sum <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, coef=time_start:time_end ) )[1:sig_cutoff]; 
+      title_add <- paste("Top ", sig_percent, "%", sep="")
+    }
     type_name <- paste(omicsList[[i]][["dataType"]], "_", "TimeCourse_Overall", sep="");
     
     # run heatmap function
-    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
+    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, title_add=title_add);
     
     # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_heatmaps",".pdf)", sep="")
     output_links <- paste(output_links, add_link, sep=" | " ); 
   }) }
   try({  
-    top_sum <- rownames( exprs(omicsList[[i]][["eSet"]])[order( abs(fData(omicsList[[i]][["eSet"]])[,"MaxFC"]), decreasing=TRUE),] )[1:100]
+    top_sum <- rownames( exprs(omicsList[[i]][["eSet"]])[order( abs(fData(omicsList[[i]][["eSet"]])[,"MaxFC"]), decreasing=TRUE),] )[1:sig_cutoff]
     type_name <- paste(omicsList[[i]][["dataType"]],"MaxFC", sep="_");
+    title_add <- paste("Top ", (sig_percent*100), "%", sep="")
     
     # run heatmap function
-    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
+    drawHeatmaps(eset=omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, title_add=title_add);
     
     # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
+    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_heatmaps",".pdf)", sep="")
     output_links <- paste(output_links, add_link, sep=" | " ); 
   }) 
   output_links <- paste(output_links, "  \n", sep="" );
 }
-
-# Heatmaps for site-normalized data
-if( (length(sites_norm_index)>0) & use_site_norm ){ for(i in 1:length(sites_norm_index)){ try({
-  if(class(omicsList[[ sites_norm_index[i] ]][["siteNorm_fit"]] )=='MArrayLM'){
-  for(c in 1:num_contrasts){
-    # For the data set and coefficient, make the summary table and name
-    top_sum <- rownames(topTable(omicsList[[ sites_norm_index[i] ]][["siteNorm_fit"]], adjust="BH", n=Inf, sort.by='p', coef=c) );
-    type_name <- paste(omicsList[[ sites_norm_index[i] ]][["dataType"]],contrast_strings[c],"NormToProteome", sep="_");
-    
-    drawHeatmaps(eset=omicsList[[ sites_norm_index[i] ]][["siteNorm"]], limmaSig=top_sum, type=type_name, show_row_names=FALSE);
-    
-    # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/heatmaps_",type_name,".pdf)", sep="")
-    output_links <- paste(output_links, add_link, sep=" | " )   
-  }
-  output_links <- paste(output_links, "  \n", sep="" );
-  }
-}) } }
+}
 
 ```
 Click to view static heatmap plots:  
@@ -302,12 +323,12 @@ output_links<-"";
 
 for(i in 1:length(omicsList)){
   if(class(omicsList[[i]][["fit"]])=='MArrayLM' & time_index==0){
-  for(c in 1:num_contrasts ){ try({
+  for(c in 1:length(loop_list) ){ try({
     top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
     type_name <- paste(omicsList[[i]][["dataType"]],contrast_strings[c], sep="_");
 
     interactiveVolcano(eset=omicsList[[i]][["eSet"]], fit=omicsList[[i]][["fit"]], dt=decideTests(omicsList[[i]][["fit"]]),
-                       limmaSig=top_sum, type=type_name, col=c);
+                       limmaSig=top_sum, type=type_name, col=loop_list[c]);
 
     add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",type_name,".html)", sep="");
     output_links <- paste(output_links, add_link, sep=" | " ); 
@@ -336,14 +357,14 @@ for(i in 1:length(omicsList)){
 ---
 
 ### Save Data
-```{r save_files_diff, eval=(time_index==0) }
+```{r save_files_diff }
 # Save data 
-for(i in 1:length(omicsList)){
+for(i in 1:length(omicsList)){ try({
   # Contrasts
-  for (c in 1:num_contrasts){
+  for (c in 1:length(loop_list)){
     top_sum <- FALSE;
     contrast_name <- contrast_strings[c];
-    try({ top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c); })
+    try({ top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c]); })
     if( class(top_sum)=="logical" ){ try({
       top_sum <- data.frame(logFC= fData(omicsList[[i]][["eSet"]])[,paste("logfc_",gsub("-","_",contrast_strings[c]),sep="")],
                           Mean=rowMeans(exprs(omicsList[[i]][["eSet"]])), 
@@ -352,9 +373,9 @@ for(i in 1:length(omicsList)){
       if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$mz <- fData(omicsList[[i]][["eSet"]])$mz }
     })}
     
-    saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
+    saveFiles(data=omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
     
-    if( !( grepl("Human", species) | grepl("Mouse", species) )  ){ 
+    if( !( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]]))   ){ 
       top_sum$Gene <- toupper(top_sum$Gene)
       saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name)
     }
@@ -378,20 +399,37 @@ for(i in 1:length(omicsList)){
     
     saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
   
-    if(!( grepl("Human", species) | grepl("Mouse", species) )){ 
+    if(!( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ try({
       top_sum$Gene <- toupper(top_sum$Gene)
       saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name)
-    }
+    }) }
   }
-}
+    # TimeSeries
+  if(time_index>0){
+    top_sum <- FALSE;
+    try({ 
+      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F', coef=time_start:time_end); 
+      top_sum[,"logFC"] <- top_sum[,"F"]
+      contrast_name <- "Timecourse_Overall"
+    
+      saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
+  
+      if(!( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ try({
+        top_sum$Gene <- toupper(top_sum$Gene)
+        saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name)
+      }) }
+    })
+  }
+  
+}) }
 
 # Save combined ranked lists for GSEA, for each contrast
 if(length(gene_data_index)>1){
-  if(time_index==0){ for (c in 1:num_contrasts ){ try({
+  for (c in 1:num_contrasts ){ try({
     top_sum <- FALSE;
     contrast_name <- contrast_strings[c];
     try({ 
-      top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=c);
+      top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=loop_list[c]);
       ranked <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
     })
     if( class(top_sum)=="logical" ){ try({
@@ -404,7 +442,7 @@ if(length(gene_data_index)>1){
     for(i in 2:length(gene_data_index) ){
       top_sum <- FALSE;
       try({ 
-        top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=c);
+        top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=loop_list[c]);
         ranked1 <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
       })
       if( class(top_sum)=="logical" ){ try({
@@ -424,12 +462,25 @@ if(length(gene_data_index)>1){
     output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",gsub("-","_",contrast_strings[c]),".rnk", sep=""));
     write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
     
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",gsub("-","_",contrast_strings[c]),"_pval.rnk", sep=""));
-    ranked[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-  }) } }
+    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",gsub("-","_",contrast_strings[c]),"_AbsVal.rnk", sep=''));
+    ranked_pval<- ranked
+    ranked_pval[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
+    write.table(x=ranked_pval,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
+    
+    if(!( grepl("Human", species)) ){ 
+      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[c]),".rnk", sep=""));
+      ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
+      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+      
+      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[c]),
+                                                                    "_AbsVal.rnk", sep=''));
+      ranked_pval<- ranked
+      ranked_pval[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
+      write.table(x=ranked_pval,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
+    }
+  }) } 
   # Save ranked list for overall variation across all conditions
-  if (statistic_index=="F" ){ try({
+  if (statistic_index=="F"){ try({
     top_sum <- FALSE;
     contrast_name <- "Overall"
     try({ 
@@ -465,10 +516,17 @@ if(length(gene_data_index)>1){
     ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
     output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,".rnk", sep=""));
     write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    
+    if(!( grepl("Human", species)) ){ 
+      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",contrast_name,".rnk", sep=""));
+      ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
+      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    }
   }) }
-   if (time_index>0 ){ try({
+  # Save ranked list for overall variation across time trajectory
+  if (time_index>0){ try({
     top_sum <- FALSE;
-    contrast_name <- "TimeCourse_Overall"
+    contrast_name <- "Timecourse_Overall"
     try({ 
       top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, coef=time_start:time_end);
       ranked <- cbind(top_sum[,"Gene"],top_sum[,"F"] ) 
@@ -490,8 +548,14 @@ if(length(gene_data_index)>1){
     ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
     output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,".rnk", sep=""));
     write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    
+    if(!( grepl("Human", species)) ){ 
+      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",contrast_name,".rnk", sep=""));
+      ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
+      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    }
   }) }
-} 
+}
 
 # Save excel file summary for collaborators
 if(saveXlsx==TRUE){    
@@ -499,177 +563,8 @@ if(saveXlsx==TRUE){
   
   for(i in 1:length(omicsList)){ try({
     writeDataToSheets(wb=wbOut, eset=omicsList[[i]][["eSet"]], limmaFit=omicsList[[i]][["fit"]], 
-                      type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]); 
-  }) }  
-  
-  output_filename=file.path(output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary", ".xlsx", sep=""))
-  saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
-}
-```
-
-```{r save_files_diff_f, eval=(time_index>0) }
-# Save data 
-for(i in 1:length(omicsList)){
-  # Contrasts
-  for (c in time_start:time_end){
-    top_sum <- FALSE;
-    contrast_name <- paste("Time_Coefficient_", c, sep="")
-    try({ 
-      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
-    
-      if(!( grepl("Human", species) | grepl("Mouse", species) )){ 
-        top_sum$Gene <- toupper(top_sum$Gene)
-        saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name)
-      }
-    })
-  }
-    top_sum <- FALSE;
-    contrast_name <- paste("Time_Course_Overall", sep="")
-    try({ 
-      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F', coef=time_start:time_end);
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
-    
-      if(!( grepl("Human", species) | grepl("Mouse", species) )){ 
-        top_sum$Gene <- toupper(top_sum$Gene)
-        saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name)
-      }
-    })
-  
-  # MaxFC or F-statistic
-  if(statistic_index=='F'){
-    top_sum <- FALSE;
-    try({ 
-      top_sum <- topTableF(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F'); 
-      contrast_name <- "Overall"
-      top_sum[,"logFC"] <- top_sum[,"F"]
-      })
-    if( class(top_sum)=="logical" ){ try({
-      top_sum <- data.frame(logFC= fData(omicsList[[i]][["eSet"]])[,"MaxFC"],
-                            Mean=rowMeans(exprs(omicsList[[i]][["eSet"]])), 
-                            feature_identifier =fData(omicsList[[i]][["eSet"]])[,"feature_identifier"] );
-      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$Gene <- fData(omicsList[[i]][["eSet"]])$Gene }
-      if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$mz <- fData(omicsList[[i]][["eSet"]])$mz }
-    })}
-    
-    saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
-  
-    if(!( grepl("Human", species) | grepl("Mouse", species) )){ 
-      top_sum$Gene <- toupper(top_sum$Gene)
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name)
-    }
-  }
-}
-
-# Save combined ranked lists for GSEA, for each contrast
-if(length(gene_data_index)>1){
-  for (c in time_start:time_end ){ try({
-    top_sum <- FALSE;
-    contrast_name <- paste("Time_Coefficient_",c,sep="");
-    
-    ranked<- data.frame()
-    try({
-      top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=c);
-      ranked <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
-    })
-    for(i in 2:length(gene_data_index) ){
-      top_sum <- FALSE;
-      try({ 
-        top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=c);
-        ranked1 <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
-      })
-
-      ranked <- rbind(ranked, ranked1)
-    }
-    colnames(ranked)<-c("GeneName", "rank")
-    ranked <- ranked[ranked[,"GeneName"]!="", ]
-    ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,".rnk", sep=""));
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-    
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,"_pval.rnk", sep=""));
-    ranked[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-  }) }
-  try({
-    top_sum <- FALSE;
-    contrast_name <- paste("TimeCourse_Overall",sep="");
-    
-    ranked<- data.frame()
-    try({
-      top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=time_start:time:end);
-      ranked <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
-    })
-    for(i in 2:length(gene_data_index) ){
-      top_sum <- FALSE;
-      try({ 
-        top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=time_start:time:end);
-        ranked1 <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
-      })
-
-      ranked <- rbind(ranked, ranked1)
-    }
-    colnames(ranked)<-c("GeneName", "rank")
-    ranked <- ranked[ranked[,"GeneName"]!="", ]
-    ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name".rnk", sep=""));
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-    
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,"_pval.rnk", sep=""));
-    ranked[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-  }) }
-  # Save ranked list for overall variation across all conditions
-  if (statistic_index=="F" ){ try({
-    top_sum <- FALSE;
-    contrast_name <- "Overall"
-    try({ 
-      top_sum <- topTableF(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='F');
-      ranked <- cbind(top_sum[,"Gene"],top_sum[,"F"] ) 
-    })
-    if( class(top_sum)=="logical" ){ try({
-      top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[1] ]][["eSet"]])[,"MaxFC"],
-                          Gene=fData(omicsList[[ gene_data_index[1] ]][["eSet"]])$Gene, 
-                          feature_identifier =fData(omicsList[[ gene_data_index[1] ]][["eSet"]])[,"feature_identifier"] );
-      ranked <- top_sum[,c("Gene","logFC")]
-    })}
-
-    for(i in 2:length(gene_data_index) ){
-      top_sum <- FALSE;
-      try({ 
-        top_sum <- topTableF(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='F');
-        ranked1 <- cbind(top_sum[,"Gene"], top_sum[,"F"])
-      })
-      if( class(top_sum)=="logical" ){ try({
-        top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"MaxFC"],
-                          Gene=fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene, 
-                          feature_identifier =fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
-        ranked1 <- top_sum[,c("Gene","logFC")]
-      })}
-
-      ranked <- rbind(ranked, ranked1)
-    }
-    colnames(ranked)<-c("GeneName", "rank")
-    ranked <- ranked[ranked[,"GeneName"]!="", ]
-    ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,".rnk", sep=""));
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-  }) }
-} 
-
-# Save excel file summary for collaborators
-if(saveXlsx==TRUE){    
-  wbOut <- createWorkbook()
-  
-  for(i in 1:length(omicsList)){ try({
-    writeDataToSheets(wb=wbOut, eset=omicsList[[i]][["eSet"]], limmaFit=omicsList[[i]][["fit"]], 
-                      type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]); 
+                      type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]],
+                      coef_index=loop_list, time_index=time_index, contrast_strings=contrast_strings); 
   }) }  
   
   output_filename=file.path(output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary", ".xlsx", sep=""))

@@ -1,0 +1,263 @@
+
+
+```{r eval=( length(metab_data_index)>0)}
+
+# Get potential id's and save a new annotation file. 
+
+for(mumm_lib_index in 1:length(mumm_libs)) { 
+    for(i in 1:length(metab_data_index) ){ try({
+      analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]], sep="" )
+      
+      output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, paste(analysis_name, "_",gsub("-","_",contrast_strings[1]), sep=""))
+      output_mummichog_path_tmp <- file.path(working_dir, output_mummichog_subdir_tmp)
+      met_ids <- read.delim(file.path(output_mummichog_path_tmp, "mummichog_matched_compound_all.csv"),
+                            header=TRUE, stringsAsFactors = F, sep=",")
+      
+      id_column_name <- paste("mummichogID_", mumm_libs[mumm_lib_index], sep="")
+      fData(omicsList[[ metab_data_index[i] ]][["eSet"]])[,id_column_name] <- ""
+      
+      for(n in 1:nrow(fData(omicsList[[ metab_data_index[i] ]][["eSet"]])) ){
+        mz_value <- fData(omicsList[[ metab_data_index[i] ]][["eSet"]])[n,"mz"]
+        met_id_list <- paste(met_ids[which(met_ids[,"Query.Mass"] == mz_value), "Matched.Compound"], collapse=",")
+        fData(omicsList[[ metab_data_index[i] ]][["eSet"]])[n,id_column_name] <- met_id_list
+      }
+      
+      output_filename <- file.path(output_files_path, paste(analysis_name,"_IDs.txt",sep="") )
+      write.table(fData(omicsList[[ metab_data_index[i] ]][["eSet"]])[,c("feature_identifier", "mz", id_column_name)],
+                  file=output_filename, quote=F, sep="\t", row.names=F)
+    
+    }) }
+}
+
+# Save excel file summary for collaborators
+if(saveXlsx==TRUE){    
+  wbOut <- createWorkbook()
+  
+  for(i in 1:length(metab_data_index)){ try({
+    writeDataToSheets(wb=wbOut, eset=omicsList[[ mz_data_index[i] ]][["eSet"]], limmaFit=omicsList[[ mz_data_index[i] ]][["fit"]], 
+                      type=omicsList[[ mz_data_index[i] ]][["dataType"]], data_format=omicsList[[ mz_data_index[i] ]][["dataFormat"]]); 
+  }) }  
+  
+  output_filename=file.path(output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary_AllMetIDs", ".xlsx", sep=""))
+  saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
+}
+```
+
+`r if( show_metab_enrich & length(gene_data_index)>1 & length(gene_data_index)>0 ) {"### Make combined ranked list with metabolites"}`
+
+```{r eval=( show_metab_enrich & length(gene_data_index)>1 & length(gene_data_index)>0) }
+
+rnk_files <-vector("list", num_contrasts)
+
+for (c in 1:num_contrasts){
+  for(mumm_lib_index in 1:length(mumm_libs)) { try({
+    i <- 1
+    analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
+                           "_",gsub("-","_",contrast_strings[c]), sep="" )
+      
+    output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, analysis_name)
+    output_mummichog_path_tmp <- file.path(working_dir, output_mummichog_subdir_tmp)
+    met_ids <- read.delim(file.path(output_mummichog_path_tmp, "mummichog_matched_compound_all.csv"),
+                          header=TRUE, stringsAsFactors = F, sep=",")
+  
+    met_ranked <- na.omit(topTable(omicsList[[ metab_data_index[i] ]][["fit"]], adjust="BH", n=Inf,
+                                   sort.by='p', coef=loop_list[c])[,c("mz", "P.Value", "logFC")] );
+    met_ranked[,"rank"] <- ( -log(met_ranked[,"P.Value"]) * sign(met_ranked[,"logFC"]) )
+    
+    for(n in 1:nrow(met_ids)){
+      met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"]), "rank"]
+      
+    }
+    
+    met_ids_out <- met_ids[,c("Matched.Compound", "rank")]
+    colnames(met_ids_out) <- c("GeneName", "rank")
+    if(length(metab_data_index)>1){
+    for(i in 2:length(metab_data_index)){ 
+      analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
+                             "_",gsub("-","_",contrast_strings[c]), sep="" )
+      
+      output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, analysis_name)
+      output_mummichog_path_tmp <- file.path(working_dir, output_mummichog_subdir_tmp)
+      met_ids <- read.delim(file.path(output_mummichog_path_tmp, "mummichog_matched_compound_all.csv"),
+                            header=TRUE, stringsAsFactors = F, sep=",")
+  
+      met_ranked <- na.omit(topTable(omicsList[[ metab_data_index[i] ]][["fit"]], adjust="BH", n=Inf,
+                                     sort.by='p', coef=loop_list[c])[,c("mz", "P.Value", "logFC")] );
+      met_ranked[,"rank"] <- ( -log(met_ranked[,"P.Value"]) * sign(met_ranked[,"logFC"]) )
+    
+      for(n in 1:nrow(met_ids)){
+        met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"]), "rank"]
+      
+      }
+      met_ids[,"GeneName"] <- met_ids[,"Matched.Compound"]
+      met_ids_out <- rbind(met_ids_out, met_ids[,c("GeneName", "rank")])
+    } }
+    
+    output_filename <- paste("Met_Ranked_", mumm_libs[mumm_lib_index],"_",
+                             gsub("-","_",contrast_strings[c]), "_Combined.rnk", sep="" )
+    
+    write.table(met_ids_out, file=file.path(output_mummichog_path, output_filename), sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    rnk_files[[c]] <- c(rnk_files[[c]], file.path(output_mummichog_path, output_filename) )
+    names(rnk_files[[c]])[length(rnk_files[[c]])] <- mumm_libs[mumm_lib_index]
+    
+    if(length(gene_data_index)>1){
+      if(grepl("Human", species) ){ 
+        gene_file <- file.path(output_contrast_path_files,paste("GSEA_combined_",gsub("-","_",contrast_strings[c]),".rnk", sep="") )
+      } else {
+        gene_file <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[c]),".rnk", sep="") )
+      }
+    } else {
+      if(grepl("Human", species)){ 
+          gene_file <- file.path(paste(output_contrast_path_files,"/GSEA_",omicsList[[ gene_data_index[1] ]][["dataType"]],
+                                       "_",gsub("-","_",contrast_strings[c]),".rnk", sep=""))
+      } else {
+          gene_file <- file.path(paste(output_contrast_path_files,"/GSEA_",omicsList[[ gene_data_index[1] ]][["dataType"]],
+                                       "_Uppercase_",gsub("-","_",contrast_strings[c]),".rnk", sep=""))
+      }
+    }
+      
+    gene_rnk <- read.delim(gene_file, stringsAsFactors = F, header=T)
+    
+    output_filename <- paste("Integrated_Ranked_", mumm_libs[mumm_lib_index],"_",
+                             gsub("-","_",contrast_strings[c]), ".rnk", sep="" )
+    
+    write.table(rbind(gene_rnk,met_ids_out), file=file.path(output_mummichog_path, output_filename),
+                sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    
+    rnk_files[[c]] <- c(rnk_files[[c]], file.path(output_mummichog_path, output_filename) )
+    names(rnk_files[[c]])[length(rnk_files[[c]])] <- mumm_libs[mumm_lib_index]
+    
+    # # Randomize for Control
+    # met_ids_out["GeneName"] <- met_ids_out[sample(nrow(met_ids_out)),"GeneName"]
+    # output_filename <- paste("MetRanked_Control_", mumm_libs[mumm_lib_index],"_",
+    #                          gsub("-","_",contrast_strings[c]), "_Combined.rnk", sep="" )
+    # 
+    # write.table(met_ids_out, file=file.path(output_mummichog_path, output_filename), sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    # 
+    # output_filename <- paste("Integrated_Ranked_Control_", mumm_libs[mumm_lib_index],"_",
+    #                          gsub("-","_",contrast_strings[c]), ".rnk", sep="" )
+    # 
+    # write.table(rbind(gene_rnk,met_ids_out), file=file.path(output_mummichog_path, output_filename),
+    #             sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    # 
+    # rnk_files[[c]] <- c(rnk_files[[c]], file.path(output_mummichog_path, output_filename) )
+    # names(rnk_files[[c]])[length(rnk_files[[c]])] <- mumm_libs[mumm_lib_index]
+  }) }
+}
+    
+```
+
+
+`r if( ( show_metab_enrich & length(metab_data_index)>1 & length(gene_data_index)>0) ){"### GSEA for Integrative Proteomics and Metabolomics"} `
+```{r, eval=( show_metab_enrich & length(metab_data_index)>1 & length(gene_data_index)>0) }
+
+if( run_gsea & species!="Other" ) { try({
+  gsea_working_dir <- "MOMENTA_Integrated"
+  gsea_working_path <- file.path(output_path, gsea_working_dir)
+  gsea_images_path <- file.path(gsea_working_path, "Images")
+  gsea_absval_path <- file.path(gsea_working_path, "AbsoluteValueRank")
+  if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
+  if( dir.exists(gsea_images_path) == FALSE ) { dir.create(gsea_images_path) }
+  if( dir.exists(gsea_absval_path) == FALSE ) { dir.create(gsea_absval_path) }
+  
+  geneset_lookup <-  read.delim(file.path(gsub("src", "data", notebook_dir),"feature","MatchedFeatureSets.txt"))
+  
+  gmt_files <- as.vector(geneset_lookup[which(geneset_lookup[,"Species"]==species),"GeneSet"])
+  gmt_names <- as.vector(geneset_lookup[which(geneset_lookup[,"Species"]==species),"Name"])
+  
+for(gmt_index in 1:length(gmt_files)){
+    
+  dest_gmt_file <-file.path(gsea_working_path, gmt_files[gmt_index])
+  file.copy(from=file.path( gsub("src", "data", notebook_dir),"feature",gmt_files[gmt_index]), to= dest_gmt_file )  
+  
+  analysis_names <- vector("list", length(loop_list))
+  for (i in 1:length(loop_list)) {
+    analysis_names[[i]] <- paste("Combined_",gmt_names[gmt_index],"_",gsub("-", "_", contrast_strings[i]),sep="")
+  }
+  expression_files <-vector("list", length(loop_list))
+  for (i in 1:length(loop_list)){  
+      expression_files[[i]] <- file.path(output_files_subdir,paste("Expression_matrix_",
+                                                                   omicsList[[ gene_data_index[1] ]][["dataType"]],".txt", sep=""))
+  }
+  rnk_files_select <-vector("list", length(loop_list))
+  for (i in 1:length(loop_list)){ 
+    rnk_files_select[[i]] <- rnk_files[[i]][str_detect(gmt_names[gmt_index], names(rnk_files[[i]]))]
+  }
+  
+  for (i in 1:length(analysis_names)){
+    for(j in 1:length(rnk_files_select[[i]])){
+    analysis_name <- paste(gsub(".*/","", gsub(".rnk", "", rnk_files_select[[i]][[j]])), "_", gmt_names[gmt_index], sep="" ) #analysis_names[[i]]
+    rnk_file <- rnk_files_select[[i]][[j]]
+    expression_file <- expression_files[[i]]
+
+    ranked_features <- read.delim(rnk_file)
+    file.copy(from=rnk_file, to=file.path(gsea_working_path,basename(rnk_file)) )
+    ranked_vector <- ranked_features[,"rank"]
+    names(ranked_vector) <- ranked_features[,"GeneName"]
+    pathways_gmt <- gmtPathways(dest_gmt_file)
+    suppressWarnings({
+    fgsea_results <- fgsea(pathways=pathways_gmt, 
+                                     stats=ranked_vector,
+                                     minSize=15, 
+                                     maxSize=500, 
+                                     nperm=10000)
+    })
+    
+    fgsea_out <- fgsea_results[,c(1,1,2,3)]
+    colnames(fgsea_out) <- c("Term", "Description", "p.Val", "FDR")
+    fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"NES"])
+    fgsea_out[,"Genes"] <- apply(fgsea_results[,"leadingEdge"], 1, function(x) paste(as.character(unlist(x["leadingEdge"])), collapse=","))
+    fgsea_out[,"Genes"] <- apply(fgsea_out, 1, function(x) gsub(" ", "", x["Genes"]))
+    fgsea_out[,"NES"] <- (fgsea_results[,"NES"])
+    fgsea_out[,"ES"] <- (fgsea_results[,"ES"])
+    fgsea_out[,"Gene_Hits"] <- apply(fgsea_results, 1, function(x) length(unlist(x["leadingEdge"])) )
+    fgsea_out[,"Gene_Total"] <- fgsea_results[,"size"]
+    output_filename <- file.path(output_path, gsea_working_dir, paste("fgsea_", analysis_name, ".txt", sep=""))
+    write.table(fgsea_out, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
+    
+    topPathways <- fgsea_results[order(pval, decreasing=F), pathway]
+    output_filename <- file.path(gsea_images_path, paste("fgsea_", analysis_name, "_allPathways.pdf", sep=""))
+    pdf(output_filename, width=4, height=3)
+    for(pathway_index in 1:length(topPathways)){ try({
+      print(plotEnrichment(pathways_gmt[[topPathways[pathway_index] ]], ranked_vector) +
+              labs(title=topPathways[pathway_index]) + theme(plot.title=element_text(size=6)) )
+    }) }
+    dev.off()
+    
+    
+    ranked_features <- read.delim(rnk_file)
+    ranked_vector <- abs(ranked_features[,"rank"])
+    names(ranked_vector) <- ranked_features[,"GeneName"]
+    pathways_gmt <- gmtPathways(dest_gmt_file)
+    suppressWarnings({
+    fgsea_results <- fgsea(pathways=pathways_gmt, 
+                                     stats=ranked_vector,
+                                     minSize=15, 
+                                     maxSize=500, 
+                                     nperm=10000)
+    })
+    
+    fgsea_out <- fgsea_results[,c(1,1,2,3)]
+    colnames(fgsea_out) <- c("Term", "Description", "p.Val", "FDR")
+    fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"NES"])
+    fgsea_out[,"Genes"] <- apply(fgsea_results[,"leadingEdge"], 1, function(x) paste(as.character(unlist(x["leadingEdge"])), collapse=","))
+    fgsea_out[,"Genes"] <- apply(fgsea_out, 1, function(x) gsub(" ", "", x["Genes"]))
+    fgsea_out[,"NES"] <- (fgsea_results[,"NES"])
+    fgsea_out[,"ES"] <- (fgsea_results[,"ES"])
+    fgsea_out[,"Gene_Hits"] <- apply(fgsea_results, 1, function(x) length(unlist(x["leadingEdge"])) )
+    fgsea_out[,"Gene_Total"] <- fgsea_results[,"size"]
+    output_filename <- file.path(gsea_absval_path, paste("fgsea_", analysis_name, "_AbsVal.txt", sep=""))
+    write.table(fgsea_out, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
+    
+    }
+  }
+
+}
+
+}) } 
+
+```
+
+
+---
+

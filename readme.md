@@ -1,15 +1,10 @@
 ## Software requirements
 
-* R 3.5,  Python 3.6, Java (for GSEA .jar and Cytoscape)
+* R 3.5,  Python 3.6.
 
 * Install Rstudio.
 
 * Install all required R packages. (See install.R)
-
-## For Enrichment Analysis
-
-#### GSEA
-* Download the GSEA .jar file from the Broad Institute. Update directory to appropriate script headers. 
 
 
 #### Enrichment Map
@@ -45,7 +40,8 @@ In the second sheet of the annotation file, the sample names are repeated. Addit
 * Batch : if "Batch" is found, the row will be used to try to perform batch correction. The default is to use ComBat. Care should be take not to overfit data.
 * ColorsHex : if "ColorsHex" is used, and the row has functional hex colors values corresponding to "Group", these hex colors will be used in figures where possible.
 * Group2: if "Group2" is used, this will specify shapes in the PCA plot. More functionality may be added later.
-* TimeSeries: if a numeric value, will run limma as for a time series analysis. Will only work with 1 or 2 Groups. Code may be edited for other analysis.
+* TimeSeries: if a numeric value, will run limma as for a time series analysis. Will only work with 2 Groups. Code may be edited for other analysis. If there is 1 group, enter the time point as "Group."
+* Pairs: if "Pairs" is found, will try to run differential analysis accounting for paired samples.
 
 
 
