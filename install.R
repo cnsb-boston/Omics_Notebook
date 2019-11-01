@@ -39,10 +39,11 @@ BiocManager::install("preprocessCore")
 BiocManager::install("edgeR")
 BiocManager::install("Glimma")
 
-# GVSA
-BiocManager::install("GSVA")
-BiocManager::install("GSEABase")
-BiocManager::install("GSVAdata")
+# # GVSA
+# BiocManager::install("GSVA")
+# BiocManager::install("GSEABase")
+# BiocManager::install("GSVAdata")
+BiocManager::install("fgsea")
 
 
 # FOR COMBAT BATCH CORRECTION
@@ -63,15 +64,18 @@ metanr_packages <- function(){
   if(length(new_pkgs)!=0){
     if (!requireNamespace("BiocManager", quietly = TRUE))
       install.packages("BiocManager")
-    BiocManager::install(new_pkgs, version = "3.8")
+    BiocManager::install(new_pkgs, version = "3.9")
     print(c(new_pkgs, " packages added..."))
   }
   if((length(new_pkgs)<1)){ print("No new packages added...") }
 }
 metanr_packages()
+  
 install.packages("devtools")
 library(devtools)
 devtools::install_github("cnsb-boston/MetaboAnalystR", build_vignettes=TRUE)
+
+
 
 
 #biocLite("hmdbQuery") 
@@ -84,7 +88,9 @@ devtools::install_github("cnsb-boston/MetaboAnalystR", build_vignettes=TRUE)
 install.packages("enrichR")
 
 # Kinase Enrichment KSEA
-install.packages("KSEAapp")
+#install.packages("KSEAapp") created fork to add output directory option
+library(devtools)
+devtools::install_github("cnsb-boston/KSEAapp")
 
 # FOR GSEA SECTION
 install.packages("RCurl")

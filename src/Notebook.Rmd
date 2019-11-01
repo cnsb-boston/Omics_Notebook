@@ -8,19 +8,21 @@ output:
     toc: yes
     code_folding: hide
     pandoc_args: [
-      "+RTS", "-K1024m",
+      "+RTS", "-K4096m",
       "-RTS"
       ]
 ---
 
 ========================================================
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE)
+#knitr::opts_knit$set(root.dir="")
+```
+
 ```{r format_variables}
-############################################
-##
+
 ##  SET FILE PATHS FOR LOCAL INSTALL
-##
-############################################
 
 ## R libraries path
 #libraries_path = '/project/cnsbomic/Tools/R'
@@ -30,24 +32,21 @@ output:
 
 # Loaded from Parameters.R
 
-############################################
-
 ## IF NOT RUNNING WITH PIPELINE, SET WORKING DIRECTORY
 # working_dir <- PATH TO DATA FILES
 # setwd(working_dir)
-
-############################################
 
 # Databases for enrichR search
 search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_Component_2017b",
                       "GO_Molecular_Function_2017b", "HMDB_Metabolites", "Reactome_2016",
                       "MSigDB_Oncogenic_Signatures");
 
-############################################
+debug_opt <- FALSE
+source("Parameters.R")
 
-source('Parameters.R')
-enrichment_map <- gsea_section; # only run enrichment map if interactive session
+```
 
+```{r, code=readLines(file.path(working_dir, "Parameters.R")) }
 ```
 
 ```{r libraries}
@@ -69,6 +68,7 @@ if(inherit_paths==TRUE) { .libPaths(libraries_path) }
 # Load pipeline libraries
 suppressPackageStartupMessages({
 library(R.utils)
+library(matrixStats)
 library(Biobase)
 library(limma)
 library(splines)
@@ -90,11 +90,15 @@ library(VennDiagram)
 library(UpSetR)
 library(corrplot)
 library(heatmaply)
+library(scales)
 library(edgeR)
 library(Glimma)
 library(openxlsx)
 library(ComplexHeatmap)
 library(RCurl)
+library(fgsea)
+library(BiocParallel)
+register(SerialParam())
 
 if(enrichr_section){ library(enrichR) }
 
@@ -129,7 +133,7 @@ sourceDirectory(file.path(gsub("src","R", notebook_dir)))
 # omicsList[[i]][[8]]
 # omicsList[[i]][[9]] 
 # omicsList[[i]][[10]] "siteNorm" is site data normalized to protein groups
-# omicsList[[i]][[11]] "siteNorm_fit" is the limmaFit output of eBayes
+# omicsList[[i]][[11]] 
 # omicsList[[i]][[12]] "prebatch_eset" is the normalized but pre-batch corrected eset, if applicable
 # omicsList[[i]][[14]] is the un-normalized eset object - for debugging only
 #
@@ -190,7 +194,7 @@ try({
 
 # Add file paths to file names (w/chanbge for generating txt report)
 for (i in 1:length(omicsList)){
-  if( (".MQ." %in% omicsList[[i]][["dataFormat"]]) & txtFolder==TRUE ) { 
+  if( (grepl(".MQ.", omicsList[[i]][["dataFormat"]]) & txtFolder==TRUE) ) { 
     omicsList[[i]][[3]] <- file.path(working_dir, "txt", omicsList[[i]][[3]]) 
   } else {
     omicsList[[i]][[3]] <- file.path(working_dir, omicsList[[i]][[3]])
@@ -202,21 +206,23 @@ for (i in 1:length(omicsList)){
     
   if( grepl(".csv$", omicsList[[i]][[3]]) ) { file_ext_sep <- ","; } else { file_ext_sep <- "\t"; }
   
-  if(!file.exists(omicsList[[i]][[3]])){
-    print(paste("File not found: ",omicsList[[i]][[3]],sep=""))
-    stop()
-  }
+  if(!file.exists(omicsList[[i]][[3]])){ stop(paste("File not found: ",omicsList[[i]][[3]],sep="")) }
   
   omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE,
                                                sep=file_ext_sep, check.names=FALSE));
   names(omicsList[[i]])[4] <- "RawData";
   
   tryCatch({
+    
     omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
+                                    log_transform=(norm_method!="none") ,
                                     data_format=omicsList[[i]][[2]], uniprot_annotation=query_web);
-    }, error=function(e){print("Problem with input data format."); stop() })
+    }, error=function(e){
+      stop(paste("Problem with input data format:", e));
+    })
+  
   names(omicsList[[i]])[5] <- "eSet";
-  #omicsList[[i]][[14]] <- omicsList[[i]][[5]] # use for debugging
+  if(debug_opt == TRUE ) { omicsList[[i]][[14]] <- omicsList[[i]][[5]] }# use for debugging
     
   if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { gene_data_index <- c(gene_data_index, i) };
   if( "Protein" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { prot_data_index <- c(prot_data_index, i) };
@@ -224,14 +230,14 @@ for (i in 1:length(omicsList)){
 }
 
 # load libraries if needed
-suppressPackageStartupMessages({
+suppressPackageStartupMessages({suppressWarnings({
 if( length(phos_data_index)>0 ){
   library(KSEAapp)
 }
 if( length(metab_data_index)>0 ){
   library(MetaboAnalystR)
 }
-})
+}) })
 ```
 
 ```{r global_options, echo=FALSE}
@@ -241,19 +247,79 @@ knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messa
 ```{r child=file.path(notebook_dir, 'Notebook_1_Expl.Rmd')}
 ```
 
+```{r}
+# Check if requirements for differential analysis are met
+if( length(contrastgroups)<2 ){
+  runDifferential <- FALSE;
+}
+
+```
+
 ```{r child=file.path(notebook_dir, 'Notebook_2_Diff.Rmd'), eval=runDifferential}
 ```
 
-```{r child=file.path(notebook_dir, 'Notebook_3_Enrch.Rmd'), eval=runDifferential}
+```{r }
+# Run enrichment based on intensity (most intense/least intense) if there's only one group.
+runEnrichment <- runDifferential
+
+if(length(contrastgroups)<=1){
+  if(gsea_section==TRUE){
+    enrichr_section<-FALSE;
+    loop_list <- c(1);
+    runEnrichment <- TRUE;
+    output_contrast_subdir <- file.path(output_subdir,"Abundance")
+    output_contast_subdir_files <- file.path(output_contrast_subdir, "files")
+    output_contrast_path <- file.path(working_dir, output_contrast_subdir)
+    output_contrast_path_files <- file.path(output_contrast_path, "files")
+    if( dir.exists(output_contrast_path) == FALSE ) { dir.create(output_contrast_path) }
+    if( dir.exists(output_contrast_path_files) == FALSE ) { dir.create(output_contrast_path_files) }
+    num_contrasts <- 1
+    contrast_strings <- "Abundance"
+    
+    for(i in 1:length(omicsList) ){
+      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) | "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+        top_sum <- data.frame(logFC= rowMeans(exprs(omicsList[[i]][["eSet"]])),
+                             Gene=fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene, 
+                             feature_identifier =fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
+        ranked <- top_sum[,c("Gene","logFC")]
+      }
+      if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+        top_sum <- data.frame(logFC= rowMeans(exprs(omicsList[[i]][["eSet"]])),
+                             Gene=fData(omicsList[[i]][["eSet"]])$mz, 
+                             feature_identifier =fData(omicsList[[i]][["eSet"]])[,"feature_identifier"] );
+        ranked <- top_sum[,c("Gene","logFC")]
+      
+      }
+      
+      colnames(ranked)<-c("GeneName", "rank")
+      ranked <- ranked[ranked[,"GeneName"]!="", ]
+      ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
+      ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
+      ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
+      output_filename <- file.path(output_contrast_path_files,paste("GSEA_",omicsList[[i]][["dataType"]],"_",
+                                                                    gsub("-","_",contrast_strings),".rnk", sep=""));
+      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    
+      if(!( grepl("Human", species)) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ 
+        output_filename <- file.path(output_contrast_path_files,paste("GSEA_Uppercase_",omicsList[[i]][["dataType"]],"_",
+                                                                      gsub("-","_",contrast_strings),".rnk", sep=""));
+        ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
+        write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+     }
+    } 
+    }
+  }
+}
+
 ```
 
+```{r child=file.path(notebook_dir, 'Notebook_3_Enrch.Rmd'), eval=runEnrichment}
+```
 
 ---
 
 # Session Info
-
-```{r, code=readLines(file.path(working_dir, "Parameters.R")) }
-```
 
 ```{r session_info}
 sessionInfo()

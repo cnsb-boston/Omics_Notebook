@@ -30,7 +30,7 @@ source(file.path(analysis_dir, "Parameters.R"));
 # Set local file paths, if not needed, set BUSCC to false
 if(inherit_paths==TRUE) {
   .libPaths(libraries_path);
-   Sys.setenv(RSTUDIO_PANDOC=pandoc_path); 
+   #Sys.setenv(RSTUDIO_PANDOC=pandoc_path); 
 }
 
 # load rmarkdown
@@ -44,6 +44,7 @@ if(shinyNorm==TRUE){
 
 # run notebook
 rmarkdown::render(file.path(notebook_dir,'Notebook.Rmd'),
+                  envir=new.env(),
                   knit_root_dir=analysis_dir,
                   intermediates_dir=analysis_dir,
                   output_file=paste(gsub("\\.","",make.names(project_name)),"_",gsub("-","",Sys.Date()),".html", sep=""),

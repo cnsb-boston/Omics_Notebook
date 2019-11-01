@@ -23,22 +23,25 @@ variationPlot <- function(eset, type, outputpath=output_plots_path,
   emat_top <- emat[top_hits[top_hits!=""],]
   
   output_filename<-file.path(outputpath, paste("variation_",type,".pdf", sep=""))
-  pdf(output_filename)
-  plot(MEAN, STDEV, pch=".", cex=4, main=paste("mean vs. stdev: ", type, sep=""))
-  plot(MED, MAD, pch=19, cex=0.5, log="", main=paste("median vs MAD: ",type, sep=""))
-  points(MED[top_hits], MAD[top_hits], pch=19, cex=0.5, col="red")
+  pdf(output_filename, width=4, height=4)
+  plot(MEAN, STDEV, pch=".", cex=1, main=paste("mean vs. stdev: ", type, sep=""))
+  plot(MED, MAD, pch=19, cex=0.3, log="", main=paste("median vs MAD: ",type, sep=""))
+  points(MED[top_hits], MAD[top_hits], pch=19, cex=0.3, col="red")
   legend("topright", pch=20, col=c("black", "red"), legend=c("all points", paste("filtered top ", percent_choice*100, "%", sep="")) )
   dev.off()
   
   try({
   output_filename<-file.path(outputpath, paste("corrplot_",type,".pdf", sep=""))
+  emat_sel <- emat_top
+  emat_sel <- na.omit(t(scale(t(emat_sel))))
   pdf(output_filename)
-  corrplot::corrplot(cor(emat_top), type="upper", order="hclust", tl.col="black")
+  corrplot::corrplot(cor(emat_sel), order="hclust", type="upper", tl.col="black")
+  corrplot::corrplot.mixed(cor(emat_sel), order="hclust", tl.col="black", diag="n", lower.col="black", number.cex=.4, tl.pos="lt")
   dev.off()
   })
   try({
-  output_filename<-file.path(outputpath, paste("pairs_",type,".jpeg", sep=""))
-  jpeg(output_filename)
+  output_filename<-file.path(outputpath, paste("pairs_",type,".tiff", sep=""))
+  tiff(output_filename)
   pairs(emat, pch=".")
   dev.off()
   })

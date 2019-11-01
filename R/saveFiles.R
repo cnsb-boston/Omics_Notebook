@@ -14,7 +14,7 @@
 #' @examples
 #' 
 #' @export
-saveFiles <- function(data, type, outputpath=output_files_path,
+saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE, 
                       limmaRes=FALSE, contrast_name=FALSE, outputcontrastpath=output_contrast_path_files){
   # Save eSet RDS  
   output_filename <- file.path(outputpath, paste("Data_",type,".RDS", sep=""));             
@@ -26,8 +26,17 @@ saveFiles <- function(data, type, outputpath=output_files_path,
   } else {  
     output_table <- cbind( rownames(exprs(data[["eSet"]])), exprs(data[["eSet"]])) 
   }
+  rownames(output_table) <- rownames(exprs(data[["eSet"]]))
   output_filename <- file.path(outputpath,paste("Expression_matrix_",type,".txt", sep=''));
   write.table(x= output_table, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
+  
+  if( class(subset)!="logical" ){ 
+    for( k in 1:length(subset) ){ suppressWarnings({ try({
+      output_table <-output_table[subset[[k]],]
+      output_filename <- file.path(outputpath,paste("Expression_matrix_",type,names(subset)[k],".txt", sep=''));
+      write.table(x= output_table, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
+    }) }) }  }
+  
   
   # If differential analysis, save ranked list
   if ( class(limmaRes) != "logical") {
@@ -46,7 +55,7 @@ saveFiles <- function(data, type, outputpath=output_files_path,
       write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
       
       # ranked list without direction
-      output_filename <- file.path(outputcontrastpath,paste("GSEA_",type,"_", gsub("-","_",contrast_name),"_pval.rnk", sep=''));
+      output_filename <- file.path(outputcontrastpath,paste("GSEA_",type,"_", gsub("-","_",contrast_name),"_AbsVal.rnk", sep=''));
       ranked[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
       write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
       
@@ -66,7 +75,7 @@ saveFiles <- function(data, type, outputpath=output_files_path,
       ranked[,"DataSet"] <- type;
       write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
     }
-    if( "mz"%in% colnames(limmaRes) & "rt"%in% colnames(limmaRes) & "P.Value" %in% colnames(limmaRes) ){
+    if( "mz"%in% colnames(limmaRes) & "rt"%in% colnames(limmaRes) & "P.Value" %in% colnames(limmaRes) & "t" %in% colnames(limmaRes)){
       output_filename <- file.path(outputcontrastpath,paste("Mummichog_",type, gsub("-","_",contrast_name),".txt", sep=''));
       ranked <- limmaRes[,c("mz", "rt", "P.Value", "t" ) ]
       colnames(ranked)<-c("mz", "rtime", "p-value", "t-score")
@@ -78,7 +87,7 @@ saveFiles <- function(data, type, outputpath=output_files_path,
       colnames(ranked)<-c("feature_identifier","mz", "rtime", "p-value", "t-score")
       ranked[,"DataSet"] <- type;
       ranked[,"Type"] <- "mz"
-      ranked[,"DisplayName"] <- ranked[,"mz"]
+      ranked[,"Display_Name"] <- paste("mz", round(ranked[,"mz"], 4), sep="")
       write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
       
       # MZ feature to HMDB interactions
@@ -89,10 +98,11 @@ saveFiles <- function(data, type, outputpath=output_files_path,
       #ranked[,"Edge_Type"] <- "mz_met"
       ranked=data.frame()
       for( i in 1:nrow(limmaRes) ){ try({
-        if( nrow(data.frame(Metabolite= gsub(" ","",gsub("\\)","",gsub("c\\(","",unlist(strsplit(limmaRes[i,"identifier"], ","))))) ))>0 ){
-        toAdd <- data.frame(Metabolite= gsub(" ","",gsub("\\)","",gsub("c\\(","",unlist(strsplit(limmaRes[i,"identifier"], ","))))) )
+        if( nrow(data.frame(Metabolite= gsub(" ","",gsub("\\)","",gsub("c\\(","",unlist(strsplit(as.character(limmaRes[i,"identifier"]), ","))))) ))>0 ){
+        toAdd <- data.frame(Metabolite= gsub(" ","",gsub("\\)","",gsub("c\\(","",unlist(strsplit(as.character(limmaRes[i,"identifier"]), ","))))) )
         toAdd[,"feature_identifier"] <- limmaRes[i,"feature_identifier"]
         toAdd[,"Edge_Type"] <- "mz_met"
+        toAdd[,"Display_Name"] <- paste("mz", round(limmaRes[i,"mz"], 4), sep="")
         ranked <- rbind(ranked, toAdd)
       } }) }      
       write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);      

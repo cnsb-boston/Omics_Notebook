@@ -8,15 +8,19 @@
 #' @param outputpath output file path for plots
 #' @param limmaSig is list of significant genes
 #'
-#' @return a matrix of most variable features by MAD
+#' @return a heatmap object
 #' 
 #' @examples
 #' 
 #' @export
-drawHeatmaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_path,
-                        mapcolor=map_color, subset=FALSE, k_clust=0, 
-                        outputcontrastpath=output_contrast_path, limmaSig=FALSE, 
-                        show_row_names=FALSE, cluster_samples=TRUE){
+drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="", 
+                         outputpath=output_plots_path,
+                         mapcolor=map_color, subset=FALSE, k_clust=0, 
+                         outputcontrastpath=output_contrast_path, limmaSig=FALSE, 
+                         show_row_names=TRUE, cluster_samples=TRUE){
+  
+  eset <- eset[,order(pData(eset)$Group)]
+  
   # Annotation Colors
   annotLab <- data.frame(Group = factor(pData(eset)$Group, levels=unique(pData(eset)$Group)));
   annotCol <- list(Group = rainbow(length(levels(factor(pData(eset)$Group)))))
@@ -53,6 +57,13 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_pat
                    row_names_gp=gpar(fontsize=4),
                    column_title=paste(type, ": \nAll features, row z score", sep='') )
     print(ht1)
+    
+    print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
+            cluster_columns=FALSE,
+            row_names_gp=gpar(fontsize=4),
+            column_title=paste(type, ": \nAll features, row z score", sep='') ))
+    
+    
     #Optional k clustering
     if(k_clust !=0){
       kclus <- kmeans(emat_sel, 3);
@@ -69,15 +80,30 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_pat
     #             column_title=paste(type, ": Correlation, row z score", sep='') ))
   
     # Subset features only
-    if( class(subset)!="logical" ){
-      emat_sel <- exprs(eset)[subset,]
-      emat_sel <- t(scale(t(emat_sel))) # Z-score across rows
-      emat_sel[emat_sel < -2] <- -2
-      emat_sel[emat_sel > 2] <- 2
-      print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
-                    cluster_columns=cluster_samples,
-                    row_names_gp=gpar(fontsize=4),
-                    column_title=paste(type, ": \nSelect genes, row z score", sep='') ) )
+    if( class(subset)!="logical" ){ 
+      for( k in 1:length(subset) ){ suppressWarnings({ try({
+        emat_sel <- exprs(eset)[subset[[k]],]
+        emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
+        emat_sel[emat_sel < -2] <- -2
+        emat_sel[emat_sel > 2] <- 2
+        print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
+                      cluster_columns=TRUE,show_row_names=show_row_names,
+                      row_names_gp=gpar(fontsize=4),
+                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
+        print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
+                      cluster_columns=FALSE,show_row_names=show_row_names,
+                      row_names_gp=gpar(fontsize=4),
+                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
+        print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
+                      cluster_columns=TRUE,show_row_names=show_row_names,cluster_rows=F,
+                      row_names_gp=gpar(fontsize=4),
+                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
+        print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
+                      cluster_columns=FALSE,show_row_names=show_row_names,cluster_rows=F,
+                      row_names_gp=gpar(fontsize=4),
+                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
+        
+      }, silent=TRUE) }) }
     }
   
     # variation filter, z score
@@ -87,14 +113,20 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_pat
       emat_sel[emat_sel < -2] <- -2
       emat_sel[emat_sel > 2] <- 2
       print( Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
-                     cluster_columns=cluster_samples,
+                     cluster_columns=TRUE,
+                     column_title=paste(type, ": \nHighest variation, row z score", sep='') ) )
+      print( Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
+                     cluster_columns=FALSE,
                      column_title=paste(type, ": \nHighest variation, row z score", sep='') ) )
     }
   
     # all features, log2 intensity
     emat_sel <- na.omit(exprs(eset))
     print(Heatmap(matrix=emat_sel, col=maponeway, name="", top_annotation=ha_column,show_row_names=FALSE,
-                  cluster_columns=cluster_samples,
+                  cluster_columns=TRUE,
+                  column_title=paste(type, ": \nAll features, log2 Intensity", sep='') ))
+    print(Heatmap(matrix=emat_sel, col=maponeway, name="", top_annotation=ha_column,show_row_names=FALSE,
+                  cluster_columns=FALSE,
                   column_title=paste(type, ": \nAll features, log2 Intensity", sep='') ))
   
     tmp<-dev.off();
@@ -102,7 +134,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_pat
     
   } else if(class(limmaSig)!="logical"){
   # Differential Heatmap
-    output_filename <- file.path(outputcontrastpath, paste("heatmaps_",type,".pdf", sep=''));
+    output_filename <- file.path(outputcontrastpath, paste(type,"_heatmaps",".pdf", sep=''));
     pdf(output_filename);
 
     # limma differential expression, z score
@@ -111,10 +143,15 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, outputpath=output_plots_pat
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2 
     print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
-                  cluster_columns=cluster_samples,
+                  cluster_columns=TRUE,
                   show_row_names=show_row_names,
                   row_names_gp=gpar(fontsize=4),
-                  column_title=paste(type, ": \nDifferential Expression, row z score", sep='') ))
+                  column_title=paste(type, ": \n", title_add," Differential Features, z score", sep='') ))
+    print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
+                  cluster_columns=FALSE,
+                  show_row_names=show_row_names,
+                  row_names_gp=gpar(fontsize=4),
+                  column_title=paste(type, ": \n", title_add," Differential Features, z score", sep='') ))
     tmp<-dev.off();
   }
 }

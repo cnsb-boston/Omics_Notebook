@@ -15,7 +15,7 @@
 #' 
 #' @export
 runEnrichR <- function (genes, type, search_dat=search_databases, 
-                        outputpath=output_contrast_path, run_seperate=FALSE) {
+                        outputpath=enrichr_working_path, run_seperate=FALSE) {
   suppressMessages({
   if(run_seperate){
     enriched<- data.frame();
@@ -52,10 +52,11 @@ runEnrichR <- function (genes, type, search_dat=search_databases,
   formatted[,"Genes"] <- enriched[,"Genes"]
   formatted[,c("Gene_Hits", "Gene_Total")] <- str_split_fixed(enriched[,"Overlap"], "/",2)
   formatted[,"Gene_Ratio"] <- as.numeric(formatted[,"Gene_Hits"])/as.numeric(formatted[,"Gene_Total"])
-  formatted[,c("Z.score", "Combined.Score")] <- format(enriched[,c("Z.score", "Combined.Score")], scientific=FALSE);
+  formatted[,c("Combined.Score")] <- format(enriched[,c("Combined.Score")], scientific=FALSE);
+  formatted[,"Database"] <- enriched[,"databases"]
   #colnames(formatted) <- c("Term","Description","p.Val","FDR","Phenotype","Genes","Z.score","Combined.Score","Gene_Hits","Gene_Total")
   
-  output_filename <- file.path(outputpath,paste("enrichr_results_", type,".txt", sep='')); 
+  output_filename <- file.path(outputpath,paste("enrichr_", type,".txt", sep='')); 
   write.table(formatted, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
   
   drawEnrichment(enrichment_results=formatted[1:20,], type=type, label="enrichr", outputpath=outputpath);

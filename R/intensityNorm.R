@@ -20,22 +20,22 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   
   col_palette <- rainbow(length(levels(as.factor(pData(eset)$Group))))
   annotCol <- col_palette[as.factor(pData(eset)$Group)]
-  try({if("Color_Groups" %in% colnames(pData(eset))) {
-    if( checkColor(pData(eset)[,"Color_Groups"]) ){
-      annotCol <- pData(eset)[,"Color_Groups"]
+  try({if("ColorsHex" %in% colnames(pData(eset))) {
+    if( checkColor(pData(eset)[,"ColorsHex"]) ){
+      annotCol <- pData(eset)[,"ColorsHex"]
     }
   } })
 
-  if( data_format!="Metabolites" ) { eset <- eset[ rowSums(exprs(eset)>0)>=cutoff*ncol(exprs(eset)), ]; }
+  eset <- eset[ rowSums(exprs(eset)>0)>=cutoff*ncol(exprs(eset)), ];
   
   eset_matrix <- exprs(eset)
   df <- data.frame(reshape2::melt(eset_matrix, id.vars = NULL));
   colnames(df) <- c("Feature","Sample", "Intensity");
   plot1 <- ggplot(df, aes(x = Sample, y = Intensity)) + geom_boxplot(fill=annotCol) +
     theme_bw() + theme(axis.text.x=element_text(angle=45, hjust=1)) +  
-    labs(title=paste(type, " log2 Intensity: Before Normalization", sep=''));
+    labs(title=paste(type, " log2 Intensity: \nBefore Normalization", sep=''));
   plot2 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + 
-    labs(title=paste(type, " log2 Intensity: Before Normalization", sep=''));
+    labs(title=paste(type, " log2 Intensity: \nBefore Normalization", sep=''));
   
   if(norm=='quantile'){
     eset_matrix_norm <- as.matrix(normalize.quantiles(eset_matrix))
@@ -43,25 +43,41 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   } else if (norm=='loess'){
     eset_matrix_norm <- as.matrix(normalizeCyclicLoess(eset_matrix, method='pairs'))
   } else if (norm=='median'){
-    eset_matrix_norm <- as.matrix(normalizeMedianValues(eset_matrix))
+    eset_matrix[eset_matrix==0] <- NA
+    colMedians <- matrixStats::colMedians(eset_matrix, na.rm=T)
+    meanColMedian <- mean(colMedians, na.rm=T)
+    eset_matrix_norm <- matrix(nrow=nrow(eset_matrix), ncol=ncol(eset_matrix), byrow=T)
+    normFunc <- function(colIndex){
+      (eset_matrix[rowIndex, colIndex]/colMedians[colIndex]) *meanColMedian
+    }
+    for( rowIndex in seq_len(nrow(eset_matrix))){
+      eset_matrix_norm[rowIndex,] <- vapply(seq_len(ncol(eset_matrix)), normFunc, 0)
+    }
+    eset_matrix_norm[is.na(eset_matrix_norm)] <- 0
+    colnames(eset_matrix_norm) <- colnames(eset_matrix)
+    rownames(eset_matrix_norm) <- rownames(eset_matrix)
+    
   } else if (norm=='z transform'){
     eset_matrix_norm <- as.matrix(scale(eset_matrix));
-  } else {  eset_matrix_norm<-eset_matrix }
+    colnames(eset_matrix_norm) <- colnames(eset_matrix)
+    rownames(eset_matrix_norm) <- rownames(eset_matrix)
+  } 
   
   if (norm != "none"){
     df <- data.frame(reshape2::melt(eset_matrix_norm, id.vars = NULL));
     colnames(df) <- c("Feature","Sample", "Intensity");
+    df[,"Sample"] <- as.character(df[,"Sample"])
     plot3 <- ggplot(df, aes(x = Sample, y = Intensity)) + geom_boxplot(fill=annotCol) +
       theme_bw() + theme(axis.text.x=element_text(angle=45, hjust=1)) + 
-      labs(title=paste(type, " log2 Intensity: After ",
+      labs(title=paste(type, " log2 Intensity: \nAfter ",
                        toupper(norm)," Normalization", sep=''));
     plot4 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + 
-      labs(title=paste(type, " log2 Intensity: After ",
+      labs(title=paste(type, " log2 Intensity: \nAfter ",
                        toupper(norm)," Normalization", sep=''));
   }
   
   output_filename<-file.path(outputpath, paste("boxplot_histogram_",type,".pdf", sep=''));
-  pdf(output_filename);
+  pdf(output_filename, width=5, height=4);
   print(plot1);
   if(norm!="none") { print(plot3);}
   print(plot2);
@@ -80,6 +96,7 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
     
   }
   
+  if(norm!="none") { 
   output_filename<-file.path(outputpath, paste("MAplots_",type,".pdf", sep=''))
   pdf(output_filename)
   for (i in 1:ncol(eset)) {
@@ -109,5 +126,8 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   fData(eset_norm) <- fData(eset);
   
   return (eset_norm);
+  } else {
+  return(eset)
+  }
 }
 
