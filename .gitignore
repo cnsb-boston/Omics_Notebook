@@ -1,2 +1,3 @@
 # ignore bash scripts
 *.sh
+packrat/lib*/

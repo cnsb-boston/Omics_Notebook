@@ -99,18 +99,17 @@ library(RCurl)
 library(fgsea)
 library(BiocParallel)
 register(SerialParam())
+library(httr)
+library(RJSONIO)
 
 if(enrichr_section){ library(enrichR) }
 
 if(gsea_section){
-  library(httr)
-  library(RJSONIO)
   library(RCy3)
-  #library(EasycyRest)
 }
 
-#library(sva) # combat/batch correction
-#library(hmdbQuery) # metabolite annotation info
+# library(sva) # combat/batch correction
+
 })
 
 # Source function file
