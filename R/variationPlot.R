@@ -32,11 +32,15 @@ variationPlot <- function(eset, type, outputpath=output_plots_path,
   
   try({
   output_filename<-file.path(outputpath, paste("corrplot_",type,".pdf", sep=""))
-  emat_sel <- emat_top
+  emat_sel <- emat
   emat_sel <- na.omit(t(scale(t(emat_sel))))
+  cor_1 <- cor(emat_sel)
+  cor_2 <- cor(emat)
   pdf(output_filename)
-  corrplot::corrplot(cor(emat_sel), order="hclust", type="upper", tl.col="black")
-  corrplot::corrplot.mixed(cor(emat_sel), order="hclust", tl.col="black", diag="n", lower.col="black", number.cex=.4, tl.pos="lt")
+  corrplot::corrplot(cor_1, order="hclust", type="upper", tl.col="black")
+  corrplot::corrplot(cor_2, order="hclust", type="upper", tl.col="black")
+  corrplot::corrplot.mixed(cor_1, order="hclust", tl.col="black", diag="n", lower.col="black", number.cex=.4, tl.pos="lt")
+  corrplot::corrplot.mixed(cor_2, order="hclust", tl.col="black", diag="n", lower.col="black", number.cex=.4, tl.pos="lt")
   dev.off()
   })
   try({

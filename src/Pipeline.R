@@ -8,7 +8,7 @@
 #libraries_path = '/project/cnsbomic/Tools/R'
 
 ## Pandoc path
-#pandoc_path = '/usr/local/apps/rstudio-0.98.1103/rstudio-0.98.1103/bin/pandoc'
+#pandoc_path = 
 
 ## Inherit paths
 #inherit_paths = "TRUE"

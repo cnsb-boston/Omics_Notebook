@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Python script to take variables and write Variables.R and run Omics_Notebook
+# Python script to take variables and write Paramters.R and run Omics_Notebook
 
 
 ############################################
@@ -13,10 +13,7 @@
 libraries_path = '/project/cnsbomic/Tools/R3.6'
 
 # Pandoc path
-#pandoc_path = '/share/pkg.7/rstudio/1.2.1335/install/bin/pandoc/pandoc'
-
-# GSEA .jar file path
-gsea_jar = "/project/cnsbomic/Tools/gsea-3.0.jar"
+#pandoc_path = SET IF NEEDED
 
 # Inherit paths
 inherit_paths = "TRUE"
@@ -119,11 +116,6 @@ class GUI(tk.Frame):
     runGSEA_state.set(True)
     runGSEA = ttk.Checkbutton(self, text="Run GSEA", var=runGSEA_state)
     runGSEA.grid(column=2, row=10, pady=(10,0), sticky=tk.W)
-    
-    #runGSEAcombined_state = tk.BooleanVar()
-    #runGSEAcombined_state.set(True)
-    #runGSEAcombined = ttk.Checkbutton(self, text="GSEA Combined", var=runGSEAcombined_state)
-    #runGSEAcombined.grid(column=3, row=10, pady=(10,0), sticky=tk.W)
     
     allcomparisons_state = tk.BooleanVar()
     allcomparisons_state.set(True)
@@ -244,7 +236,6 @@ class GUI(tk.Frame):
       
       outputfile.write("enrichr_section <- " + str(runEnrichr_state.get()).upper() + ";\n")
       outputfile.write("gsea_section <- " + str(runGSEA_state.get()).upper() + ";\n")
-      #outputfile.write("gsea_combined <- "+ str(runGSEAcombined_state.get()).upper() + ";\n")
       outputfile.write("all_comparisons <- "+ str(allcomparisons_state.get()).upper() + ";\n")
       
       outputfile.write("species <- '" + str(species.get()) + "';\n")
@@ -260,7 +251,6 @@ class GUI(tk.Frame):
       outputfile.write("inherit_paths <- " + inherit_paths +  ";\n")
       outputfile.write("libraries_path <- '" + libraries_path +  "';\n")
       #outputfile.write("pandoc_path <- '" + pandoc_path +  "';\n")
-      outputfile.write("gsea_jar <- '" + gsea_jar +  "';\n")
 
       outputfile.close()
       lbl.configure(text="Parameters file created.")
