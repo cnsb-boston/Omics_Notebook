@@ -1,3 +1,9 @@
 # ignore bash scripts
 *.sh
 packrat/lib*/
+
+#
+AnnotationExample.xlsx
+
+#
+Omics_Notebook/*
