@@ -2,7 +2,7 @@
 ## Unbundle packrat libraries
 install.packages("packrat")
 
-packrat::unbundle("/project/cnsbomic/Omics_Notebook/Omics_Notebook-2019-11-04.tar.gz", where="./")
+packrat::unbundle("Omics_Notebook-2019-11-04.tar.gz", where="./")
 
 # 
 # 

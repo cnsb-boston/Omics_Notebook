@@ -1,10 +1,12 @@
 ## Software requirements
 
-* R 3.5,  Python 3.6.
+* R 3.6,  Python 3.6.
 
 * Install Rstudio.
 
 * Install all required R packages. (See install.R)
+
+This software has been tested for use on Linux (Cent OS 6 and 7) and MacOS (10.14 and 10.15)
 
 
 #### Enrichment Map
@@ -44,5 +46,12 @@ In the second sheet of the annotation file, the sample names are repeated. Addit
 * Pairs: if "Pairs" is found, will try to run differential analysis accounting for paired samples.
 
 
+---
+
+## Output
+
+The output of the Omics Notebook analysis is an html file (from the R markdown templates) and analysis directory with results saved as text or image files. The output adapts depending on the input data but includes exploratory, differential, and enrichment analysis.
+
+The complete pipeline should run on a normal desktop computer in a few hours, possibly more or much less depending on options and data set.
 
 ---
