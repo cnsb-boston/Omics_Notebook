@@ -97,7 +97,7 @@ for( i in 1:length(omicsList) ){ try({
   for( j in 1:(length(contrastgroups)-1) ){
     for( k in 2:(length(contrastgroups)) ){
       col_name <- paste("logfc_",contrastgroups[k],"_",contrastgroups[j],sep="");
-      fData(omicsList[[i]][["eSet"]])[,col_name] <- log2( fData(omicsList[[i]][["eSet"]])[,paste("mean_",contrastgroups[k],sep="")] /
+      fData(omicsList[[i]][["eSet"]])[,col_name] <- ( fData(omicsList[[i]][["eSet"]])[,paste("mean_",contrastgroups[k],sep="")] -
                                                           fData(omicsList[[i]][["eSet"]])[,paste("mean_",contrastgroups[j],sep="")]    ) 
       logfc_index <- c(logfc_index, col_name)
     }
@@ -425,7 +425,8 @@ for(i in 1:length(omicsList)){ try({
 
 # Save combined ranked lists for GSEA, for each contrast
 if(length(gene_data_index)>1){
-  for (c in 1:num_contrasts ){ try({
+  
+  for (c in 1:length(loop_list) ){ try({
     top_sum <- FALSE;
     contrast_name <- contrast_strings[c];
     try({ 
@@ -479,6 +480,8 @@ if(length(gene_data_index)>1){
       write.table(x=ranked_pval,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
     }
   }) } 
+  
+  
   # Save ranked list for overall variation across all conditions
   if (statistic_index=="F"){ try({
     top_sum <- FALSE;

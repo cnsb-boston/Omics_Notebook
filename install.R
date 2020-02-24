@@ -33,9 +33,11 @@ packrat::unbundle("Omics_Notebook-2019-11-04.tar.gz", where="./")
 # install.packages("openxlsx")
 # install.packages("UpSetR")
 # install.packages("corrplot")
-# 
+# install.packages("uwot")
+# install.packages("cowplot")
 # 
 # install.packages("rmarkdown")
+# install.packages("knitrBootstrap")
 # 
 # install.packages("BiocManager")
 # 

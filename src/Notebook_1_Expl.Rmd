@@ -35,9 +35,9 @@ for(i in 1:length(omicsList)){
                                       norm=norm_method, cutoff=zero_percent)
   
   # Make output hyperlinks for markdown
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], ": Boxplot/Dist. ](", output_plots_subdir,
+  add_link <- paste(omicsList[[i]][["dataType"]], ": [ Boxplot/Dist. ](", output_plots_subdir,
                     "/boxplot_histogram_",omicsList[[i]][["dataType"]],".pdf)", sep="")
-  output_links <- paste(output_links, add_link, sep=" | " )
+  output_links <- paste(output_links, add_link, sep="" )
   
   # Batch correction
   if("Batch" %in% colnames(pData(omicsList[[i]][["eSet"]])) & !("Met" %in% omicsList[[i]][["dataFormat"]])) { try({
@@ -64,15 +64,22 @@ for(i in 1:length(omicsList)){
   pca_output[[i]] <- drawPCA(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
   
   # Make output hyperlinks for markdown
-  add_link <- paste("[ ",omicsList[[i]][["dataType"]], ": PCA ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+  add_link <- paste( "[ PCA ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
+  
+  try({ 
+    drawUMAP(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
+    add_link <- paste( "[ UMAP ](", output_plots_subdir,"/UMAPplot_",omicsList[[i]][["dataType"]],".pdf)", sep="")
+    output_links <- paste(output_links, add_link, sep=" | " )
+  })
+  
   output_links <- paste(output_links, "  \n", sep="" )
 }
 
-print_report <- c();
+print_report <- "";
 for(i in 1:length(omicsList)){
-    print_report <- c(print_report, paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[4]])," features detected in raw data. \n",sep=""),
-                      paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[5]])," features detected in filtered data. \n",sep="") )
+    print_report <- paste(print_report, paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[4]])," features detected in raw data. \n",sep=""),
+                      paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[5]])," features detected in filtered data. \n",sep=""), sep="" )
 }
 
 cat(print_report)
