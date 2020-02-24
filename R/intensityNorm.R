@@ -63,7 +63,7 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
     rownames(eset_matrix_norm) <- rownames(eset_matrix)
   } 
   
-  if (norm != "none"){
+  if ( !grepl("none", norm) ){
     df <- data.frame(reshape2::melt(eset_matrix_norm, id.vars = NULL));
     colnames(df) <- c("Feature","Sample", "Intensity");
     df[,"Sample"] <- as.character(df[,"Sample"])
@@ -79,12 +79,12 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   output_filename<-file.path(outputpath, paste("boxplot_histogram_",type,".pdf", sep=''));
   pdf(output_filename, width=5, height=4);
   print(plot1);
-  if(norm!="none") { print(plot3);}
+  if(!grepl("none", norm)) { print(plot3);}
   print(plot2);
-  if(norm!="none") { print(plot4); }
+  if(!grepl("none", norm)) { print(plot4); }
   dev.off();
   
-  if(norm!="none") { 
+  if(!grepl("none", norm)) { 
     grid.arrange(plot1+labs(title="Raw Data"), plot3+labs(title="Normalized"),
                  plot2+theme(legend.position="none")+labs(title="Raw Data"), 
                  plot4+theme(legend.position="none")+labs(title="Normalized"),
@@ -96,7 +96,7 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
     
   }
   
-  if(norm!="none") { 
+  if(!grepl("none", norm)) { 
   output_filename<-file.path(outputpath, paste("MAplots_",type,".pdf", sep=''))
   pdf(output_filename)
   for (i in 1:ncol(eset)) {

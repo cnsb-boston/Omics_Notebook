@@ -137,7 +137,7 @@ class GUI(tk.Frame):
     normMethod_lbl = tk.Label(self, text="Normalization Method:")
     normMethod_lbl.grid(column=2, row=14, sticky=tk.E)
     normMethod = ttk.Combobox(self)
-    normMethod['values']=('loess', 'quantile', 'median', 'z transform', 'none')
+    normMethod['values']=('loess', 'quantile', 'median', 'z transform', 'none (use raw values)', 'none (apply log trans.)')
     normMethod.current(0)
     normMethod.grid(column=3, row=14)
 

@@ -34,7 +34,7 @@ drawVolcano <- function(dat, type, subset_rows=F,
   
   # Plot
   plot1 <- ggplot(data=data.frame(dat)) + 
-    geom_point(aes(x=logFC, y=-log10(P.Value),colour=(dat$Significance)),size=0.7, pch=21) +
+    geom_point(aes(x=logFC, y=-log10(P.Value),colour=(dat$Significance)),size=0.7, pch=19) +
     scale_colour_manual(values=c(NS="grey", Up="Red", Down="blue"))   +
     labs(title=paste(type,"Volcano Plot\n ", title_add, sep=" ")) + theme_bw() + 
     theme(legend.title=element_blank())
@@ -42,7 +42,7 @@ drawVolcano <- function(dat, type, subset_rows=F,
     { if( "Gene" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=logFC, y=-log10(P.Value), label=Gene))
       else if( "mz" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=logFC, y=-log10(P.Value), label=round(mz, digits=2)))
       else geom_text_repel(data=data.frame(dat[label_names,]), aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))
-    }
+    } + geom_point(data=data.frame(dat[label_names,]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21)
   
   output_filename <- file.path(outputpath, paste(type,"_volcano",".pdf", sep=''));
   pdf(output_filename, width=3, height=3);
@@ -53,9 +53,13 @@ drawVolcano <- function(dat, type, subset_rows=F,
       if(length(subset_rows[[j]])>100){subset_rows[[j]]<- subset_rows[[j]][1:100]}
       if(length(subset_rows[[j]])>0){
       if( "Gene" %in% colnames(dat)){
-        plot(plot2+geom_text_repel(data=data.frame(dat[subset_rows[[j]],]),size=2,direction="y", aes(x=logFC, y=-log10(P.Value), label=Gene))+theme(legend.position="none") )
+        plot(plot2+
+               geom_text_repel(data=data.frame(dat[subset_rows[[j]],]),size=2,direction="y", aes(x=logFC, y=-log10(P.Value), label=Gene))+theme(legend.position="none") +
+               geom_point(data=data.frame(dat[subset_rows[[j]],]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
       } else{
-        plot(plot2+geom_text_repel(data=data.frame(dat[subset_rows[[j]],]),direction="y", aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))+theme(legend.position="none") )
+        plot(plot2 + 
+               geom_text_repel(data=data.frame(dat[subset_rows[[j]],]),direction="y", aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))+theme(legend.position="none") +
+               geom_point(data=data.frame(dat[subset_rows[[j]],]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
       }
       }
     }) }
@@ -63,7 +67,7 @@ drawVolcano <- function(dat, type, subset_rows=F,
   grid.arrange(g_legend(plot1))
   tmp<-dev.off();
 }
-drawMDPlot <- function(dat, type, subset_rows=FALSE, outputpath=output_contrast_path, cutoff=0.2){ 
+drawMDPlot <- function(dat, type, subset_rows=FALSE, outputpath=output_contrast_path, cutoff=1){ 
   # Gene labels
   label_names <- c(rownames(dat[order(dat$logFC, decreasing=FALSE),])[1:10],
                    rownames(dat[order(dat$logFC, decreasing=TRUE),])[1:10] )
@@ -83,7 +87,7 @@ drawMDPlot <- function(dat, type, subset_rows=FALSE, outputpath=output_contrast_
     { if( "Gene" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=Mean, y=logFC, label=Gene))
       else if( "mz" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=Mean, y=logFC, label=round(mz, digits=2)))
       else geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=Mean, y=logFC, label=feature_identifier))
-    }
+    } + geom_point(data=data.frame(dat[label_names,]), aes(x=Mean, y=logFC ),size=0.8, pch=21)
 
 output_filename <- file.path(outputpath, paste(type,"_MDplot",".pdf", sep=''));
 pdf(output_filename, width=3, height=3);

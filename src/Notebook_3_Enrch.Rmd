@@ -218,7 +218,7 @@ if( run_gsea & species!="Other" ) { try({
     rx = gregexpr("(?<=<a href=\")(.*.GOBP_AllPathways_no_GO_iea.*.)(.gmt)(?=\">)",contents, perl = TRUE)
     gmt_file = unlist(regmatches(contents, rx))
     dest_gmt_file <- file.path(gsea_working_path,gmt_file)
-    download.file(paste(gmt_url,gmt_file,sep=""),destfile=dest_gmt_file)
+    if(!file.exists(dest_gmt_file)) { download.file(paste(gmt_url,gmt_file,sep=""),destfile=dest_gmt_file) }
   }) }) } else { try({
     geneset_lookup <-  read.delim(file.path(gsub("src", "data", notebook_dir),"geneset_table.txt"))
     gmt_file <- as.character(geneset_lookup[geneset_lookup[,"Species"]==species,"GeneSet"])
