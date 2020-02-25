@@ -136,7 +136,7 @@ if( length(mz_data_index) > 1 ){
 
 ---
 
-`r if(length(gene_data_index)>1 | length(prot_data_index)>1){"### XY Correlation - Across Datasets"}`
+`r if(length(gene_data_index)>1 | length(prot_data_index)>1){"### Correlation Across Datasets"}`
 ```{r gene_correlation, eval= (length(gene_data_index)>1 | length(prot_data_index)>1) }
 
 output_links <-"";
@@ -197,7 +197,7 @@ if(length(prot_data_index)>1){ try({
 
 ---
 
-### XY Correlation - Across Sample Groups
+### Correlation Across Groups
 ```{r sample_group_correlation }
 
 output_links <-"";
@@ -234,9 +234,9 @@ for(i in 1:length(omicsList)){ try({
 
 `r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){"### Site Normalization to Proteins"}`
 ```{r site_normalixation, eval= ( length(prot_groups_index)>0 & length(sites_data_index)>0 ) }
-suppressMessages({suppressWarnings({
+suppressMessages({suppressWarnings({ 
 output_links<-"";
-
+try({
 # Take first protein groups data set for normalization
 item_name <- "Protein"
 data_index <- prot_groups_index
@@ -301,6 +301,7 @@ for(i in 1:length(sites_norm_index)){
   add_link <- paste("[ PCA:",type_name, " ](", output_plots_subdir,"/PCAplots_",type_name,".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
 }
+})
 })})
 ```
 `r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){"Site to Proteome Normalization:"}`
