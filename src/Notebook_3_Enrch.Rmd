@@ -291,7 +291,7 @@ if( run_gsea & species!="Other" ) { try({
     }, silent=TRUE) }
     dev.off()
     
-    add_link <- paste("[ fgsea-",analysis_name, " ](", output_subdir,"/",gsea_working_dir,"Images/fgsea_", analysis_name,".pdf)", sep="");
+    add_link <- paste("[ fgsea-",analysis_name, " ](", output_subdir,"/",gsea_working_dir,"/Images/fgsea_", analysis_name,".pdf)", sep="");
     output_links <- paste(output_links, add_link, sep=" | " ); 
     
     if(runDifferential==TRUE){
@@ -611,8 +611,6 @@ for(gmt_index in 1:length(gmt_files)){
 }) } 
 
 ```
-`r if(show_metab_enrich & length(gene_data_index)>0 & runDifferential){"Click below to view GSEA results:  "} `
-`r if(show_metab_enrich & length(gene_data_index)>0 & runDifferential){ output_links } `
 
 ---
 
