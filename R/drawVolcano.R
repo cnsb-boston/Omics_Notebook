@@ -36,7 +36,7 @@ drawVolcano <- function(dat, type, subset_rows=F,
   plot1 <- ggplot(data=data.frame(dat)) + 
     geom_point(aes(x=logFC, y=-log10(P.Value),colour=(dat$Significance)),size=0.7, pch=19) +
     scale_colour_manual(values=c(NS="grey", Up="Red", Down="blue"))   +
-    labs(title=paste(type,"Volcano Plot\n ", title_add, sep=" ")) + theme_bw() + 
+    labs(title=paste(type,"\nVolcano Plot ", title_add, sep=" ")) + theme_bw() + 
     theme(legend.title=element_blank())
   plot2 <- plot1 +
     { if( "Gene" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=logFC, y=-log10(P.Value), label=Gene))
@@ -52,14 +52,15 @@ drawVolcano <- function(dat, type, subset_rows=F,
     for( j in 1:length(subset_rows)){ try({
       if(length(subset_rows[[j]])>100){subset_rows[[j]]<- subset_rows[[j]][1:100]}
       if(length(subset_rows[[j]])>0){
+        label_names2 <- subset_rows[[j]][!(subset_rows[[j]] %in% label_names)]
       if( "Gene" %in% colnames(dat)){
         plot(plot2+
-               geom_text_repel(data=data.frame(dat[subset_rows[[j]],]),size=2,direction="y", aes(x=logFC, y=-log10(P.Value), label=Gene))+theme(legend.position="none") +
-               geom_point(data=data.frame(dat[subset_rows[[j]],]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
+               geom_text_repel(data=data.frame(dat[label_names2,]),size=2,direction="y", aes(x=logFC, y=-log10(P.Value), label=Gene))+theme(legend.position="none") +
+               geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
       } else{
         plot(plot2 + 
-               geom_text_repel(data=data.frame(dat[subset_rows[[j]],]),direction="y", aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))+theme(legend.position="none") +
-               geom_point(data=data.frame(dat[subset_rows[[j]],]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
+               geom_text_repel(data=data.frame(dat[label_names2,]),direction="y", aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))+theme(legend.position="none") +
+               geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
       }
       }
     }) }
