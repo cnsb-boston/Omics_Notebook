@@ -32,7 +32,7 @@ for(i in 1:length(omicsList)){
   omicsList[[i]][[5]] <-intensityNorm(eset=omicsList[[i]][[index]],
                                       type=omicsList[[i]][[1]], 
                                       data_format=omicsList[[i]][["dataFormat"]],
-                                      norm=norm_method, cutoff=zero_percent)
+                                      norm=norm_method, zero_cutoff=zero_percent)
   
   # Make output hyperlinks for markdown
   add_link <- paste(omicsList[[i]][["dataType"]], ": [ Boxplot/Dist. ](", output_plots_subdir,
@@ -78,8 +78,10 @@ for(i in 1:length(omicsList)){
 
 print_report <- "";
 for(i in 1:length(omicsList)){
-    print_report <- paste(print_report, paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[4]])," features detected in raw data. \n",sep=""),
-                      paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[5]])," features detected in filtered data. \n",sep=""), sep="" )
+    print_report <- paste(print_report, 
+                          paste(omicsList[[i]][[1]],": ",nrow(omicsList[[i]][[4]])," features detected in raw data, ", 
+                                nrow(omicsList[[i]][[5]]), " after filtering. \n",sep=""),
+                          paste(omicsList[[i]][[1]],": ", ncol(omicsList[[i]][[5]]), " samples after filtering. \n",sep=""), sep="" )
 }
 
 cat(print_report)

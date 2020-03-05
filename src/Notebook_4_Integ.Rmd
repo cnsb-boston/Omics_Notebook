@@ -43,9 +43,9 @@ if(saveXlsx==TRUE){
 }
 ```
 
-`r if( show_metab_enrich & length(gene_data_index)>1 & length(gene_data_index)>0 ) {"### Make combined ranked list with metabolites"}`
+`r if( show_metab_enrich & length(metab_data_index)>1 ) {"### Make combined ranked list with metabolites"}`
 
-```{r eval=( show_metab_enrich & length(gene_data_index)>1 & length(gene_data_index)>0) }
+```{r eval=( show_metab_enrich & length(metab_data_index)>1 ) }
 
 rnk_files <-vector("list", num_contrasts)
 
@@ -148,8 +148,8 @@ for (c in 1:num_contrasts){
 ```
 
 
-`r if( ( show_metab_enrich & length(metab_data_index)>1 & length(gene_data_index)>0) ){"### GSEA for Integrative Proteomics and Metabolomics"} `
-```{r, eval=( show_metab_enrich & length(metab_data_index)>1 & length(gene_data_index)>0) }
+`r if( ( show_metab_enrich & length(metab_data_index)>0 & length(gene_data_index)>0) ){"### GSEA for Integrative Proteomics and Metabolomics"} `
+```{r, eval=( show_metab_enrich & length(metab_data_index)>0 & length(gene_data_index)>0) }
 
 if( run_gsea & species!="Other" ) { try({
   gsea_working_dir <- "MOMENTA_Integrated"

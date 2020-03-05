@@ -3,7 +3,6 @@
 `r if(enrichr_section&length(gene_data_index)>0){"### EnrichR"}`
 ```{r enrichr, eval=(enrichr_section&length(gene_data_index)>0) }
 
-output_links<-"";
 run_enrichr_seperate <- TRUE;
 
 enrichr_working_dir <- "EnrichR"
@@ -32,10 +31,7 @@ for(i in 1:length(gene_data_index) ){
     type_name <- paste(omicsList[[ gene_data_index[i] ]][["dataType"]], contrast_name, sep="_");
     
     runEnrichR(genes=top_sum[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate) 
-    
-    # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", enrichr_working_dir,"/enrichr_",type_name,".txt) | ", sep="")
-    output_links <- paste(output_links, add_link, sep="  \n" )
+
   }) } 
   
   # Timecourse
@@ -48,10 +44,7 @@ for(i in 1:length(gene_data_index) ){
     type_name <- paste(omicsList[[ gene_data_index[i] ]][["dataType"]], "TimeCourse_Overall", sep="_");
     
     runEnrichR(genes=top_sum[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate) 
-    
-    # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", enrichr_working_dir,"/enrichr_",type_name,".txt) | ", sep="")
-    output_links <- paste(output_links, add_link, sep="  \n" )
+
   }) } 
 } 
   
@@ -76,10 +69,7 @@ if( length(gene_data_index)>1 ){
     }
     
     runEnrichR(gene_table[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate )
-   
-    # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", enrichr_working_dir,"/enrichr_",type_name,".txt) | ", sep="")
-    output_links <- paste(output_links, add_link, sep="  \n" )
+
   } 
    if(statistic_index=='F'){ 
     sig_cutoff <- round(sig_percent*nrow(omicsList[[ gene_data_index[1] ]][["eSet"]]), digits=0)
@@ -97,10 +87,7 @@ if( length(gene_data_index)>1 ){
     }
     gene_table[,"logFC" ] <- gene_table[,"F" ] 
     runEnrichR(gene_table[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate )
-   
-    # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", enrichr_working_dir,"/enrichr_",type_name,".txt) | ", sep="")
-    output_links <- paste(output_links, add_link, sep="  \n" )
+
   } 
 } 
 })
@@ -118,15 +105,11 @@ for(i in 1:length(gene_data_index) ){
     
     runEnrichR(genes=top_sum[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate) 
     
-    # Make output hyperlinks for markdown
-    add_link <- paste("[ ",type_name, " ](", enrichr_working_dir,"/enrichr_",type_name,".txt) | ", sep="")
-    output_links <- paste(output_links, add_link, sep="  \n" )
   }) }
 } 
 
 ```
-`r if(enrichr_section&length(gene_data_index)>0 & output_links!=""){"Click below to view enrichR results:  "}`  
-`r if(enrichr_section&length(gene_data_index)>0){ output_links } `   
+`r if(enrichr_section&length(gene_data_index)>0){paste("For EnrichR results, see ", enrichr_working_dir, " directory.  ", sep="")}`    
 
 ---
 ```{r echo=FALSE}
@@ -140,7 +123,6 @@ output_network_file <- FALSE;
 ## The connection between R and cytoscape must be configured for proper functioning.
 ## For more info: baderlab.github.io/Cytoscape_workflows/EnrichmentMapPipeline/
 
-output_links <- "";
 run_gsea <- gsea_section; # if GSEA has already been run, set to false and include results in directory
 enrichment_map <- gsea_section; # only run enrichment map if interactive session
 
@@ -291,9 +273,6 @@ if( run_gsea & species!="Other" ) { try({
     }, silent=TRUE) }
     dev.off()
     
-    add_link <- paste("[ fgsea-",analysis_name, " ](", output_subdir,"/",gsea_working_dir,"/Images/fgsea_", analysis_name,".pdf)", sep="");
-    output_links <- paste(output_links, add_link, sep=" | " ); 
-    
     if(runDifferential==TRUE){
     ranked_features <- read.delim(rnk_file)
     ranked_vector <- abs(ranked_features[,"rank"])
@@ -397,8 +376,7 @@ if( run_gsea & species!="Other" ) { try({
 # }
 
 ```
-`r if(gsea_section & species!="Other" & length(gene_data_index)>0 ){"Click below to view GSEA results:  "} `
-`r if(gsea_section & species!="Other" & length(gene_data_index)>0){ output_links } `
+`r if(gsea_section & species!="Other" & length(gene_data_index)>0 ){paste("For GSEA results, see ", gsea_working_dir, " directory.  ", sep="")} `
 
 `r if(enrichment_map ){if( class(output_network_file)!="logical"){ "Click to view EnrichmentMap screen shot: \n"}  }`
 `r if(enrichment_map ){if( class(output_network_file)!="logical"){ paste(" | [ EnrichmentMap Image](",output_subdir,"/",gsea_working_dir,"/screenshot_network.pdf)", sep="") } } `  
@@ -455,7 +433,9 @@ for( i in 1:length(phos_data_index) ){
 
 ```
 `r if(run_ksea){"Click below to view KSEA results:  "} `
-`r if( run_ksea ){ output_links } `
+`r if( run_ksea ){ output_links } `  
+`r if(run_ksea){paste("For complete KSEA results, see KSEA directory.  ", sep="")} `
+
 
 ---
 ```{r echo=FALSE}
@@ -465,7 +445,6 @@ show_metab_enrich <- grepl(paste("Human", "Mouse", "Fruit Fly", "Yeast", "E. col
 `r if( (show_metab_enrich& length(gene_data_index)>0 & runDifferential) ){"### GSEA for Metabolomic Models"} `
 ```{r gsea_met_section, eval=(show_metab_enrich & length(gene_data_index)>0 & runDifferential) }
 
-output_links <- "";
 run_gsea <- gsea_section; # if GSEA has already been run, set to false and include results in directory
 
 if( run_gsea & species!="Other" ) { try({
@@ -611,13 +590,13 @@ for(gmt_index in 1:length(gmt_files)){
 }) } 
 
 ```
+`r if( (show_metab_enrich& length(gene_data_index)>0 & runDifferential) ){paste("For complete GSEA-MOMENTA results, see ", gsea_working_dir ," directory.  ", sep="")} `
 
 ---
 
 `r if( length(metab_data_index)>0 ){"### Metabolite Enrichment"}`
 ```{r mummichog, eval=( length(metab_data_index)>0 )}
 
-output_links <- "";
 output_mummichog_subdir <- file.path(output_subdir,"Metabo_Enrichment" )
 output_mummichog_path <- file.path(working_dir, output_mummichog_subdir)
 if( dir.exists(output_mummichog_path) == FALSE ) { dir.create(output_mummichog_path) }
@@ -692,9 +671,6 @@ for(i in 1:length(metab_data_index)){ try({
         #drawEnrichment(out_table,type=analysis_name,label="mummichog", outputpath=output_mummichog_path_tmp)
         #mset<-PlotIntegPaths(mSet, "png", 400, width=10)
       
-        add_link <- paste("[ ",analysis_name, " ](", output_mummichog_subdir_tmp,"/emap_fgsea_pathway_enrichment.txt)", sep="")
-        output_links <- paste(output_links, add_link, sep=" | " )
-      
       } else { # Run based on enrichment of most intense/least intense
         input_data <- data.frame(m.z= fData(omicsList[[ metab_data_index[i] ]][["eSet"]])$mz,
                                  rank= rowMeans(exprs(omicsList[[ metab_data_index[i] ]][["eSet"]])) )
@@ -705,7 +681,6 @@ for(i in 1:length(metab_data_index)){ try({
         
       }
     }) }
-    output_links <- paste(output_links, add_link, sep="  \n" )
   }
 }) }
 }) })
@@ -713,12 +688,11 @@ for(i in 1:length(metab_data_index)){ try({
 setwd(working_dir)
     
 ```
-`r if(( length(metab_data_index)>0 ) ){"Click below to view Mummichog results:  "}`
-`r if(( length(metab_data_index)>0 ) ){ if(output_links != ""){ output_links }}`
+`r if(( length(metab_data_index)>0 ) ){paste("For complete results, see ", output_mummichog_subdir ," directory.  ", sep="")}`
 
 ---
 
-```{r child=file.path(notebook_dir, 'Notebook_4_Integ.Rmd'), eval=( show_metab_enrich & length(metab_data_index>1))}
+```{r child=file.path(notebook_dir, 'Notebook_4_Integ.Rmd'), eval=( show_metab_enrich & length(metab_data_index>0))}
 ```
 
 
