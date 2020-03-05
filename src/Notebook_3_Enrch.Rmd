@@ -259,7 +259,7 @@ if( run_gsea & species!="Other" ) { try({
     topPathwaysUp <- fgsea_results[ES > 0][head(order(pval), n=10), pathway]
     topPathwaysDown <- fgsea_results[ES < 0][head(order(pval), n=10), pathway]
     topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
-    pdf(output_filename, width=12, height=8)
+    pdf(output_filename, width=20, height=8)
     plotGseaTable(pathways_gmt[topPathways], ranked_vector, fgsea_results, gseaParam = 0.5)
     dev.off()
     
