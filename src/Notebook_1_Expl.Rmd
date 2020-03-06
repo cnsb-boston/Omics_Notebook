@@ -59,14 +59,14 @@ for(i in 1:length(omicsList)){
     omicsList[[i]][["eSet"]] <- combat_eset
     tmp<-drawPCA(eset=omicsList[[i]][["prebatch_eset"]], type=paste(omicsList[[i]][["dataType"]],"_precorrection", sep=""));
   }) }
-  
+  try({
   # PCA plots
   pca_output[[i]] <- drawPCA(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
   
   # Make output hyperlinks for markdown
   add_link <- paste( "[ PCA ](", output_plots_subdir,"/PCAplots_",omicsList[[i]][["dataType"]],".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
-  
+  })
   try({ 
     drawUMAP(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
     add_link <- paste( "[ UMAP ](", output_plots_subdir,"/UMAPplot_",omicsList[[i]][["dataType"]],".pdf)", sep="")
