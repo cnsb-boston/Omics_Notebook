@@ -32,7 +32,9 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
   
   
   pca_graph <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,x_axis], y=PC_data$x[,y_axis]))+ 
-    { if( "Group2" %in% colnames(pData(eset)) ) {geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group));} else {geom_point(aes(colour=pData(eset)$Group)); }} + 
+    { if( "Group2" %in% colnames(pData(eset)) ) { geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group)); }} +
+    { if( "Group2" %in% colnames(pData(eset)) ) { scale_shape_manual(values=1:length(unique(pData(eset)$Group2))) } else { geom_point(aes(colour=pData(eset)$Group)); }} + 
+    theme_bw() + theme(legend.title=element_blank()) + 
     theme_bw() + theme(legend.title=element_blank()) + 
     { if (!make_colors) scale_color_manual(values=colors_dots);  } +
     labs(title=paste("PCA: \n ",type,sep=""),
@@ -52,7 +54,8 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
     
   try({
   pca_graph2 <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,y_axis], y=PC_data$x[,"PC3"]))+ 
-    { if( "Group2" %in% colnames(pData(eset)) ) {geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group));} else {geom_point(aes(colour=pData(eset)$Group)); }} + 
+    { if( "Group2" %in% colnames(pData(eset)) ) { geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group)); }} +
+    { if( "Group2" %in% colnames(pData(eset)) ) { scale_shape_manual(values=1:length(unique(pData(eset)$Group2))) }  else { geom_point(aes(colour=pData(eset)$Group)); }} + 
     theme_bw() + theme(legend.title=element_blank()) + 
     { if (!make_colors) scale_color_manual(values=colors_dots);  } +
     labs(title=paste("PCA: \n ",type,sep=""),
@@ -213,7 +216,8 @@ drawUMAP <- function(eset, type, outputpath=output_plots_path) {
   
   # Make plot
   umap_graph <- ggplot(data=as.data.frame(data.umap), aes(x=data.umap[,1], y=data.umap[,2]))+ 
-    { if( "Group2" %in% colnames(pData(eset)) ) {geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group));} else {geom_point(aes(colour=pData(eset)$Group)); }} + 
+    { if( "Group2" %in% colnames(pData(eset)) ) { geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group)); } } +
+    { if( "Group2" %in% colnames(pData(eset)) ) { scale_shape_manual(values=1:length(unique(pData(eset)$Group2))) } else { geom_point(aes(colour=pData(eset)$Group)); }} + 
     theme_bw() + theme(legend.title=element_blank()) + 
     { if (!make_colors) scale_color_manual(values=colors_dots);  } +
     labs(title=paste("UMAP: \n ",type,sep="") );
