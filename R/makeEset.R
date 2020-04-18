@@ -102,7 +102,10 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     
   }
   
-  drawRange(matrix=data.matrix, file_name = type, outputpath = outputpath )
+  # data.matrix <- as.numeric(as.character(data.matrix) )
+  # data.matrix[is.na(data.matrix)] <- 0
+  
+  try({ drawRange(matrix=data.matrix, file_name = type, outputpath = outputpath ) })
   
   # log2 Intensity Values
   if(log_transform){ data.matrix <- log2(data.matrix+1); }

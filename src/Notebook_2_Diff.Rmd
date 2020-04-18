@@ -5,15 +5,17 @@
 
 # Make contrasts between groups
 contrast_strings <- c();
-if(all_comparisons == TRUE){
+if(all_comparisons == TRUE & length(contrastgroups>1) ){
   for (j in 1:(length(contrastgroups)-1)){
     for (k in (j+1):length(contrastgroups)){
       contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[j], sep=''));
   }  }
-} else {
+} else if(all_comparisons == FALSE & length(contrastgroups>1) ){
   for (k in 2:length(contrastgroups)){
       contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[1], sep=''));
   } 
+} else if( length(contrastgroups) ==1 ){
+  contrast_strings <- contrastgroups
 }
 num_contrasts <- length(contrast_strings);
 loop_list <- 1:num_contrasts

@@ -43,9 +43,9 @@ if(saveXlsx==TRUE){
 }
 ```
 
-`r if( show_metab_enrich & length(metab_data_index)>1 ) {"### Make combined ranked list with metabolites"}`
+`r if( length(metab_data_index)>1 ) {"### Make combined ranked list with metabolites"}`
 
-```{r eval=( show_metab_enrich & length(metab_data_index)>1 ) }
+```{r eval=( length(metab_data_index)>1 ) }
 
 rnk_files <-vector("list", num_contrasts)
 

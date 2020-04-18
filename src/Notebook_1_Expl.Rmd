@@ -87,7 +87,7 @@ for(i in 1:length(omicsList)){
 cat(print_report)
 writeLines(print_report, con=file.path(output_files_path, "Feature_Numbers.txt"))
 
-grid.arrange(grobs=pca_output, ncol=2)
+try({ grid.arrange(grobs=pca_output, ncol=2) })
 
 ```
 Click to view full size images:  
@@ -475,7 +475,7 @@ if(saveXlsx==TRUE){
     writeDataToSheets(wb=wbOut, eset=eSet, type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]);
   } 
   
-  output_filename=file.path(output_path, paste(project_name, "_Summary.xlsx", sep=""))
+  output_filename=file.path(output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary", ".xlsx", sep=""))
   saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
 }
 

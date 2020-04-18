@@ -1,5 +1,9 @@
 # Enrichment Analysis 
 
+```{r, echo=FALSE}
+enrichr_working_dir <- "EnrichR"
+```
+
 `r if(enrichr_section&length(gene_data_index)>0){"### EnrichR"}`
 ```{r enrichr, eval=(enrichr_section&length(gene_data_index)>0) }
 
@@ -115,6 +119,7 @@ for(i in 1:length(gene_data_index) ){
 ```{r echo=FALSE}
 enrichment_map <- gsea_section; # only run enrichment map if interactive session
 output_network_file <- FALSE;
+gsea_working_dir <- "GSEA"
 ```
 
 `r if( gsea_section & species!="Other" & length(gene_data_index)>0){"### GSEA and EnrichmentMap"} `
@@ -593,6 +598,10 @@ for(gmt_index in 1:length(gmt_files)){
 `r if( (show_metab_enrich& length(gene_data_index)>0 & runDifferential) ){paste("For complete GSEA-MOMENTA results, see ", gsea_working_dir ," directory.  ", sep="")} `
 
 ---
+
+```{r, echo=FALSE}
+output_mummichog_subdir <- file.path(output_subdir,"Metabo_Enrichment" )
+```
 
 `r if( length(metab_data_index)>0 ){"### Metabolite Enrichment"}`
 ```{r mummichog, eval=( length(metab_data_index)>0 )}

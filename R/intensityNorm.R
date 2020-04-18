@@ -18,6 +18,9 @@
 intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
                           annotate=annot, zero_cutoff=0, data_format, min_feature=0.1 ){
   
+  eset <- eset[ rowSums(exprs(eset)>0)>=zero_cutoff*ncol(exprs(eset)), ];
+  eset <- eset[ , colSums(exprs(eset)>0)>=min_feature*nrow(exprs(eset)) ];
+  
   col_palette <- rainbow(length(levels(as.factor(pData(eset)$Group))))
   annotCol <- col_palette[as.factor(pData(eset)$Group)]
   try({if("ColorsHex" %in% colnames(pData(eset))) {
@@ -25,9 +28,6 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
       annotCol <- pData(eset)[,"ColorsHex"]
     }
   } })
-
-  eset <- eset[ rowSums(exprs(eset)>0)>=zero_cutoff*ncol(exprs(eset)), ];
-  eset <- eset[ , colSums(exprs(eset)>0)>=min_feature*nrow(exprs(eset)) ];
   
   eset_matrix <- exprs(eset)
   df <- data.frame(reshape2::melt(eset_matrix, id.vars = NULL));
