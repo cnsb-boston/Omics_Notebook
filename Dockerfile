@@ -102,5 +102,4 @@ RUN Rscript -e 'BiocManager::install(c( \
 
 RUN Rscript -e 'devtools::install_github("cnsb-boston/MetaboAnalystR", build_vignettes=FALSE);'
 
-RUN Python src/Pipeline.py
 
