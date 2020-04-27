@@ -41,8 +41,6 @@ BiocManager::install("ComplexHeatmap")
 BiocManager::install("preprocessCore")
 BiocManager::install("edgeR")
 BiocManager::install("Glimma")
-
-
 BiocManager::install("fgsea")
 
 
@@ -53,12 +51,16 @@ BiocManager::install("sva")
 # FOR TXT (Maxquant) RAW DATA REPORT
 install.packages("PTXQC")
 
-# # FOR METABOLITES ONLY
+# FOR METABOLITES ONLY
 metanr_packages <- function(){
-  metr_pkgs <- c("Rserve", "ellipse", "scatterplot3d", "Cairo", "randomForest", "caTools", "e1071", "som", "impute", "pcaMethods", "RJSONIO", "ROCR",
-                 "globaltest", "GlobalAncova", "Rgraphviz", "preprocessCore", "genefilter", "pheatmap", "SSPA", "sva", "Rcpp", "pROC", "data.table",
-                 "limma", "car", "fitdistrplus", "lars", "Hmisc", "magrittr", "methods", "xtable", "pls", "caret", "lattice", "igraph", "gplots",
-                 "KEGGgraph", "reshape", "RColorBrewer", "tibble", "siggenes", "plotly", "xcms", "CAMERA", "fgsea", "MSnbase", "BiocParallel", "metap", "reshape2", "scales")
+  metr_pkgs <- c("Rserve", "ellipse", "scatterplot3d", "Cairo", "randomForest", "caTools",
+                 "e1071", "som", "impute", "pcaMethods", "RJSONIO", "ROCR", "MSnbase",
+                 "globaltest", "GlobalAncova", "Rgraphviz", "preprocessCore",
+                 "genefilter", "pheatmap", "SSPA", "sva", "Rcpp", "pROC", "data.table",
+                 "limma", "car", "fitdistrplus", "lars", "Hmisc", "magrittr", "methods",
+                 "xtable", "pls", "caret", "lattice", "igraph", "gplots",
+                 "KEGGgraph", "reshape", "RColorBrewer", "tibble", "siggenes", "plotly",
+                 "xcms", "CAMERA", "fgsea", "BiocParallel", "metap", "reshape2", "scales")
   list_installed <- installed.packages()
   new_pkgs <- subset(metr_pkgs, !(metr_pkgs %in% list_installed[, "Package"]))
   if(length(new_pkgs)!=0){
@@ -77,26 +79,26 @@ library(devtools)
 devtools::install_github("cnsb-boston/MetaboAnalystR", build_vignettes=FALSE)
 
 
-#######
-
-## ENRICHMENT
-
-# For Enrichr
-install.packages("enrichR")
-
-# Kinase Enrichment KSEA
-#install.packages("KSEAapp") created fork to add output directory option
-library(devtools)
-devtools::install_github("cnsb-boston/KSEAapp")
-
-# FOR GSEA SECTION
-install.packages("RCurl")
-install.packages("httr")
-install.packages("RJSONIO")
-
-# FOR ENRICHMENT MAP
-BiocManager::install("RCy3")
-#######
+# #######
+# 
+# ## ENRICHMENT
+# 
+# # For Enrichr
+# install.packages("enrichR")
+# 
+# # Kinase Enrichment KSEA
+# #install.packages("KSEAapp") created fork to add output directory option
+# library(devtools)
+# devtools::install_github("cnsb-boston/KSEAapp")
+# 
+# # FOR GSEA SECTION
+# install.packages("RCurl")
+# install.packages("httr")
+# install.packages("RJSONIO")
+# 
+# # FOR ENRICHMENT MAP
+# BiocManager::install("RCy3")
+# #######
 
 
 
