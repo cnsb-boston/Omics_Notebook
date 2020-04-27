@@ -16,7 +16,7 @@
 #' 
 #' @export
 intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
-                          annotate=annot, zero_cutoff=0, data_format, min_feature=0.1 ){
+                          annotate=annot, zero_cutoff=0, data_format, min_feature=0.01 ){
   
   eset <- eset[ rowSums(exprs(eset)>0)>=zero_cutoff*ncol(exprs(eset)), ];
   eset <- eset[ , colSums(exprs(eset)>0)>=min_feature*nrow(exprs(eset)) ];
