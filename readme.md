@@ -1,3 +1,16 @@
+## Instructions
+
+1. Install git. Clone github repository:
+
+<code> git clone git@github.com:cnsb-boston/Omics_Notebook.git </code>
+
+2. Install Docker. From Omics Notebook Directory, run:
+
+<code> docker run </code>
+
+Note: GUI requires X11
+
+
 ## Software requirements
 
 * R 3.6,  Python 3.6.
