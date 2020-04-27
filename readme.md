@@ -6,7 +6,22 @@
 
 2. Install Docker. From Omics Notebook Directory, run:
 
-<code> docker run </code>
+<code> 
+
+docker pull bblum/omics_notebook:latest
+
+docker run -i -t --rm \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+  -v ../Omics_Notebook:/home:rw \
+  bblum/omics_notebook
+
+
+
+
+
+
+</code>
 
 Note: GUI requires X11
 
