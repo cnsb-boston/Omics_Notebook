@@ -7,3 +7,7 @@ packrat/lib*/
 
 #
 Omics_Notebook/*
+
+.Rhistory
+src/.Rhistory
+.DS_Store
