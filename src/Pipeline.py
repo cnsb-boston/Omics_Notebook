@@ -52,7 +52,10 @@ class GUI(tk.Frame):
     fileDir_lbl.grid(column=0, row=2, sticky=tk.E)
     fileDir_field = tk.Entry(self, width=60)
     fileDir_field.grid(column=1, row=2, columnspan=3, sticky=tk.W)
-    #startDir = "/projectnb/cnsbomic" # change default based on install
+    if os.path.isdir(os.path.normpath(startDir) ):
+      startDir = os.path.normpath(startDir)
+    else :
+      startDir = os.path.normpath("./")
     def fileDir_clicked():
       global fileDir
       fileDir = filedialog.askdirectory(initialdir=startDir, title='Choose directory') 
@@ -207,6 +210,14 @@ class GUI(tk.Frame):
     txtFolder['values']=('TRUE', 'FALSE')
     txtFolder.current(1)
     txtFolder.grid(column=1, row=24, pady=(20,0))
+    
+    # Check if inherit paths directories are there
+    
+    if os.path.isdir(os.path.normpath(libraries_path) ):
+      libraries_path = os.path.normpath(libraries_path)
+    else :
+      libraries_path = os.path.normpath("./")
+      inherit_paths = "FALSE"
 
     ############################################
     # SAVE VARIABLES FILE AND CLOSE COMMAND

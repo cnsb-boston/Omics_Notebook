@@ -17,3 +17,5 @@ RUN apt-get update \
 COPY install.R /home/install.R
 
 RUN Rscript home/install.R
+
+CMD ["/bin/bash"]
