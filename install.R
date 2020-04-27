@@ -79,26 +79,26 @@ library(devtools)
 devtools::install_github("cnsb-boston/MetaboAnalystR", build_vignettes=FALSE)
 
 
-# #######
-# 
-# ## ENRICHMENT
-# 
-# # For Enrichr
-# install.packages("enrichR")
-# 
-# # Kinase Enrichment KSEA
-# #install.packages("KSEAapp") created fork to add output directory option
-# library(devtools)
-# devtools::install_github("cnsb-boston/KSEAapp")
-# 
-# # FOR GSEA SECTION
-# install.packages("RCurl")
-# install.packages("httr")
-# install.packages("RJSONIO")
-# 
-# # FOR ENRICHMENT MAP
-# BiocManager::install("RCy3")
-# #######
+#######
+
+## ENRICHMENT
+
+# For Enrichr
+install.packages("enrichR")
+
+# Kinase Enrichment KSEA
+#install.packages("KSEAapp") created fork to add output directory option
+library(devtools)
+devtools::install_github("cnsb-boston/KSEAapp")
+
+# FOR GSEA SECTION
+install.packages("RCurl")
+install.packages("httr")
+install.packages("RJSONIO")
+
+# FOR ENRICHMENT MAP
+BiocManager::install("RCy3")
+#######
 
 
 
