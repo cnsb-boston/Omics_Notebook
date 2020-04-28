@@ -12,12 +12,17 @@ docker pull bblum/omics_notebook:latest
 
 docker run -i -t --rm \
   -e DISPLAY=$DISPLAY \
+  -u docker \
   -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
-  -v ../Omics_Notebook:/home:rw \
+  -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook
-
-
-
+  
+docker run -it --rm \
+  -u docker \
+  -v /tmp/.X11-unix:/tmp/.X11-unix \ 
+  -e DISPLAY=unix$DISPLAY \
+  -v ~/Omics_Notebook:/home:rw \
+  bblum/omics_notebook
 
 
 
