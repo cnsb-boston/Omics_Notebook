@@ -18,8 +18,14 @@ RUN apt-get update \
 RUN apt-get install -qqy x11-apps
 ENV DISPLAY $DISPLAY
 
+
 COPY install.R /home/install.R
 
 RUN Rscript home/install.R
+
+
+RUN useradd -ms /bin/bash docker
+USER newuser
+WORKDIR /home/newuser
 
 CMD ["/bin/bash"]
