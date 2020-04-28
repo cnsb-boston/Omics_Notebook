@@ -15,17 +15,23 @@ RUN apt-get update \
         r-base-dev
 
 
-RUN apt-get install -qqy x11-apps
-ENV DISPLAY $DISPLAY
-
-
+# Install R libraries
 COPY install.R /home/install.R
 
 RUN Rscript home/install.R
 
 
+# Install vnc, xvfb in order to create a 'fake' display and firefox
+RUN     apt-get install -y x11vnc xvfb
+RUN     mkdir ~/.vnc
+# Setup a password
+RUN     x11vnc -storepasswd 1234 ~/.vnc/passwd
+
+
+# Create user
 RUN useradd -ms /bin/bash docker
 USER newuser
-WORKDIR /home/newuser
 
+
+# Start at prompt
 CMD ["/bin/bash"]
