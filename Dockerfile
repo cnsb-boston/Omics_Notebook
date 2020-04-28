@@ -14,9 +14,6 @@ RUN apt-get update \
         python3-tk \
         r-base-dev
 
-RUN apt-get install -qqy x11-apps
-ENV DISPLAY :0
-
 COPY install.R /home/install.R
 
 RUN Rscript home/install.R
