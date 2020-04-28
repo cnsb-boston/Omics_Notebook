@@ -12,7 +12,10 @@ RUN apt-get update \
         pandoc \
         python3 \
         python3-tk \
-        r-base-dev
+        r-base-dev \
+        -qqy x11-apps
+
+ENV DISPLAY :0
 
 COPY install.R /home/install.R
 
