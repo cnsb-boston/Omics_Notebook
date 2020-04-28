@@ -12,25 +12,35 @@ RUN apt-get update \
         pandoc \
         python3 \
         python3-tk \
-        r-base-dev
-
+        r-base-dev \
+        && rm -rf /var/lib/apt/lists/*
 
 # Install R libraries
 COPY install.R /home/install.R
 
 RUN Rscript home/install.R
 
-
-# Install vnc, xvfb in order to create a 'fake' display and firefox
-RUN     apt-get install -y x11vnc xvfb
-RUN     mkdir ~/.vnc
-# Setup a password
-RUN     x11vnc -storepasswd 1234 ~/.vnc/passwd
+RUN apt-get update && apt-get install -y \
+	ca-certificates \
+	curl \
+	dirmngr \
+	gnupg \
+	libasound2 \
+	libdbus-glib-1-2 \
+	libgtk-3-0 \
+	libxrender1 \
+	libx11-xcb-dev \
+	libx11-xcb1 \
+	libxt6 \
+	xz-utils \
+	file \
+	--no-install-recommends \
+	&& rm -rf /var/lib/apt/lists/*
 
 
 # Create user
 RUN useradd -ms /bin/bash docker
-USER newuser
+USER docker
 
 
 # Start at prompt
