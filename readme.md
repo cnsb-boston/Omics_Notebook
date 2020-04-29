@@ -10,25 +10,44 @@
 
 docker pull bblum/omics_notebook:latest
 
-docker run -i -t --rm \
+</code>
+
+The GUI component works by mounting the X11 socket into the container. Mac and Windows users require X11. 
+
+For macOS (socat and xquartz required):
+<code> 
+open -a Xquartz
+socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\"
+</code>
+
+Set the display variable for your platform:
+macOS: <code> -e DISPLAY=docker.for.mac.host.internal:0 </code>
+Windows: <code> -e DISPLAY=host.docker.internal:0 </code>
+Linux: <code> --net=host -e DISPLAY=:0 </code>
+
+Perform docker run command with platform specific display:
+<code>
+docker run -it --rm \
   -e DISPLAY=$DISPLAY \
   -u docker \
   -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
   -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook
   
+
 docker run -it --rm \
+  -e DISPLAY=docker.for.mac.host.internal:0 \
   -u docker \
-  -v /tmp/.X11-unix:/tmp/.X11-unix \ 
-  -e DISPLAY=unix$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
   -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook
 
-
-
 </code>
 
-Note: GUI requires X11
+Note: GUI requires X11. If you are unable to configure X11 socket, you can create the parameters file manually. 
+
+In the docker prompt, run: <code> python3 /home/Notebook.py </code>
+
 
 
 ## Software requirements

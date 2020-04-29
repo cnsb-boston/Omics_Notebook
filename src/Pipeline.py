@@ -2,26 +2,6 @@
 
 # Python script to take variables and write Paramters.R and run Omics_Notebook
 
-
-############################################
-##
-##  SET FILE PATHS FOR LOCAL INSTALL
-##
-############################################
-
-# R libraries path
-libraries_path = '/project/cnsbomic/Tools/R3.6'
-
-# Pandoc path
-#pandoc_path = SET IF NEEDED
-
-# Inherit paths
-inherit_paths = "TRUE"
-
-startDir = "/projectnb/cnsbomic" # change default based on install
-
-############################################
-
 # Load modules
 import tkinter as tk
 from tkinter import ttk, filedialog
@@ -35,6 +15,25 @@ import sys
 class GUI(tk.Frame):
   def __init__(self, parent):
     tk.Frame.__init__(self,parent)
+    
+    ############################################
+    ##
+    ##  SET FILE PATHS FOR LOCAL INSTALL
+    ##
+    ############################################
+
+    # R libraries path
+    libraries_path = '/project/cnsbomic/Tools/R3.6'
+
+    # Pandoc path
+    #pandoc_path = SET IF NEEDED
+
+    # Inherit paths
+    inherit_paths = "TRUE"
+
+    startDir = "/projectnb/cnsbomic" # change default based on install
+
+    ############################################
     
     # WINDOW TITLE AND DIMENSIONS
     lbl = tk.Label(self, text="Enter variables below to configure Omics Notebook")
