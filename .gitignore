@@ -11,3 +11,5 @@ Omics_Notebook/*
 .Rhistory
 src/.Rhistory
 .DS_Store
+
+example/Parameters.R
