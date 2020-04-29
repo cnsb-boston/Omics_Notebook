@@ -2,31 +2,27 @@
 
 1. Install git. Clone github repository:
 
-<code> git clone git@github.com:cnsb-boston/Omics_Notebook.git </code>
+`git clone git@github.com:cnsb-boston/Omics_Notebook.git`
 
 2. Install Docker. From Omics Notebook Directory, run:
 
-<code> 
-
-docker pull bblum/omics_notebook:latest
-
-</code>
+`docker pull bblum/omics_notebook:latest`
 
 The GUI component works by mounting the X11 socket into the container. Mac and Windows users require X11. 
 
 For macOS (socat and xquartz required):
-<code> 
+```
 open -a Xquartz
 socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\"
-</code>
+```
 
 Set the display variable for your platform:
-macOS: <code> -e DISPLAY=docker.for.mac.host.internal:0 </code>
-Windows: <code> -e DISPLAY=host.docker.internal:0 </code>
-Linux: <code> --net=host -e DISPLAY=:0 </code>
+macOS: `-e DISPLAY=docker.for.mac.host.internal:0`
+Windows: `-e DISPLAY=host.docker.internal:0`
+Linux: `--net=host -e DISPLAY=:0`
 
 Perform docker run command with platform specific display:
-<code>
+```
 docker run -it --rm \
   -e DISPLAY=$DISPLAY \
   -u docker \
@@ -42,7 +38,7 @@ docker run -it --rm \
   -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook
 
-</code>
+```
 
 Note: GUI requires X11. If you are unable to configure X11 socket, you can create the parameters file manually. 
 
