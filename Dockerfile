@@ -1,4 +1,4 @@
-FROM debian:sid-slim
+FROM rocker/r-ver:3.6.1
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -10,16 +10,11 @@ RUN apt-get update \
         libxt-dev \
         libcairo2-dev \
         pandoc \
-        python3=3.6.7 \
+        python3 \
         python3-tk \
         r-base-dev \
         && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get -y install --no-install-recommends --no-install-suggests \
-        ca-certificates software-properties-common gnupg2 gnupg1 \
-      && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
-      && add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/' \
-      && apt-get install r-base=3.6.3
 
 # Install R libraries
 COPY install.R /home/install.R
