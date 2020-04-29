@@ -10,7 +10,7 @@ RUN apt-get update \
         libxt-dev \
         libcairo2-dev \
         pandoc \
-        python3 \
+        python3=3.6.7 \
         python3-tk \
         r-base-dev \
         && rm -rf /var/lib/apt/lists/*
