@@ -1,4 +1,4 @@
-FROM rocker/r-ver:3.6.1
+FROM debian:sid-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -15,27 +15,17 @@ RUN apt-get update \
         r-base-dev \
         && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get -y install --no-install-recommends --no-install-suggests \
+        ca-certificates software-properties-common gnupg2 gnupg1 \
+      && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9 \
+      && add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/' \
+      && apt-get install r-base=3.6.3
+
 # Install R libraries
 COPY install.R /home/install.R
 
 RUN Rscript home/install.R
 
-RUN apt-get update && apt-get install -y \
-	ca-certificates \
-	curl \
-	dirmngr \
-	gnupg \
-	libasound2 \
-	libdbus-glib-1-2 \
-	libgtk-3-0 \
-	libxrender1 \
-	libx11-xcb-dev \
-	libx11-xcb1 \
-	libxt6 \
-	xz-utils \
-	file \
-	--no-install-recommends \
-	&& rm -rf /var/lib/apt/lists/*
 
 
 # Create user
