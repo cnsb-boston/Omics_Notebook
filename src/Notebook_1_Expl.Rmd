@@ -160,18 +160,22 @@ if(length(gene_data_index)>1){ try({
   item_name <- "Gene"
   data_index <- gene_data_index
   
-  gene_values <- vector("list", length(data_index))
-  for (i in 1:(length(gene_data_index)) ){
-    gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i] ]][["eSet"]]) ); # Make a data frame of values and genes
-    gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i] ]][["eSet"]])[,item_name] ;                                                                         
-    gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
-    gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
-    gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
-    names(gene_values)[i] <- omicsList[[ data_index[i] ]][["dataType"]]
+  for (j in 1:length(contrastgroups) ){
+    group_name <- paste(item_name,"_", contrastgroups[j], sep="")
+    gene_values <- vector("list", (length(data_index)) )
+    for (i in 1:(length(data_index)) ){
+      group_columns <- grepl(contrastgroups[j], pData(omicsList[[ data_index[i] ]][["eSet"]])$Group)
+      gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i] ]][["eSet"]])[,group_columns] ); # Make a data frame of values and genes
+      gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i] ]][["eSet"]])[,item_name] ;                                                                         
+      gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+      gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+      gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
+      names(gene_values)[i] <- paste(omicsList[[ data_index[i] ]][["dataType"]],"_",contrastgroups[j], sep="")
+    }
+    drawXYCorr(item_list=gene_values, item_name=item_name, file_name = contrastgroups[j] , subset_genes=subset_genes);
+    add_link <- paste("[ ",group_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",group_name,".pdf)", sep="") ;
+    output_links <- paste(output_links, add_link, sep=" | " )
   }
-  drawXYCorr(item_list=gene_values, item_name=item_name, subset_genes=subset_genes);
-  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,"_.pdf)", sep="") ;
-  output_links <- paste(output_links, add_link, sep=" | " )
 }) }
 
 # Correlation for "Protein"
@@ -179,18 +183,22 @@ if(length(prot_data_index)>1){ try({
   item_name <- "Protein"
   data_index <- prot_data_index
   
-  gene_values <- vector("list", length(data_index))
-  for (i in 1:(length(gene_data_index)) ){
-    gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i] ]][["eSet"]]) ); # Make a data frame of values and genes
-    gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i] ]][["eSet"]])[,item_name] ;                                                                         
-    gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
-    gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
-    gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
-    names(gene_values)[i] <- omicsList[[ data_index[i] ]][["dataType"]]
+    for (j in 1:length(contrastgroups) ){
+    group_name <- paste(item_name,"_", contrastgroups[j], sep="")
+    gene_values <- vector("list", (length(data_index)) )
+    for (i in 1:(length(data_index)) ){
+      group_columns <- grepl(contrastgroups[j], pData(omicsList[[ data_index[i] ]][["eSet"]])$Group)
+      gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i] ]][["eSet"]])[,group_columns] ); # Make a data frame of values and genes
+      gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i] ]][["eSet"]])[,item_name] ;                                                                         
+      gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+      gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+      gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
+      names(gene_values)[i] <- paste(omicsList[[ data_index[i] ]][["dataType"]],"_",contrastgroups[j], sep="")
+    }
+    drawXYCorr(item_list=gene_values, item_name=item_name, file_name = contrastgroups[j] , subset_genes=subset_genes);
+    add_link <- paste("[ ",group_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",group_name,".pdf)", sep="") ;
+    output_links <- paste(output_links, add_link, sep=" | " )
   }
-  drawXYCorr(item_list=gene_values, item_name=item_name);
-  add_link <- paste("[ ",item_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",item_name,"_.pdf)", sep="");
-  output_links <- paste(output_links, add_link, sep=" | " )
 }) }
 
 ```
@@ -234,88 +242,127 @@ for(i in 1:length(omicsList)){ try({
 
 ---
 
-`r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){"### Site Normalization to Proteins"}`
-```{r site_normalixation, eval= ( length(prot_groups_index)>0 & length(sites_data_index)>0 ) }
+`r if( length(prot_data_index)>0 | length(gene_data_index)>0 ){"### Normalize to 1st Data Set"}`
+```{r site_normalixation, eval= ( length(prot_data_index)>0 | length(gene_data_index)>0 ) }
 suppressMessages({suppressWarnings({ 
 output_links<-"";
 try({
-# Take first protein groups data set for normalization
-item_name <- "Protein"
-data_index <- prot_groups_index
+  
+# Take first data set for normalization
+if(length(prot_data_index)>1){
+  item_name <- "Protein"
+  data_index <- prot_data_index
 
-gene_values <- data.frame( exprs(omicsList[[ data_index[1] ]][["eSet"]]) ); # Make a data frame of values and genes
-gene_values[,item_name] <- fData(omicsList[[ data_index[1] ]][["eSet"]])[,item_name] ;                                                                         
-gene_values <- gene_values %>% gather(sample, value, -item_name); # Gather values and get average by gene
-gene_values <- gene_values %>% group_by(.dots=item_name, sample) %>% summarize(mean=mean(value));
-gene_values <- gene_values %>% spread(sample, mean) %>% as.data.frame
-gene_values <- gene_values[gene_values[,item_name]!="",]
-rownames(gene_values) <- gene_values[,item_name];
-gene_values <- gene_values[,colnames(gene_values)!=item_name];
-
-# Normalize sites files
-for(i in 1:length(sites_data_index)){
-  if( identical(omicsList[[ prot_groups_index[1] ]][["eSet"]]$SampleName,
-                omicsList[[ sites_data_index[i] ]][["eSet"]]$SampleName) ) {
+  gene_values <- omicsList[[ data_index[1] ]][["eSet"]]; 
+  for(i in 2:length(data_index)){
+    if( identical(gene_values$SampleName, omicsList[[ data_index[i] ]][["eSet"]]$SampleName) ) {
     
-    norm_values <- omicsList[[ sites_data_index[i] ]][["eSet"]] ;
-    norm_values <- norm_values[ fData(norm_values)[,item_name] %in% rownames(gene_values) ,];
+      norm_values <- omicsList[[ data_index[i] ]][["eSet"]] ;
+      norm_values <- norm_values[ fData(norm_values)[,item_name] %in% fData(gene_values)[,item_name] ,];
    
     for(g in 1:nrow(norm_values)) {
-      exprs(norm_values)[g,] <- as.numeric(exprs(norm_values)[g,] / gene_values[which(rownames(gene_values)==fData(norm_values)[g,item_name]),] );
-      exprs(norm_values)[g,] <- as.numeric(exprs(norm_values)[g,] * rowMeans(gene_values[which(rownames(gene_values)==fData(norm_values)[g,item_name]),]) );
+      gene_values_rows <- grep(fData(norm_values)[g,item_name], fData(gene_values)[,item_name])
+      if(length(gene_values_rows)>1){
+        gene_values_means <- colMeans(exprs(gene_values)[gene_values_rows,])
+      } else {
+        gene_values_means <- (exprs(gene_values)[gene_values_rows,])
+      }
+      exprs(norm_values)[g,] <- (as.numeric(exprs(norm_values)[g,] - gene_values_means )) + mean(gene_values_means) ;
+      exprs(norm_values)[g,] <- as.numeric(exprs(norm_values)[g,] + mean(gene_values_means) );
     }
   
-    omicsList[[ sites_data_index[i] ]][[10]] <- norm_values;
-    names( omicsList[[ sites_data_index[i] ]] )[10] <- "siteNorm";
+    omicsList[[ data_index[i] ]][[10]] <- norm_values;
+    names( omicsList[[ data_index[i] ]] )[10] <- "siteNorm";
   
-    sites_norm_index <- c(sites_norm_index, sites_data_index[i]);
+    data_norm_index <- c(data_norm_index, data_index[i]);
+    }
+  }
+} else {
+  item_name <- "Gene"
+  data_index <- gene_data_index
+  
+  gene_values <- omicsList[[ data_index[1] ]][["eSet"]]; 
+  for(i in 2:length(data_index)){
+    if( identical(gene_values$SampleName, omicsList[[ data_index[i] ]][["eSet"]]$SampleName) ) {
+    
+      norm_values <- omicsList[[ data_index[i] ]][["eSet"]] ;
+      norm_values <- norm_values[ fData(norm_values)[,item_name] %in% fData(gene_values)[,item_name] ,];
+   
+    for(g in 1:nrow(norm_values)) {
+      gene_values_rows <- grep(fData(norm_values)[g,item_name], fData(gene_values)[,item_name])
+      if(length(gene_values_rows)>1){
+        gene_values_means <- colMeans(exprs(gene_values)[gene_values_rows,])
+      } else {
+        gene_values_means <- (exprs(gene_values)[gene_values_rows,])
+      }
+      exprs(norm_values)[g,] <- as.numeric(exprs(norm_values)[g,] - gene_values_means );
+      exprs(norm_values)[g,] <- as.numeric(exprs(norm_values)[g,] + mean(gene_values_means) );
+    }
+  
+    omicsList[[ data_index[i] ]][[10]] <- norm_values;
+    names( omicsList[[ data_index[i] ]] )[10] <- "siteNorm";
+  
+    data_norm_index <- c(data_norm_index, data_index[i]);
+    }
   }
 }
 
-# Plot new correlation
-gene_values <- vector("list", (length(sites_norm_index)+1) )
-gene_values[[1]] <- data.frame( exprs(omicsList[[ data_index[1] ]][["eSet"]]) ); # Make a data frame of values and genes
-gene_values[[1]][,item_name] <- fData(omicsList[[ data_index[1] ]][["eSet"]])[,item_name] ;                                                                         
-gene_values[[1]] <- gene_values[[1]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
-gene_values[[1]] <- gene_values[[1]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
-gene_values[[1]] <- gene_values[[1]][gene_values[[i]][,item_name]!="",]
-names(gene_values)[1] <- omicsList[[ data_index[1] ]][["dataType"]]
+# Correlation for normalized data
+  for (j in 1:length(contrastgroups) ){
+    group_name <- paste("siteNorm_",item_name,"_", contrastgroups[j], sep="")
+    gene_values <- vector("list", (length(data_index)) )
+    
+    group_columns <- grepl(contrastgroups[j], pData(omicsList[[ data_index[1] ]][["eSet"]])$Group)
+    gene_values[[1]] <- data.frame( exprs(omicsList[[ data_index[1] ]][["eSet"]])[,group_columns] ); # Make a data frame of values and genes
+    gene_values[[1]][,item_name] <- fData(omicsList[[ data_index[1] ]][["eSet"]])[,item_name] ;                                                                         
+    gene_values[[1]] <- gene_values[[1]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+    gene_values[[1]] <- gene_values[[1]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+    gene_values[[1]] <- gene_values[[1]][gene_values[[1]][,item_name]!="",]
+    names(gene_values)[1] <- paste(omicsList[[ data_index[1] ]][["dataType"]],"_",contrastgroups[j], sep="")
+    
+    for (i in 2:(length(data_index)) ){
+      group_columns <- grepl(contrastgroups[j], pData(omicsList[[ data_index[i] ]][["siteNorm"]])$Group)
+      gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i] ]][["siteNorm"]])[,group_columns] ); # Make a data frame of values and genes
+      gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i] ]][["siteNorm"]])[,item_name] ;                                                                         
+      gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
+      gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
+      gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
+      names(gene_values)[i] <- paste("siteNorm_",omicsList[[ data_index[i] ]][["dataType"]],"_",contrastgroups[j], sep="")
+    }
+    
+    drawXYCorr(item_list=gene_values, item_name=item_name, file_name = paste(contrastgroups[j], "_siteNorm", sep="") ,
+               subset_genes=subset_genes);
+    add_link <- paste("[ ",group_name," Correlation Plots ](",output_plots_subdir,"/Correlation_Plots_",group_name,".pdf)", sep="") ;
+    output_links <- paste(output_links, add_link, sep=" | " )
+  }
 
-data_index <- sites_norm_index;
-for (i in 2:(length(data_index)+1) ){
-  gene_values[[i]] <- data.frame( exprs(omicsList[[ data_index[i-1] ]][["siteNorm"]]) ); # Make a data frame of values and genes
-  gene_values[[i]][,item_name] <- fData(omicsList[[ data_index[i-1] ]][["siteNorm"]])[,item_name] ;                                                                         
-  gene_values[[i]] <- gene_values[[i]] %>% gather(sample, value, -item_name); # Gather values and get average by gene
-  gene_values[[i]] <- gene_values[[i]] %>% group_by(.dots=item_name) %>% summarize(mean=mean(value));
-  gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
-  names(gene_values)[i] <- paste(omicsList[[ data_index[i-1] ]][["dataType"]], "_NormToProteome",sep="")
-}
 
-drawXYCorr(item_list=gene_values, item_name=item_name, file_name="_withSiteNorm" );
-add_link <- paste("[ ",item_name,"_withSiteNorm Correlation Plots ](",output_plots_subdir,
-                  "/Correlation_Plots_",item_name,"_withSiteNorm.pdf)  \n", sep="") ;
-output_links <- paste(output_links, add_link, sep=" | " )
 
-for(i in 1:length(sites_norm_index)){
-  type_name <- paste(omicsList[[ sites_norm_index[i] ]][["dataType"]], "_normtoProteome",sep="")
-  tmp<-drawPCA(eset=omicsList[[ sites_norm_index[i] ]][["siteNorm"]], type=type_name, show_sample_names=TRUE)
+for(i in 1:length(data_norm_index)){
+  type_name <- paste(omicsList[[ data_norm_index[i] ]][["dataType"]], "_NormTo",omicsList[[ data_index[1] ]][["dataType"]],sep="")
+  tmp<-drawPCA(eset=omicsList[[ data_norm_index[i] ]][["siteNorm"]], type=type_name, show_sample_names=TRUE)
 
   add_link <- paste("[ PCA:",type_name, " ](", output_plots_subdir,"/PCAplots_",type_name,".pdf)", sep="")
   output_links <- paste(output_links, add_link, sep=" | " )
 }
+  
 })
 })})
 ```
-`r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){"Site to Proteome Normalization:"}`
-`r if( length(prot_groups_index)>0 & length(sites_data_index)>0 ){ output_links }`
+`r if( length(prot_data_index)>0 | length(gene_data_index)>0 ){"Proteome Normalization:"}`
+`r if( length(prot_data_index)>0 | length(gene_data_index)>0 ){ output_links }`
 
 ```{r add_site_norm, eval=use_site_norm}
 
-for(i in 1:length(sites_norm_index)){try({
+unnorm_gene_index <- gene_data_index
+gene_data_index <- data_index[1]
+
+for(i in 1:length(data_norm_index)){try({
   start_length <- length(omicsList) + 1
-  omicsList[[start_length]] <- omicsList[[ sites_norm_index[i] ]]
+  omicsList[[start_length]] <- omicsList[[ data_norm_index[i] ]]
   omicsList[[start_length]][["eSet"]] <- omicsList[[start_length]][["siteNorm"]] 
-  omicsList[[start_length]][["dataType"]] <- paste(omicsList[[start_length]][["dataType"]], "_normToProt", sep="")
+  omicsList[[start_length]][["dataType"]] <- paste(omicsList[[start_length]][["dataType"]],
+                                                   "_NormTo",omicsList[[ data_index[1] ]][["dataType"]],sep="")
   gene_data_index <- c(gene_data_index, start_length)
 }) }
 

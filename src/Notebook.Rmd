@@ -136,7 +136,7 @@ sourceDirectory(file.path(gsub("src","R", notebook_dir)))
 # omicsList[[i]][[7]] "fit" is the limmaFit output of eBayes
 # omicsList[[i]][[8]]
 # omicsList[[i]][[9]] 
-# omicsList[[i]][[10]] "siteNorm" is site data normalized to protein groups
+# omicsList[[i]][[10]] "siteNorm" is  data normalized to the first data set by protein or gene
 # omicsList[[i]][[11]] 
 # omicsList[[i]][[12]] "prebatch_eset" is the normalized but pre-batch corrected eset, if applicable
 # omicsList[[i]][[14]] is the un-normalized eset object - for debugging only
@@ -148,10 +148,11 @@ metab_data_index <- c();  # index of all Metabolite data
 mz_data_index <- c();     # index of all data with mz
 phos_data_index <- c();   # index of Phospho Site Data (from MQ)
 sites_data_index <- c();  # index of all site data (from MQ)
-sites_norm_index <- c();  # index of site data normalized to proteome (if applicable)
+data_norm_index <- c();  # index of site data normalized to proteome (if applicable)
 gene_data_index <- c();   # index of all data  with Gene (HGNC Symbols)
 prot_data_index <- c();   # index of all data with Protein (Uniprot IDs)
 prot_groups_index <- c(); # index of all Protein Groups Data (MQ)
+unnorm_gene_index<-c() # index of all data with Genes, including pre-site normalized
 
 # Import annotation file
 if(!file.exists(annotation_filename)){
@@ -232,6 +233,8 @@ for (i in 1:length(omicsList)){
   if( "Protein" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { prot_data_index <- c(prot_data_index, i) };
   if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { mz_data_index <- c(mz_data_index, i) };
 }
+
+unnorm_gene_index <- gene_data_index ;
 
 # load libraries if needed
 suppressPackageStartupMessages({suppressWarnings({

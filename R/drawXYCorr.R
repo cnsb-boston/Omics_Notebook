@@ -28,7 +28,7 @@ drawXYCorr <- function(item_list, item_name, outputpath=output_plots_path, file_
       label<-paste("italic(r) == ",round(corr_coef, digits=2), sep="");
       plot <- ggplot(data=plot_data, aes(x=plot_data[,2], y=plot_data[,3], color=Density)) + 
         geom_point() + scale_color_viridis(direction=-1) + labs(x=names(item_list)[j], y=names(item_list)[k]) +
-        labs(title=paste("Avg. ",item_name, " ", file_name,": \n",names(item_list)[j]," vs. ",names(item_list)[k],sep="" )) +
+        labs(title=paste("Avg. ",item_name, " ", file_name,sep=""))+#,": \n",names(item_list)[j]," vs. ",names(item_list)[k],sep="" )) +
         theme_bw() + annotate("text",x=-Inf, y=Inf, label=label, color="black", vjust=1.5, hjust=-0.4 , parse=TRUE) +
         geom_smooth(method=lm, se=FALSE, color="red")
       print(plot+theme(legend.position="none"))

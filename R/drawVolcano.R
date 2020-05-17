@@ -16,7 +16,7 @@
 #' 
 #' @export
 drawVolcano <- function(dat, type, subset_rows=F,
-                        title_add="", top_rows="",
+                        top_values=0.05, 
                         outputpath=output_contrast_path){ 
   # Gene labels
   label_names <- c(rownames(dat[dat$logFC>0,][order(dat$P.Value, decreasing=FALSE),])[1:6],
@@ -28,21 +28,37 @@ drawVolcano <- function(dat, type, subset_rows=F,
   
   # Dot coloring
   dat$Significance <- "NS"
-  dat$Significance[( (rownames(dat)%in%top_rows) & sign(dat$logFC)>0) ] <- "Up"
-  dat$Significance[( (rownames(dat)%in%top_rows) & sign(dat$logFC)<0) ] <- "Down"
+  dat$Significance[( (dat$P.Value<=top_values) & sign(dat$logFC)>0) ] <- "Up"
+  dat$Significance[( (dat$P.Value<=top_values) & sign(dat$logFC)<0) ] <- "Down"
   dat$Signicance <- factor(dat$Significance, levels="NS", "Up", "Down")
+  
+  dat$Significance2 <- "NS"
+  dat$Significance2[( (dat$adj.P.Val<=top_values) & sign(dat$logFC)>0) ] <- "Up"
+  dat$Significance2[( (dat$adj.P.Val<=top_values) & sign(dat$logFC)<0) ] <- "Down"
+  dat$Signicance2 <- factor(dat$Significance2, levels="NS", "Up", "Down")
   
   # Plot
   plot1 <- ggplot(data=data.frame(dat)) + 
     geom_point(aes(x=logFC, y=-log10(P.Value),colour=(dat$Significance)),size=0.7, pch=19) +
-    scale_colour_manual(values=c(NS="grey", Up="Red", Down="blue"))   +
-    labs(title=paste(type,"\nVolcano Plot ", title_add, sep=" ")) + theme_bw() + 
+    scale_colour_manual(values=c(NS="Grey", Up="Red", Down="Blue"))   +
+    labs(title=paste(type,"\nVolcano Plot",sep=" ")) + theme_bw() + 
     theme(legend.title=element_blank())
   plot2 <- plot1 +
     { if( "Gene" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=logFC, y=-log10(P.Value), label=Gene))
       else if( "mz" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=logFC, y=-log10(P.Value), label=round(mz, digits=2)))
       else geom_text_repel(data=data.frame(dat[label_names,]), aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))
     } + geom_point(data=data.frame(dat[label_names,]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21)
+  
+  plot3 <- ggplot(data=data.frame(dat)) + 
+    geom_point(aes(x=logFC, y=-log10(adj.P.Val),colour=(dat$Significance2)),size=0.7, pch=19) +
+    scale_colour_manual(values=c(NS="Grey", Up="Red", Down="Blue"))   +
+    labs(title=paste(type,"\nVolcano Plot",sep=" ")) + theme_bw() + 
+    theme(legend.title=element_blank())
+  plot4 <- plot3 +
+    { if( "Gene" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=logFC, y=-log10(adj.P.Val), label=Gene))
+      else if( "mz" %in% colnames(dat)) geom_text_repel(data=data.frame(dat[label_names,]),size=2, aes(x=logFC, y=-log10(adj.P.Val), label=round(mz, digits=2)))
+      else geom_text_repel(data=data.frame(dat[label_names,]), aes(x=logFC, y=-log10(adj.P.Val),size=1, label=feature_identifier))
+    } + geom_point(data=data.frame(dat[label_names,]), aes(x=logFC, y=-log10(adj.P.Val) ),size=0.7, pch=21)
   
   output_filename <- file.path(outputpath, paste(type,"_volcano",".pdf", sep=''));
   pdf(output_filename, width=3, height=3);
@@ -62,6 +78,26 @@ drawVolcano <- function(dat, type, subset_rows=F,
                geom_text_repel(data=data.frame(dat[label_names2,]),direction="y", aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))+theme(legend.position="none") +
                geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
       }
+      }
+    }) }
+  }
+  
+  plot(plot3+theme(legend.position="none"))
+  plot(plot4+theme(legend.position="none"))
+  if(class(subset_rows)!="logical" ){
+    for( j in 1:length(subset_rows)){ try({
+      if(length(subset_rows[[j]])>100){subset_rows[[j]]<- subset_rows[[j]][1:100]}
+      if(length(subset_rows[[j]])>0){
+        label_names2 <- subset_rows[[j]][!(subset_rows[[j]] %in% label_names)]
+        if( "Gene" %in% colnames(dat)){
+          plot(plot4+
+                 geom_text_repel(data=data.frame(dat[label_names2,]),size=2,direction="y", aes(x=logFC, y=-log10(adj.P.Val), label=Gene))+theme(legend.position="none") +
+                 geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(adj.P.Val) ),size=0.7, pch=21) ) 
+        } else{
+          plot(plot4 + 
+                 geom_text_repel(data=data.frame(dat[label_names2,]),direction="y", aes(x=logFC, y=-log10(adj.P.Val),size=1, label=feature_identifier))+theme(legend.position="none") +
+                 geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(adj.P.Val) ),size=0.7, pch=21) ) 
+        }
       }
     }) }
   }

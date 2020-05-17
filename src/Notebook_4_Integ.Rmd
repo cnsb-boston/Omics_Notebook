@@ -154,11 +154,7 @@ for (c in 1:num_contrasts){
 if( run_gsea & species!="Other" ) { try({
   gsea_working_dir <- "MOMENTA_Integrated"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
-  gsea_images_path <- file.path(gsea_working_path, "Images")
-  gsea_absval_path <- file.path(gsea_working_path, "AbsoluteValueRank")
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
-  if( dir.exists(gsea_images_path) == FALSE ) { dir.create(gsea_images_path) }
-  if( dir.exists(gsea_absval_path) == FALSE ) { dir.create(gsea_absval_path) }
   
   geneset_lookup <-  read.delim(file.path(gsub("src", "data", notebook_dir),"feature","MatchedFeatureSets.txt"))
   
@@ -174,11 +170,7 @@ for(gmt_index in 1:length(gmt_files)){
   for (i in 1:length(loop_list)) {
     analysis_names[[i]] <- paste("Combined_",gmt_names[gmt_index],"_",gsub("-", "_", contrast_strings[i]),sep="")
   }
-  expression_files <-vector("list", length(loop_list))
-  for (i in 1:length(loop_list)){  
-      expression_files[[i]] <- file.path(output_files_subdir,paste("Expression_matrix_",
-                                                                   omicsList[[ gene_data_index[1] ]][["dataType"]],".txt", sep=""))
-  }
+
   rnk_files_select <-vector("list", length(loop_list))
   for (i in 1:length(loop_list)){ 
     rnk_files_select[[i]] <- rnk_files[[i]][str_detect(gmt_names[gmt_index], names(rnk_files[[i]]))]
@@ -188,67 +180,8 @@ for(gmt_index in 1:length(gmt_files)){
     for(j in 1:length(rnk_files_select[[i]])){
     analysis_name <- paste(gsub(".*/","", gsub(".rnk", "", rnk_files_select[[i]][[j]])), "_", gmt_names[gmt_index], sep="" ) #analysis_names[[i]]
     rnk_file <- rnk_files_select[[i]][[j]]
-    expression_file <- expression_files[[i]]
-
-    ranked_features <- read.delim(rnk_file)
-    file.copy(from=rnk_file, to=file.path(gsea_working_path,basename(rnk_file)) )
-    ranked_vector <- ranked_features[,"rank"]
-    names(ranked_vector) <- ranked_features[,"GeneName"]
-    pathways_gmt <- gmtPathways(dest_gmt_file)
-    suppressWarnings({
-    fgsea_results <- fgsea(pathways=pathways_gmt, 
-                                     stats=ranked_vector,
-                                     minSize=15, 
-                                     maxSize=500, 
-                                     nperm=10000)
-    })
     
-    fgsea_out <- fgsea_results[,c(1,1,2,3)]
-    colnames(fgsea_out) <- c("Term", "Description", "p.Val", "FDR")
-    fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"NES"])
-    fgsea_out[,"Genes"] <- apply(fgsea_results[,"leadingEdge"], 1, function(x) paste(as.character(unlist(x["leadingEdge"])), collapse=","))
-    fgsea_out[,"Genes"] <- apply(fgsea_out, 1, function(x) gsub(" ", "", x["Genes"]))
-    fgsea_out[,"NES"] <- (fgsea_results[,"NES"])
-    fgsea_out[,"ES"] <- (fgsea_results[,"ES"])
-    fgsea_out[,"Gene_Hits"] <- apply(fgsea_results, 1, function(x) length(unlist(x["leadingEdge"])) )
-    fgsea_out[,"Gene_Total"] <- fgsea_results[,"size"]
-    output_filename <- file.path(output_path, gsea_working_dir, paste("fgsea_", analysis_name, ".txt", sep=""))
-    write.table(fgsea_out, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
-    
-    topPathways <- fgsea_results[order(pval, decreasing=F), pathway]
-    output_filename <- file.path(gsea_images_path, paste("fgsea_", analysis_name, "_allPathways.pdf", sep=""))
-    pdf(output_filename, width=4, height=3)
-    for(pathway_index in 1:length(topPathways)){ try({
-      print(plotEnrichment(pathways_gmt[[topPathways[pathway_index] ]], ranked_vector) +
-              labs(title=topPathways[pathway_index]) + theme(plot.title=element_text(size=6)) )
-    }) }
-    dev.off()
-    
-    
-    ranked_features <- read.delim(rnk_file)
-    ranked_vector <- abs(ranked_features[,"rank"])
-    names(ranked_vector) <- ranked_features[,"GeneName"]
-    pathways_gmt <- gmtPathways(dest_gmt_file)
-    suppressWarnings({
-    fgsea_results <- fgsea(pathways=pathways_gmt, 
-                                     stats=ranked_vector,
-                                     minSize=15, 
-                                     maxSize=500, 
-                                     nperm=10000)
-    })
-    
-    fgsea_out <- fgsea_results[,c(1,1,2,3)]
-    colnames(fgsea_out) <- c("Term", "Description", "p.Val", "FDR")
-    fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"NES"])
-    fgsea_out[,"Genes"] <- apply(fgsea_results[,"leadingEdge"], 1, function(x) paste(as.character(unlist(x["leadingEdge"])), collapse=","))
-    fgsea_out[,"Genes"] <- apply(fgsea_out, 1, function(x) gsub(" ", "", x["Genes"]))
-    fgsea_out[,"NES"] <- (fgsea_results[,"NES"])
-    fgsea_out[,"ES"] <- (fgsea_results[,"ES"])
-    fgsea_out[,"Gene_Hits"] <- apply(fgsea_results, 1, function(x) length(unlist(x["leadingEdge"])) )
-    fgsea_out[,"Gene_Total"] <- fgsea_results[,"size"]
-    output_filename <- file.path(gsea_absval_path, paste("fgsea_", analysis_name, "_AbsVal.txt", sep=""))
-    write.table(fgsea_out, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
-    
+    runGSEA(rnk=rnk_file, gmt=dest_gmt_file, analysisName=analysis_name, out_path=gsea_working_path )
     }
   }
 
