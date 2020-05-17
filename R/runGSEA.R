@@ -15,7 +15,7 @@
 #' 
 #' @export
 runGSEA <- function (rnk, gmt,
-                     analysisName="GSEA", 
+                     analysisName="GSEA", pathway_plots= F,
                      out_path=getwd()   ) {
   
   try({
@@ -28,8 +28,10 @@ runGSEA <- function (rnk, gmt,
   ranked_features <- read.delim(rnk)
   file.copy(from=rnk, to=file.path(out_path,basename(rnk)) )
   ranked_vector <- ranked_features[,"rank"]
-  names(ranked_vector) <- ranked_features[,"GeneName"]
+  names(ranked_vector) <- toupper(ranked_features[,"GeneName"])
   pathways_gmt <- gmtPathways(gmt)
+  pathways_gmt <- sapply(pathways_gmt, toupper)
+  
   suppressWarnings({
     fgsea_results <- fgsea(pathways=pathways_gmt, 
                            stats=ranked_vector,
@@ -51,7 +53,18 @@ runGSEA <- function (rnk, gmt,
   output_filename <- file.path(out_path, paste("fgsea_", analysisName, ".txt", sep=""))
   write.table(fgsea_out, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
   
+  output_filename <- file.path(gsea_images_path, paste("fgsea_", analysisName, ".pdf", sep=""))
+  topPathwaysUp <- fgsea_results[ES > 0][head(order(pval), n=10), pathway]
+  topPathwaysDown <- fgsea_results[ES < 0][head(order(pval), n=10), pathway]
+  topPathways <- c(topPathwaysUp, rev(topPathwaysDown))
+  pdf(output_filename, width=20, height=8)
+  plotGseaTable(pathways_gmt[topPathways], ranked_vector, fgsea_results, gseaParam = 0.5)
+  dev.off()
+  
+  if(pathway_plots){
   topPathways <- fgsea_results[order(pval, decreasing=F), pathway]
+  if( length(topPathways) > 50 ) { topPathways <- topPathways[1:50]}
+
   output_filename <- file.path(gsea_images_path, paste("fgsea_", analysisName, "_allPathways.pdf", sep=""))
   pdf(output_filename, width=4, height=3)
   for(pathway_index in 1:length(topPathways)){ try({
@@ -59,10 +72,11 @@ runGSEA <- function (rnk, gmt,
             labs(title=topPathways[pathway_index]) + theme(plot.title=element_text(size=6)) )
   }, silent=TRUE) }
   dev.off()
+  }
   
   ranked_vector <- abs(ranked_features[,"rank"])
-  names(ranked_vector) <- ranked_features[,"GeneName"]
-
+  names(ranked_vector) <- toupper(ranked_features[,"GeneName"])
+  
   suppressWarnings({
     fgsea_results <- fgsea(pathways=pathways_gmt, 
                            stats=ranked_vector,

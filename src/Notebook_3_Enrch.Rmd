@@ -199,7 +199,7 @@ if( run_gsea & species!="Other" ) { try({
     analysis_name <- analysis_names[[i]]
     rnk_file <- rnk_files[[i]]
     
-    runGSEA(rnk=rnk_file, gmt=dest_gmt_file, analysisName=analysis_name, out_path=gsea_working_path )
+    runGSEA(rnk=rnk_file, gmt=dest_gmt_file, analysisName=analysis_name, pathway_plots=T,out_path=gsea_working_path )
   }
 
 }) } 
@@ -302,52 +302,12 @@ if(dir.exists("Gene_Sets") ){
     
     for(gmt_index in 1:length(gmt_files)){
       gmt_file <-file.path("Gene_Sets", gmt_files[[gmt_index]] )
-      
-      analysis_names <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
-      counter<-1;                       
-      for (j in 1:length(gene_data_index)) {
-        for (k in 1:length(loop_list)) {
-          analysis_names[[counter]] <- paste(omicsList[[ gene_data_index[j] ]][["dataType"]], "_", gsub("-", "_", contrast_strings[k]), sep="") ;
-          counter <- counter+1;
-        }
-      }
-      rnk_files <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
-      counter<-1;                       
-      for (j in 1:length(gene_data_index)) {
-        for (k in 1:length(loop_list)) {
-          if(grepl("Human", species)){ 
-            rnk_files[[counter]] <- file.path(paste(output_contrast_path_files,"/GSEA_",omicsList[[ gene_data_index[j] ]][["dataType"]],
-                                                  "_",gsub("-","_",contrast_strings[k]),".rnk", sep=""))
-          } else {
-            rnk_files[[counter]] <- file.path(paste(output_contrast_path_files,"/GSEA_",
-                                                  omicsList[[ gene_data_index[j] ]][["dataType"]],#"_Uppercase_",
-                                                  gsub("-","_",contrast_strings[k]),".rnk", sep=""))
-          }
-          counter <- counter+1;
-        }
-      }
-
-      if(length(gene_data_index)>1){ 
-        for (i in 1:length(loop_list)) {
-        analysis_names[[length(analysis_names)+1]] <- paste("Combined_",gsub("-", "_", contrast_strings[i]),sep="")
-        }
-        for (i in 1:length(loop_list)){
-          if(grepl("Human", species)){ 
-            rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
-                                                        paste("GSEA_combined_",gsub("-","_",contrast_strings[i]),".rnk", sep="") ))
-          } else {
-            rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
-                                                        paste("GSEA_combined_",#"Uppercase_",
-                                                              gsub("-","_",contrast_strings[i]),".rnk", sep="") ))
-          }
-        }
-      }
 
       for (i in 1:length(analysis_names)){
         analysis_name <- paste(analysis_names[[i]], gmt_names[gmt_index], sep="_")
         rnk_file <- rnk_files[[i]]
     
-        runGSEA(rnk=rnk_file, gmt=gmt_file, analysisName=analysis_name, out_path=gsea_working_path )
+        runGSEA(rnk=rnk_file, gmt=gmt_file, analysisName=analysis_name, pathway_plots=T, out_path=gsea_working_path )
       }
   
     }
@@ -418,7 +378,7 @@ show_metab_enrich <- grepl(paste("Human", "Mouse", "Fruit Fly", "Yeast", "E. col
 `r if( (show_metab_enrich& length(gene_data_index)>0 & runDifferential) ){"### GSEA for Metabolomic Models"} `
 ```{r gsea_met_section, eval=(show_metab_enrich & length(gene_data_index)>0 & runDifferential) }
 
-run_gsea <- gsea_section; # if GSEA has already been run, set to false and include results in directory
+run_gsea <- gsea_section; 
 
 if( run_gsea & species!="Other" ) { try({
 
@@ -436,52 +396,6 @@ for(gmt_index in 1:length(gmt_files)){
   dest_gmt_file <-file.path(gsea_working_path, gmt_files[gmt_index])
   file.copy(from=file.path( gsub("src", "data", notebook_dir),"matched",gmt_files[gmt_index]), to= dest_gmt_file )  
   
-    analysis_names <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
-    counter<-1;                       
-    for (j in 1:length(gene_data_index)) {
-      for (k in 1:length(loop_list)) {
-        analysis_names[[counter]] <- paste(omicsList[[ gene_data_index[j] ]][["dataType"]], "_", gsub("-", "_", contrast_strings[k]), sep="") ;
-        counter <- counter+1;
-      }
-    }
-    rnk_files <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
-    counter<-1;                       
-    for (j in 1:length(gene_data_index)) {
-      for (k in 1:length(loop_list)) {
-        if(grepl("Human", species)){ 
-          rnk_files[[counter]] <- file.path(paste(output_contrast_path_files,"/GSEA_",omicsList[[ gene_data_index[j] ]][["dataType"]],
-                                                  "_",gsub("-","_",contrast_strings[k]),".rnk", sep=""))
-        } else {
-          rnk_files[[counter]] <- file.path(paste(output_contrast_path_files,"/GSEA_",
-                                                  omicsList[[ gene_data_index[j] ]][["dataType"]],"_Uppercase_",
-                                                  gsub("-","_",contrast_strings[k]),".rnk", sep=""))
-        }
-        counter <- counter+1;
-      }
-    }
-    expression_files <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
-    counter<-1;                       
-    for (j in 1:length(gene_data_index)) {
-      for (k in 1:length(loop_list)) {
-        expression_files[[counter]] <- file.path(paste(output_files_subdir, "/Expression_matrix_",
-                                                       omicsList[[ gene_data_index[j] ]][["dataType"]],".txt", sep=""))
-        counter <- counter+1;
-      }
-    } 
-      if(length(gene_data_index)>1){ 
-    for (i in 1:length(loop_list)) {
-      analysis_names[[length(analysis_names)+1]] <- paste("Combined_",gsub("-", "_", contrast_strings[i]),sep="")
-    }
-    for (i in 1:length(loop_list)){
-        if(grepl("Human", species)){ 
-          rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
-                                                        paste("GSEA_combined_",gsub("-","_",contrast_strings[i]),".rnk", sep="") ))
-        } else {
-          rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
-                                                        paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[i]),".rnk", sep="") ))
-        }
-    }
-  }
   
   for (i in 1:length(analysis_names)){
     analysis_name <- paste(analysis_names[[i]], gmt_names[gmt_index], sep="_")
