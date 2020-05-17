@@ -144,21 +144,12 @@ for(i in 1:length(omicsList)){
     }, silent=TRUE) }
     
     for(c in 1:length(loop_list)){
-      sig_cutoff <- round(sig_percent*nrow(omicsList[[i]][["eSet"]]), digits=0)
-      # For the data set and coefficient, make the summary table and name
-      top_rows <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c], p.value=adjpcutoff) );
-      title_add <- paste("FDR<", adjpcutoff, sep="")
-      if (length(top_rows)< sig_cutoff ){ 
-        top_rows <- rownames( topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c]))[1:sig_cutoff];
-        title_add <- paste("Top ", (sig_percent*100), "%", sep="")
-      }
-    
       # For the data set and coefficient, make the summary table and name
       top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c]);
       type_name <- paste(omicsList[[i]][["dataType"]],contrast_strings[c], sep="_");
     
       # run Volcan function
-      drawVolcano(dat=top_sum, type=type_name, subset_rows=subset_rows, title_add=title_add, top_rows=top_rows);
+      drawVolcano(dat=top_sum, type=type_name, subset_rows=subset_rows, top_values=adjpcutoff);
     
       # Make output hyperlinks for markdown
       add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name, "_volcano",".pdf)", sep="")

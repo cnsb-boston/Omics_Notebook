@@ -126,7 +126,7 @@ class GUI(tk.Frame):
     
     useSiteNorm_state = tk.BooleanVar()
     useSiteNorm_state.set(False)
-    useSiteNorm = ttk.Checkbutton(self, text="Use Sites Normalized to Proteome", var=useSiteNorm_state)
+    useSiteNorm = ttk.Checkbutton(self, text="Use Normalized to 1st Data", var=useSiteNorm_state)
     useSiteNorm.grid(column=3, row=11,columnspan=2, pady=(10,10), sticky=tk.W)
     
     incShinyNorm_state = tk.BooleanVar()

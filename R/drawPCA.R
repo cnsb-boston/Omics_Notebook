@@ -158,7 +158,7 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
                              stats=ranked_vector,
                              minSize=15, 
                              maxSize=500, 
-                             nperm=10000)
+                             nperm=1000)
       })
     
       fgsea_out <- fgsea_results[,c(1,1,2,3)]
@@ -170,6 +170,7 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
       fgsea_out[,"ES"] <- (fgsea_results[,"ES"])
       fgsea_out[,"Gene_Hits"] <- apply(fgsea_results, 1, function(x) length(unlist(x["leadingEdge"])) )
       fgsea_out[,"Gene_Total"] <- fgsea_results[,"size"]
+      fgsea_out <- fgsea_out[order(fgsea_out[,"p.Val"], decreasing=F)]
       output_filename <- file.path(gsea_working_path, paste("fgsea_", analysis_name, "_loadings.txt", sep=""))
       write.table(fgsea_out, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
     }
