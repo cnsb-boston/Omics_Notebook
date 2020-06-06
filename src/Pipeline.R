@@ -20,8 +20,11 @@
 # Get Notebook directory - if running pipeline
 run_directories <- commandArgs(trailingOnly=FALSE)
 
-notebook_dir <- file.path(run_directories[6], "src");
-analysis_dir <- file.path(run_directories[7]);
+index <- length(run_directories)
+
+notebook_dir <- file.path(run_directories[(index-1)], "src");
+analysis_dir <- file.path(run_directories[index]);
+
 
 # source run variables
 setwd(analysis_dir);
@@ -30,7 +33,7 @@ source(file.path(analysis_dir, "Parameters.R"));
 # Set local file paths, if not needed, set BUSCC to false
 if(inherit_paths==TRUE) {
   .libPaths(libraries_path);
-   #Sys.setenv(RSTUDIO_PANDOC=pandoc_path); 
+   #Sys.setenv(RSTUDIO_PANDOC=pandoc_path);
 }
 
 # load rmarkdown

@@ -14,4 +14,3 @@ p = subprocess.Popen(args=["python3", pipeline_path], stderr=subprocess.STDOUT, 
 analysis_dir = str(p.communicate()[0], 'utf-8').rstrip()
 
 subprocess.Popen(args=["Rscript", r_path, notebook_path, analysis_dir])
-
