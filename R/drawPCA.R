@@ -221,7 +221,7 @@ drawUMAP <- function(eset, type, outputpath=output_plots_path) {
     { if( "Group2" %in% colnames(pData(eset)) ) { scale_shape_manual(values=1:length(unique(pData(eset)$Group2))) } else { geom_point(aes(colour=pData(eset)$Group)); }} + 
     theme_bw() + theme(legend.title=element_blank()) + 
     { if (!make_colors) scale_color_manual(values=colors_dots);  } +
-    labs(title=paste("UMAP: \n ",type,sep="") );
+    labs(title=paste("UMAP: \n ",type,sep="") ) + xlab("UMAP1") + ylab("UMPA2") ;
   
   # Graph output
   output_filename <- file.path(outputpath, paste("UMAPplot_",type,".pdf",sep=""))

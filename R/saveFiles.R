@@ -40,6 +40,10 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE,
   
   # If differential analysis, save ranked list
   if ( class(limmaRes) != "logical") {
+    # Save expression matrix
+    output_filename <- file.path(outputcontrastpath,paste("DE_matrix_",type,".txt", sep=''));
+    write.table(x= limmaRes, file=output_filename, sep='\t',row.names=T, col.names=TRUE, quote=FALSE);
+    
     if("Gene"%in% colnames(limmaRes)){
       # ranked list with direction
       output_filename <- file.path(outputcontrastpath,paste("GSEA_",type,"_", gsub("-","_",contrast_name),".rnk", sep=''));
@@ -58,6 +62,7 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE,
       output_filename <- file.path(outputcontrastpath,paste("GSEA_",type,"_", gsub("-","_",contrast_name),"_AbsVal.rnk", sep=''));
       ranked[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
       write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
+      
       
       # File for network analysis
       output_filename <- file.path(outputcontrastpath,paste("Network_",type, gsub("-","_",contrast_name),".txt", sep=''));
