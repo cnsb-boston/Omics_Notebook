@@ -21,6 +21,9 @@ COPY install.R /home/install.R
 
 RUN Rscript home/install.R
 
+# Create user
+ RUN useradd -ms /bin/bash docker
+ USER docker
 
 # Start at prompt
 CMD ["/bin/bash"]
