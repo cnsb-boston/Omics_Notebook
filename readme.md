@@ -23,6 +23,8 @@ macOS: `-e DISPLAY=docker.for.mac.host.internal:0`
 Windows: `-e DISPLAY=host.docker.internal:0`
 Linux: `--net=host -e DISPLAY=:0`
 
+3. Run Omics Notebook
+
 Perform docker run command with platform specific display:
 
 Linux:
@@ -32,7 +34,7 @@ docker run -it --rm \
   -u docker \
   -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
   -v ~/Omics_Notebook:/home:rw \
-  bblum/omics_notebook
+  bblum/omics_notebook python3 /home/Notebook.py
 ```  
 MacOS:
 ```
@@ -41,15 +43,15 @@ docker run -it --rm \
   -u docker \
   -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
   -v ~/Omics_Notebook:/home:rw \
-  bblum/omics_notebook
+  bblum/omics_notebook python3 /home/Notebook.py
 
 ```
 
 Note: GUI requires X11. If you are unable to configure X11 socket, you can create the parameters file manually. 
 
-3. In the docker prompt, run: <code> python3 /home/Notebook.py </code>
 
 Or install required software (below) and run Notebook.py.
+See "Structure" or additional documentation for more details on running in part or customizing to your needs.
 
 ---
 
