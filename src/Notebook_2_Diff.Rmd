@@ -231,8 +231,7 @@ for(i in 1:length(omicsList)){
     # Make output hyperlinks for markdown
     add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_heatmaps",".pdf)", sep="")
     if(num_contrasts>1){ 
-      add_link <- paste(add_link, " | [ ",type_name, "_subgroup ](", output_contrast_subdir,"/heatmaps_",
-                        type_name,"_subgroup.pdf) \n", sep=""); }
+      add_link <- paste(add_link, " | [ ",type_name, "_subgroup ](", output_contrast_subdir,"/",type_name,"_subgroup_heatmaps.pdf) \n", sep=""); }
     output_links <- paste(output_links, add_link, sep=" | " ); 
     
   }) } } else {

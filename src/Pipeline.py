@@ -139,9 +139,14 @@ class GUI(tk.Frame):
     normMethod_lbl = tk.Label(self, text="Normalization Method:")
     normMethod_lbl.grid(column=2, row=14, sticky=tk.E)
     normMethod = ttk.Combobox(self)
-    normMethod['values']=('loess', 'quantile', 'median', 'z transform', 'none (use raw values)', 'none (apply log trans.)')
+    normMethod['values']=('loess', 'quantile', 'median', 'z transform', 'none')
     normMethod.current(0)
     normMethod.grid(column=3, row=14)
+    
+    logtransform_state = tk.BooleanVar()
+    logtransform_state.set(True)
+    logtransform = ttk.Checkbutton(self, text="Log Transform", var=logtransform_state)
+    logtransform.grid(column=4, row=14)
 
     species_lbl = tk.Label(self, text="Species:")
     species_lbl.grid(column=0, row=16, pady=(30,0), sticky=tk.E)
@@ -237,6 +242,7 @@ class GUI(tk.Frame):
       
       outputfile.write("zero_percent <- " + str(cutoff_zero_val.get()) + ";\n")
       outputfile.write("norm_method <- '" + str(normMethod.get()) + "';\n")
+      outputfile.write("log_transform <- "+ str(logtransform_state.get()).upper() + ";\n")
       outputfile.write("shinyNorm <- " + str(incShinyNorm_state.get()).upper() +  ";\n")
       
       outputfile.write("saveXlsx <- " + str(runXlsx_state.get()).upper() + ";\n")

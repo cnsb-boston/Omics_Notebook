@@ -220,7 +220,7 @@ for (i in 1:length(omicsList)){
   tryCatch({
     
     omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
-                                    log_transform=( !grepl("raw values", norm_method) ),
+                                    log_transform=log_transform,
                                     data_format=omicsList[[i]][[2]], uniprot_annotation=query_web);
     }, error=function(e){
       stop(paste("Problem with input data format:", e));
