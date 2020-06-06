@@ -8,6 +8,8 @@
 
 `docker pull bblum/omics_notebook:latest`
 
+Or build from Dockerfile.
+
 The GUI component works by mounting the X11 socket into the container. Mac and Windows users require X11. 
 
 For macOS (socat and xquartz required):
@@ -22,6 +24,8 @@ Windows: `-e DISPLAY=host.docker.internal:0`
 Linux: `--net=host -e DISPLAY=:0`
 
 Perform docker run command with platform specific display:
+
+Linux:
 ```
 docker run -it --rm \
   -e DISPLAY=$DISPLAY \
@@ -29,8 +33,9 @@ docker run -it --rm \
   -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
   -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook
-  
-
+```  
+MacOS:
+```
 docker run -it --rm \
   -e DISPLAY=docker.for.mac.host.internal:0 \
   -u docker \
@@ -42,9 +47,11 @@ docker run -it --rm \
 
 Note: GUI requires X11. If you are unable to configure X11 socket, you can create the parameters file manually. 
 
-In the docker prompt, run: <code> python3 /home/Notebook.py </code>
+3. In the docker prompt, run: <code> python3 /home/Notebook.py </code>
 
+Or install required software (below) and run Notebook.py.
 
+---
 
 ## Software requirements
 
@@ -54,7 +61,7 @@ In the docker prompt, run: <code> python3 /home/Notebook.py </code>
 
 * Install all required R packages. (See install.R)
 
-This software has been tested for use on Linux (Cent OS 6 and 7) and MacOS (10.14 and 10.15)
+This software has been tested for use on Linux (Cent OS 6 and 7, Ubuntu 18.04) and MacOS (10.14 and 10.15)
 
 
 #### Enrichment Map
@@ -69,7 +76,7 @@ Note: it may be easier to run the scripts and import enrichment results into Cyt
 
 ---
 
-## Structure and Instructions
+## Structure
 
 "Notebook.py" is a python script that will call two scripts. The first is "src/Pipeline.py", which will generate a Parameters.R file in the directory with the data. This can be helpful to assure correct variable formatting. The second is "src/Pipeline.R", which will knit the R markdown files.
 
@@ -83,7 +90,7 @@ The makeEset function should be modified to parse additional input data formats.
 
 ---
 
-## Annotation file
+#### Annotation file
 
 The annotation file provides a standard way to read in the experimental data. The top section has information about what differential analyses to perform, what Group each sample belongs to, and the sample names for each sample. Datasets names, "type" and filename should be specified in the bottom left, with no empty rows. Each row in the lower section is a different omics dataset. For a given row, the columns under the samplenames should correspond to the samples. Other columns will be kepts as annotation information.
 
@@ -98,7 +105,7 @@ In the second sheet of the annotation file, the sample names are repeated. Addit
 
 ---
 
-## Output
+#### Output
 
 The output of the Omics Notebook analysis is an html file (from the R markdown templates) and analysis directory with results saved as text or image files. The output adapts depending on the input data but includes exploratory, differential, and enrichment analysis.
 
