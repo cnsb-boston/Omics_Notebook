@@ -22,7 +22,7 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE,
   
   # Save expression matrix
   if ( "Gene" %in% colnames(fData(data[["eSet"]])) &  "Protein.names" %in% colnames(fData(data[["eSet"]])) ) {
-    output_table <- cbind(fData(data[["eSet"]])[,c("Gene", "Protein.names")],exprs(data[["eSet"]]))
+    output_table <- cbind(fData(data[["eSet"]])[,c("feature_identifier","Gene", "Protein.names")],exprs(data[["eSet"]]))
   } else {  
     output_table <- cbind( rownames(exprs(data[["eSet"]])), exprs(data[["eSet"]])) 
   }
@@ -41,8 +41,10 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE,
   # If differential analysis, save ranked list
   if ( class(limmaRes) != "logical") {
     # Save expression matrix
-    output_filename <- file.path(outputcontrastpath,paste("DE_matrix_",type,".txt", sep=''));
-    write.table(x= limmaRes, file=output_filename, sep='\t',row.names=T, col.names=TRUE, quote=FALSE);
+    output_filename <- file.path(outputcontrastpath,paste("DE_matrix_",type,"_", gsub("-","_",contrast_name),".txt", sep=''));
+    select_cols<- c("Gene", "feature_identifier", "Protein", "mz", "P.Value", "adj.P.Val", "logFC", "AveExpr")
+    select_cols<- select_cols[which(select_cols %in% colnames(limmaRes))]
+    write.table(x= limmaRes[,select_cols], file=output_filename, sep='\t',row.names=F, col.names=TRUE, quote=FALSE);
     
     if("Gene"%in% colnames(limmaRes)){
       # ranked list with direction

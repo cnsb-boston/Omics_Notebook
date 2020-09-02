@@ -32,7 +32,10 @@ for(i in 1:length(omicsList)){
   omicsList[[i]][[5]] <-intensityNorm(eset=omicsList[[i]][[index]],
                                       type=omicsList[[i]][[1]], 
                                       data_format=omicsList[[i]][["dataFormat"]],
-                                      norm=norm_method, zero_cutoff=zero_percent)
+                                      norm=norm_method, zero_cutoff=zero_percent,
+                                      min_feature=min_feature_per_sample,
+                                      norm_by_batch=norm_batches)
+  
   
   # Make output hyperlinks for markdown
   add_link <- paste(omicsList[[i]][["dataType"]], ": [ Boxplot/Dist. ](", output_plots_subdir,
@@ -58,7 +61,19 @@ for(i in 1:length(omicsList)){
     })})
     omicsList[[i]][["eSet"]] <- combat_eset
     tmp<-drawPCA(eset=omicsList[[i]][["prebatch_eset"]], type=paste(omicsList[[i]][["dataType"]],"_precorrection", sep=""));
+    
+    capture.output( intensityNorm(eset=omicsList[[i]][[index]],
+                                      type=paste(omicsList[[i]][[1]],"_postBatchCor",sep=""), 
+                                      data_format=omicsList[[i]][["dataFormat"]],
+                                      norm=norm_post_batch, zero_cutoff=zero_percent,
+                                      min_feature=min_feature_per_sample, norm_by_batch=F) )
+    
   }) }
+  
+  if(remove_group!=""){
+    omicsList[[i]][[5]] <- omicsList[[i]][[5]][, !grepl(paste(remove_group, collapse="|"),pData(omicsList[[i]][[5]])$Group) ]
+  }
+  
   try({
   # PCA plots
   pca_output[[i]] <- drawPCA(eset=omicsList[[i]][["eSet"]], type=omicsList[[i]][["dataType"]])
@@ -452,14 +467,13 @@ for(i in 1:length(omicsList)){ try({
         subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[which(fData(omicsList[[i]][["eSet"]])$Gene %in% subset_genes[[j]] )]
       }
       if( length(subset_rows[[j]])==0 ){
-        subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ grep( paste(subset_genes[[j]], collapse="|"),
-                                                                      rownames(exprs(omicsList[[i]][["eSet"]])) ) ]
+        subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ which(rownames(omicsList[[i]][["eSet"]]) %in% subset_genes[[j]] ) ]
       }
     }
   },silent=T) }
   # Draw the heatmaps and sace the Complex Heatmap object
   map_out <- drawHeatmaps(eset=omicsList[[i]][["eSet"]], emat_top=omicsList[[i]][["topVariable"]],
-                          type=omicsList[[i]][["dataType"]], subset=subset_rows);
+                          type=omicsList[[i]][["dataType"]], subset=subset_rows, k_clust=knn_heatmap);
   saveRDS(map_out, file=file.path(output_files_path, paste("Heatmap_",omicsList[[i]][["dataType"]],".RDS",sep="")) )
   
   # Make output hyperlinks for markdown

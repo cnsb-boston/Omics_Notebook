@@ -127,7 +127,12 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
   # make feature identifiers/rownames
   if( "Gene" %in% colnames(data) ){
     if( "Protein" %in% colnames(data) ){
-      data[,"feature_identifier"] <- make.unique( paste(data[,"Gene"], data[,"Protein"], sep="_" ) );
+      if(("Amino.acid" %in% colnames(data))&("Position"%in%colnames(data))){
+        data[,"feature_identifier"] <- make.unique( paste(data[,"Gene"],"_", data[,"Protein"],"_",
+                                                          data[,"Amino.acid"],"", data[,"Position"], sep="" ) );
+      } else {
+        data[,"feature_identifier"] <- make.unique( paste(data[,"Gene"], data[,"Protein"], sep="_" ) );
+      }
     } else if( "Transcript" %in% colnames(data) ){
       data[,"feature_identifier"] <- make.unique( paste(data[,"Gene"], data[,"Transcript"], sep="_" ) );
     } else {
