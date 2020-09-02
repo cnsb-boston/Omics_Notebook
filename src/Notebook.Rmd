@@ -124,6 +124,27 @@ sourceDirectory(file.path(gsub("src","R", notebook_dir)))
 
 ```
 
+
+```{r }
+remove_group<-"";               # remove a group (like a Pool or Standard) for visualization
+knn_heatmap<-0;                 # Use knn clustering to draw heatmap with clusters
+min_feature_per_sample <- 0.01; # minimum number of features to keep a sample
+norm_batches=F;                 # normalize batches seperately
+norm_post_batch <- F;           # apply normalization post batch correction
+fc_cutoff <- 0;                 # defines fold change cutoff to be used with selecting top hits
+
+if(file.exists(file.path(working_dir,"Options.R")) ){
+  source(file.path(working_dir,"Options.R"))    # import file to oiverwrite default values
+} 
+
+```
+
+```{r, eval=(file.exists(file.path(working_dir,"Options.R"))), code={if(file.exists(file.path(working_dir,"Options.R"))) readLines(file.path(working_dir,"Options.R")) } }
+```
+
+
+
+
 # Load Search Output and Process
 ```{r load_data_qc}
 ############################################

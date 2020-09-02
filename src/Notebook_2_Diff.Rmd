@@ -137,8 +137,7 @@ for(i in 1:length(omicsList)){
           subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[which(fData(omicsList[[i]][["eSet"]])$Gene %in% subset_genes[[j]] )]
         }
         if( length(subset_rows[[j]])==0 ){
-          subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ grep( paste(subset_genes[[j]], collapse="|"), 
-                                                                      rownames(exprs(omicsList[[i]][["eSet"]])) ) ]
+          subset_rows[[j]] <- rownames(omicsList[[i]][["eSet"]])[ which(rownames(omicsList[[i]][["eSet"]]) %in% subset_genes[[j]] ) ]
         }
       }
     }, silent=TRUE) }
@@ -149,7 +148,7 @@ for(i in 1:length(omicsList)){
       type_name <- paste(omicsList[[i]][["dataType"]],contrast_strings[c], sep="_");
     
       # run Volcan function
-      drawVolcano(dat=top_sum, type=type_name, subset_rows=subset_rows, top_values=adjpcutoff);
+      drawVolcano(dat=top_sum, type=type_name, subset_rows=subset_rows, top_values=adjpcutoff,top_fc=fc_cutoff);
     
       # Make output hyperlinks for markdown
       add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name, "_volcano",".pdf)", sep="")
@@ -187,7 +186,8 @@ for(i in 1:length(omicsList)){
     type_name <- paste(omicsList[[i]][["dataType"]],logfc_index[c], sep="_");
     
     # run Volcan function
-    drawMDPlot(dat=top_sum, type=type_name, subset_rows=subset_rows);
+    if(fc_cutoff==0){ tmp <- 1 } else { tmp <- fc_cutoff }
+    drawMDPlot(dat=top_sum, type=type_name, subset_rows=subset_rows, cutoff=tmp );
     
     # Make output hyperlinks for markdown
     add_link <- paste("[ ",type_name, " ](", output_contrast_subdir,"/",type_name,"_MDplot",".pdf)", sep="")

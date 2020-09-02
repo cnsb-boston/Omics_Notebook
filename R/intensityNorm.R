@@ -16,7 +16,8 @@
 #' 
 #' @export
 intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
-                          annotate=annot, zero_cutoff=0, data_format, min_feature=0.01 ){
+                          annotate=annot, zero_cutoff=0, data_format, min_feature=0.01,
+                          norm_by_batches=F){
   
   eset <- eset[ rowSums(exprs(eset)>0)>=zero_cutoff*ncol(exprs(eset)), ];
   eset <- eset[ , colSums(exprs(eset)>0)>=min_feature*nrow(exprs(eset)) ];
@@ -38,16 +39,28 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   plot2 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + 
     labs(title=paste(type, " log2 Intensity: \nBefore Normalization", sep=''));
   
+  if( !("Batch" %in% colnames(pData(eset))) | !norm_by_batches){
+    pData(eset)$Batch2 <- 1
+  } else {
+    pData(eset)$Batch2 <- pData(eset)$Batch
+    
+  }
+  eset_matrix_norm<-eset_matrix
+  
+  for( i in 1:length(unique(pData(eset)$Batch2))){
+    
+    index <- unique(pData(eset)$Batch2)[i]
+    
   if(norm=='quantile'){
-    eset_matrix_norm <- as.matrix(normalize.quantiles(eset_matrix))
+    eset_matrix_norm[,grep(index,pData(eset)$Batch2)] <- as.matrix(normalize.quantiles(eset_matrix[,grep(index,pData(eset)$Batch2)]))
     dimnames(eset_matrix_norm) <- dimnames(eset_matrix)
   } else if (norm=='loess'){
-    eset_matrix_norm <- as.matrix(normalizeCyclicLoess(eset_matrix, method='pairs'))
+    eset_matrix_norm[,grep(index,pData(eset)$Batch2)] <- as.matrix(normalizeCyclicLoess(eset_matrix[,grep(index,pData(eset)$Batch2)], method='pairs'))
   } else if (norm=='median'){
     eset_matrix[eset_matrix==0] <- NA
     colMedians <- matrixStats::colMedians(eset_matrix, na.rm=T)
     meanColMedian <- mean(colMedians, na.rm=T)
-    eset_matrix_norm <- matrix(nrow=nrow(eset_matrix), ncol=ncol(eset_matrix), byrow=T)
+    eset_matrix_norm <- matrix(nrow=nrow(eset_matrix),ncol=ncol(eset_matrix), byrow=T)
     normFunc <- function(colIndex){
       (eset_matrix[rowIndex, colIndex]/colMedians[colIndex]) *meanColMedian
     }
@@ -59,10 +72,12 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
     rownames(eset_matrix_norm) <- rownames(eset_matrix)
     
   } else if (norm=='z transform'){
-    eset_matrix_norm <- as.matrix(scale(eset_matrix));
+    eset_matrix_norm[,grep(index,pData(eset)$Batch2)] <- as.matrix(scale(eset_matrix[,grep(index,pData(eset)$Batch2)]));
     colnames(eset_matrix_norm) <- colnames(eset_matrix)
     rownames(eset_matrix_norm) <- rownames(eset_matrix)
   } 
+  
+  }
   
   if ( !grepl("none", norm) ){
     df <- data.frame(reshape2::melt(eset_matrix_norm, id.vars = NULL));

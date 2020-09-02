@@ -147,7 +147,10 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
     names <- c(names, colnames(fData(eset))[grepl("mummichogID_", colnames(fData(eset)) )])
     col_widths <- c(col_widths, rep(8, sum(grepl("mummichogID_", colnames(fData(eset)) ) )))
   }
-  
+  if ( "Fasta.headers" %in% colnames(fData(eset)) ){ 
+    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Fasta.headers")]); 
+    names <- c(names,"Fasta_Headers"); col_widths<-c(col_widths, 8);
+  }
   if ( "Uniprot_Function" %in% colnames(fData(eset)) ){ 
     formatted_table <- data.frame(formatted_table, fData(eset)[,c("Uniprot_Function")]); 
     names <- c(names,"Uniprot_Function"); col_widths<-c(col_widths, 50);

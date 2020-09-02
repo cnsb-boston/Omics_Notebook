@@ -94,14 +94,14 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
                       cluster_columns=FALSE,show_row_names=show_row_names,
                       row_names_gp=gpar(fontsize=4),
                       column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
-        print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
-                      cluster_columns=TRUE,show_row_names=show_row_names,cluster_rows=F,
-                      row_names_gp=gpar(fontsize=4),
-                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
-        print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
-                      cluster_columns=FALSE,show_row_names=show_row_names,cluster_rows=F,
-                      row_names_gp=gpar(fontsize=4),
-                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
+        # print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
+        #               cluster_columns=TRUE,show_row_names=show_row_names,cluster_rows=F,
+        #               row_names_gp=gpar(fontsize=4),
+        #               column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
+        # print(Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,
+        #               cluster_columns=FALSE,show_row_names=show_row_names,cluster_rows=F,
+        #               row_names_gp=gpar(fontsize=4),
+        #               column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
         
       }, silent=TRUE) }) }
     }

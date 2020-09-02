@@ -35,14 +35,13 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
     { if( "Group2" %in% colnames(pData(eset)) ) { geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group)); }} +
     { if( "Group2" %in% colnames(pData(eset)) ) { scale_shape_manual(values=1:length(unique(pData(eset)$Group2))) } else { geom_point(aes(colour=pData(eset)$Group)); }} + 
     theme_bw() + theme(legend.title=element_blank()) + 
-    theme_bw() + theme(legend.title=element_blank()) + 
     { if (!make_colors) scale_color_manual(values=colors_dots);  } +
     labs(title=paste("PCA: \n ",type,sep=""),
        x=paste(x_axis, sprintf(" (%2.0f%%)", percent_variance[x_axis]), sep=""),
        y=paste(y_axis, sprintf(" (%2.0f%%)", percent_variance[y_axis]), sep=""));
   
   gg_dist_1 <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,x_axis], fill=pData(eset)$Group)) + 
-    geom_density(alpha=0.4, size=0.2) + ylab(paste(x_axis, "Density", sep="\n") ) + theme_bw() +
+    geom_density(alpha=0.4, size=0.2) + ylab(paste(x_axis, "Density", sep="\n") ) + theme_bw() + 
     theme(legend.position="none", axis.text=element_blank(), axis.line=element_blank(), axis.ticks=element_blank(),
           panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border=element_blank(), 
           axis.title=element_text(size=8) )
@@ -85,7 +84,7 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
 
   # Graph output
   output_filename <- file.path(outputpath, paste("PCAplots_",type,".pdf",sep=""))
-  pdf(output_filename, width=4, height=4)
+  pdf(output_filename, width=3.5, height=3.5)
   print(pca_graph+theme(legend.position="none") )
   print(pca_graph+theme(legend.position="none")+geom_text_repel(aes(x=PC_data$x[,x_axis], y=PC_data$x[,y_axis], label=rownames(PC_data$x)), colour="black", size=3) )
   grid.arrange(g_legend(pca_graph) )
@@ -225,7 +224,7 @@ drawUMAP <- function(eset, type, outputpath=output_plots_path) {
   
   # Graph output
   output_filename <- file.path(outputpath, paste("UMAPplot_",type,".pdf",sep=""))
-  pdf(output_filename, width=4, height=4)
+  pdf(output_filename, width=3.5, height=3.5)
   
   print(umap_graph+theme(legend.position = "none"))
   grid.arrange(g_legend(umap_graph) )

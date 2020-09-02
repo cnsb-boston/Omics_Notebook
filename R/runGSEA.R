@@ -37,12 +37,12 @@ runGSEA <- function (rnk, gmt,
                            stats=ranked_vector,
                            minSize=15, 
                            maxSize=500, 
-                           nperm=1000)
+                           nperm=10000)
   })
   
   fgsea_out <- fgsea_results[,c(1,1,2,3)]
   colnames(fgsea_out) <- c("Term", "Description", "p.Val", "FDR")
-  fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"NES"])
+  fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"ES"])
   fgsea_out[,"Genes"] <- apply(fgsea_results[,"leadingEdge"], 1, function(x) paste(as.character(unlist(x["leadingEdge"])), collapse=","))
   fgsea_out[,"Genes"] <- apply(fgsea_out, 1, function(x) gsub(" ", "", x["Genes"]))
   fgsea_out[,"NES"] <- (fgsea_results[,"NES"])
@@ -82,12 +82,12 @@ runGSEA <- function (rnk, gmt,
                            stats=ranked_vector,
                            minSize=15, 
                            maxSize=500, 
-                           nperm=1000)
+                           nperm=10000)
   })
   
   fgsea_out <- fgsea_results[,c(1,1,2,3)]
   colnames(fgsea_out) <- c("Term", "Description", "p.Val", "FDR")
-  fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"NES"])
+  fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"ES"])
   fgsea_out[,"Genes"] <- apply(fgsea_results[,"leadingEdge"], 1, function(x) paste(as.character(unlist(x["leadingEdge"])), collapse=","))
   fgsea_out[,"Genes"] <- apply(fgsea_out, 1, function(x) gsub(" ", "", x["Genes"]))
   fgsea_out[,"NES"] <- (fgsea_results[,"NES"])
