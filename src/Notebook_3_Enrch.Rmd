@@ -288,20 +288,30 @@ if( run_gsea & species!="Other" ) { try({
 ---
 ```{r, eval=(length(gene_data_index)>0 & runDifferential & gsea_section) }
 
-if(dir.exists("Gene_Sets") ){
+if(dir.exists("Gene_Sets") | dir.exists(file.path("..","Gene_Sets")) ){
   
-  gmt_files <- list.files("Gene_Sets")[grepl(".GMT", toupper(list.files("Gene_Sets")) )]
+  gmt_files2 <- c()
+  gmt_names <- c()
   
-  if(length(gmt_files)>0){
+  if( dir.exists("Gene_Sets") ){
+    gmt_files_add <- list.files("Gene_Sets")[grepl(".GMT", toupper(list.files("Gene_Sets")) )]
+    gmt_names <- c(gmt_names, gsub(".gmt","", gmt_files_add))
+    gmt_files2 <- c(gmt_files2, file.path("Gene_sets",gmt_files_add))
+  }
+  if( dir.exists(file.path("..","Gene_Sets")) ){
+    gmt_files_add <- list.files(file.path("..","Gene_Sets"))[grepl(".GMT", toupper(list.files(file.path("..","Gene_Sets"))) )]
+    gmt_names <- c(gmt_names, gsub(".gmt|.GMT","", gmt_files_add))
+    gmt_files2 <- c(gmt_files2, file.path("..","Gene_Sets",gmt_files_add))
+  }
+  
+  if(length(gmt_files2)>0){
     
     gsea_working_dir <- "GSEA_Custom"
     gsea_working_path <- file.path(output_path, gsea_working_dir)
     if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
     
-    gmt_names <- gsub(".gmt","", gmt_files)
-    
-    for(gmt_index in 1:length(gmt_files)){
-      gmt_file <-file.path("Gene_Sets", gmt_files[[gmt_index]] )
+    for(gmt_index in 1:length(gmt_files2)){
+      gmt_file <-gmt_files2[[gmt_index]] 
 
       for (i in 1:length(analysis_names)){
         analysis_name <- paste(analysis_names[[i]], gmt_names[gmt_index], sep="_")
@@ -393,7 +403,7 @@ if( run_gsea & species!="Other" ) { try({
   
 for(gmt_index in 1:length(gmt_files)){
     
-  dest_gmt_file <-file.path(gsea_working_path, gmt_files[gmt_index])
+  dest_gmt_file2 <-file.path(gsea_working_path, gmt_files[gmt_index])
   file.copy(from=file.path( gsub("src", "data", notebook_dir),"matched",gmt_files[gmt_index]), to= dest_gmt_file )  
   
   
@@ -401,7 +411,7 @@ for(gmt_index in 1:length(gmt_files)){
     analysis_name <- paste(analysis_names[[i]], gmt_names[gmt_index], sep="_")
     rnk_file <- rnk_files[[i]]
     
-    runGSEA(rnk=rnk_file, gmt=dest_gmt_file, analysisName=analysis_name, out_path=gsea_working_path )
+    runGSEA(rnk=rnk_file, gmt=dest_gmt_file2, analysisName=analysis_name, out_path=gsea_working_path )
   }
 
 }
@@ -515,7 +525,8 @@ setwd(working_dir)
 
 ---
 
-```{r child=file.path(notebook_dir, 'Notebook_4_Integ.Rmd'), eval=( show_metab_enrich & length(metab_data_index>0))}
+```{r child=file.path(notebook_dir, 'Notebook_4_Integ.Rmd'), eval=( (show_metab_enrich & length(metab_data_index)>0) | length(gene_data_index>1) )}
+
 ```
 
 

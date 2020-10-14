@@ -73,11 +73,17 @@ drawVolcano <- function(dat, type, subset_rows=F,
         label_names2 <- subset_rows[[j]]#[!(subset_rows[[j]] %in% label_names)]
       if( "Gene" %in% colnames(dat)){
         plot(plot1+
-               geom_text_repel(data=data.frame(dat[label_names2,]),size=2, aes(x=logFC, y=-log10(P.Value), label=Gene))+theme(legend.position="none") +
+               geom_label_repel(data=data.frame(dat[label_names,]),size=2.5, 
+                                aes(x=logFC, y=-log10(adj.P.Val), label=Gene),
+                                label.size=NA, label.padding = .1, na.rm=T, fill=alpha(c("white"),0.5) )+
+               theme(legend.position="none") +
                geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
       } else{
         plot(plot1 + 
-               geom_text_repel(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(P.Value),size=1, label=feature_identifier))+theme(legend.position="none") +
+               geom_label_repel(data=data.frame(dat[label_names,]),size=1.5, 
+                                aes(x=logFC, y=-log10(adj.P.Val), label=feature_identifier),
+                                label.size=NA, label.padding = .1, na.rm=T, fill=alpha(c("white"),0.5) )+
+               theme(legend.position="none") +
                geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(P.Value) ),size=0.7, pch=21) ) 
       }
       }
@@ -93,11 +99,18 @@ drawVolcano <- function(dat, type, subset_rows=F,
         label_names2 <- subset_rows[[j]]#[!(subset_rows[[j]] %in% label_names)]
         if( "Gene" %in% colnames(dat)){
           plot(plot3+
-                 geom_text_repel(data=data.frame(dat[label_names2,]),size=2, aes(x=logFC, y=-log10(adj.P.Val), label=Gene))+theme(legend.position="none") +
-                 geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(adj.P.Val) ),size=0.7, pch=21) ) 
+                 geom_label_repel(data=data.frame(dat[label_names2,]),size=2.5, 
+                                 aes(x=logFC, y=-log10(adj.P.Val), label=Gene),
+                                 label.size=NA, label.padding = .1, na.rm=T, fill=alpha(c("white"),0.5) )+
+                 theme(legend.position="none") +
+                 geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(adj.P.Val) ),size=0.7, pch=21) 
+                 )
         } else{
           plot(plot3 + 
-                 geom_text_repel(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(adj.P.Val),size=1, label=feature_identifier))+theme(legend.position="none") +
+                 geom_label_repel(data=data.frame(dat[label_names2,]),size=1.5, 
+                                  aes(x=logFC, y=-log10(adj.P.Val), label=feature_identifier),
+                                  label.size=NA, label.padding = .1, na.rm=T, fill=alpha(c("white"),0.5) ) +
+                 theme(legend.position="none") +
                  geom_point(data=data.frame(dat[label_names2,]), aes(x=logFC, y=-log10(adj.P.Val) ),size=0.7, pch=21) ) 
         }
       }
