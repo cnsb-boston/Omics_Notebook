@@ -461,7 +461,8 @@ if(length(gene_data_index)>1){
     write.table(x=ranked_pval,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
     
     if(!( grepl("Human", species)) ){ 
-      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[c]),".rnk", sep=""));
+      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",
+                                                                    gsub("-","_",contrast_strings[c]),".rnk", sep=""));
       ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
       write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
       

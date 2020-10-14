@@ -486,6 +486,54 @@ Click to view static heatmaps plots: `r { output_links }`
 
 ---
 
+```{r boxplots_for_select_features}
+
+# If there's a directory called "Subset_Lists" make feature lists based on text files
+subset_genes=FALSE;
+if( dir.exists("Subset_Lists") ){ try({
+  filelist <- list.files(path=file.path("Subset_Lists"), pattern="*.txt")
+  subset_genes <- vector("list", length=length(filelist))
+  names(subset_genes) <- gsub("*.txt", "", filelist)
+  
+  for( i in 1:length(filelist)){
+    subset_genes[i] <- unique(list(scan(file.path("Subset_Lists", filelist[i]), what="", sep=" " ) ))
+  }
+  subset_genes <- unique(unlist(subset_genes, use.names = F))
+}) }
+
+for(i in 1:length(omicsList)){ try({
+  subset_rows=FALSE;
+  if( class(subset_genes)!="logical" ){ try({
+    subset_rows <- c()
+    if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
+      subset_rows <- rownames(omicsList[[i]][["eSet"]])[which(fData(omicsList[[i]][["eSet"]])$Gene %in% subset_genes )]
+    }
+    if( length(subset_rows)==0 ){
+      subset_rows <- rownames(omicsList[[i]][["eSet"]])[ which(rownames(omicsList[[i]][["eSet"]]) %in% subset_genes ) ]
+    }
+  },silent=T) }
+  # Draw the boxplots
+  if(class(subset_rows)!="logical"){ 
+    output_filename<-file.path(output_plots_path, paste(omicsList[[i]][["dataType"]],"_SelectFeatures",".pdf", sep=""))
+    pdf(output_filename, width=3, height=3)
+    for(j in 1:length(subset_rows)){ try({
+      dat <- data.frame(Intensity=exprs(omicsList[[i]][["eSet"]])[subset_rows[j],],
+                        Group = pData(omicsList[[i]][["eSet"]])$Group  )
+      print(ggplot(data=dat, aes(color=Group, x=Group, y=Intensity)) + geom_boxplot() + geom_point() +
+          theme_bw() + labs(title=paste( omicsList[[i]][["dataType"]],"\n", subset_rows[j], sep="")) +
+          theme(legend.position = "none") + ylab("Log2 Intensity") +
+          theme(axis.text.x=element_text(angle=45, hjust=1))
+      )
+    
+    }) }
+    dev.off()
+  }
+}) }
+
+```
+
+---
+
 `r if(int_heatmap_section){"### Interactive Heatmap"}`
 ```{r interactive_plots_qc, eval=int_heatmap_section}
 output_links<-"";
@@ -509,6 +557,18 @@ for(i in 1:length(omicsList)){
 ```{r save_data_qc }
 
 # save for omics integrator, expression matrix, expression set RDS, ranked list for GSEA
+subset_genes=FALSE;
+if( dir.exists("Subset_Lists") ){ try({
+  filelist <- list.files(path=file.path("Subset_Lists"), pattern="*.txt")
+  subset_genes <- vector("list", length=length(filelist))
+  names(subset_genes) <- gsub("*.txt", "", filelist)
+  
+  for( i in 1:length(filelist)){
+    subset_genes[i] <- unique(list(scan(file.path("Subset_Lists", filelist[i]), what="", sep=" " ) ))
+    subset_genes[[i]] <- subset_genes[[i]][subset_genes[[i]]!=""]
+  }
+}) }
+
 for(i in 1:length(omicsList)){
   subset_rows=FALSE;
   if( class(subset_genes)!="logical" ){ try({

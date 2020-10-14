@@ -1,4 +1,15 @@
 
+`r if( FALSE & gsea_section & length(gene_data_index)>1){"### ActivePathways Integrative Enrichment"} `
+```{r, eval=(FALSE & length(gene_data_index)>1 & runDifferential & gsea_section) }
+    
+gsea_working_dir <- "ActivePathways"
+gsea_working_path <- file.path(output_path, gsea_working_dir)
+    
+
+
+```
+
+---
 
 ```{r eval=( length(metab_data_index)>0)}
 
@@ -163,7 +174,7 @@ if( run_gsea & species!="Other" ) { try({
   
 for(gmt_index in 1:length(gmt_files)){
     
-  dest_gmt_file <-file.path(gsea_working_path, gmt_files[gmt_index])
+  dest_gmt_file2 <-file.path(gsea_working_path, gmt_files[gmt_index])
   file.copy(from=file.path( gsub("src", "data", notebook_dir),"feature",gmt_files[gmt_index]), to= dest_gmt_file )  
   
   analysis_names <- vector("list", length(loop_list))
@@ -181,7 +192,7 @@ for(gmt_index in 1:length(gmt_files)){
     analysis_name <- paste(gsub(".*/","", gsub(".rnk", "", rnk_files_select[[i]][[j]])), "_", gmt_names[gmt_index], sep="" ) #analysis_names[[i]]
     rnk_file <- rnk_files_select[[i]][[j]]
     
-    runGSEA(rnk=rnk_file, gmt=dest_gmt_file, analysisName=analysis_name, out_path=gsea_working_path )
+    runGSEA(rnk=rnk_file, gmt=dest_gmt_file2, analysisName=analysis_name, out_path=gsea_working_path )
     }
   }
 
