@@ -6,7 +6,7 @@
 
 2. Install Docker. From Omics Notebook Directory, run:
 
-`docker pull bblum/omics_notebook:latest`
+`docker run bblum/omics_notebook:latest`
 
 Or build from Dockerfile.
 
