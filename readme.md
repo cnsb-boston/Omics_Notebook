@@ -1,33 +1,36 @@
 ## Instructions
 
-1. Install git. Clone github repository:
+#### 1. Install git. Clone github repository:
 
 `git clone https://github.com/cnsb-boston/Omics_Notebook.git`
 
-2 A. Run Natively.
+#### 2 A. Run Natively.
 
 Install specified versions of R and Python and all packages in Install.R file.
 
 Run Notebook.py script, which will automate entire pipeline.
 
 
-2 B. Run with Docker.
+#### 2 B. Run with Docker.
 
 Given complexity with R package dependencies, it may be easiest to run with the assistance of docker. 
 
-i. Install Python (see version below) and Docker. 
+###### i. Install Python (see version below) and Docker. 
 
-ii. The GUI component automates the creation of the Parameters.R file and should be run natively with Pynton3 and tkinter.
+###### ii. Generate Parameters.R file.
+
+The GUI component automates the creation of the Parameters.R file and should be run natively with Pynton3 and tkinter.
 
 `python3 /src/Pipeline.py` Adjust path for file location.
 
-iii. From Omics Notebook Directory, run:
+###### iii. From Omics Notebook Directory, run:
 
 `docker run bblum/omics_notebook:latest`
 
 Or build from Dockerfile.
 
-iv. Run R analysis using docker:
+
+###### iv. Run R analysis using docker:
 
 ```
 docker run -it --rm \
