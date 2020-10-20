@@ -15,22 +15,22 @@ Run Notebook.py script, which will automate entire pipeline.
 
 Given complexity with R package dependencies, it may be easiest to run with the assistance of docker. 
 
-###### i. Install Python (see version below) and Docker. 
+##### i. Install Python (see version below) and Docker. 
 
-###### ii. Generate Parameters.R file.
+##### ii. Generate Parameters.R file.
 
 The GUI component automates the creation of the Parameters.R file and should be run natively with Pynton3 and tkinter.
 
 `python3 /src/Pipeline.py` Adjust path for file location.
 
-###### iii. From Omics Notebook Directory, run:
+##### iii. From Omics Notebook Directory, run:
 
 `docker run bblum/omics_notebook:latest`
 
 Or build from Dockerfile.
 
 
-###### iv. Run R analysis using docker:
+##### iv. Run R analysis using docker:
 
 ```
 docker run -it --rm \
@@ -38,6 +38,8 @@ docker run -it --rm \
   -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook Rscript /home/src/Pipeline.R "/PATH/TO/OMICS NOTEBOOK" "/PATH/TO/DATA ANALYSIS DIR"
 ```
+The Analaysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container and the third line mounts the local Omics_Notebook diectory to the home folder in the container.
+
 This may look like:
 ```
 docker run -it --rm \
