@@ -4,54 +4,46 @@
 
 `git clone https://github.com/cnsb-boston/Omics_Notebook.git`
 
-2. Install Docker. From Omics Notebook Directory, run:
+2 A. Run Natively.
+
+Install specified versions of R and Python and all packages in Install.R file.
+
+Run Notebook.py script, which will automate entire pipeline.
+
+
+2 B. Run with Docker.
+
+Given complexity with R package dependencies, it may be easiest to run with the assistance of docker. 
+
+i. Install Python (see version below) and Docker. 
+
+ii. The GUI component automates the creation of the Parameters.R file and should be run natively with Pynton3 and tkinter.
+
+`python3 /src/Pipeline.py` Adjust path for file location.
+
+iii. From Omics Notebook Directory, run:
 
 `docker run bblum/omics_notebook:latest`
 
 Or build from Dockerfile.
 
-The GUI component works by mounting the X11 socket into the container. Mac and Windows users require X11. 
+iv. Run R analysis using docker:
 
-For macOS (socat and xquartz required):
-```
-open -a Xquartz
-socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\"
-```
-
-Set the display variable for your platform:
-macOS: `-e DISPLAY=docker.for.mac.host.internal:0`
-Windows: `-e DISPLAY=host.docker.internal:0`
-Linux: `--net=host -e DISPLAY=:0`
-
-3. Run Omics Notebook
-
-Perform docker run command with platform specific display:
-
-Linux:
 ```
 docker run -it --rm \
-  -e DISPLAY=$DISPLAY \
   -u docker \
-  -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
   -v ~/Omics_Notebook:/home:rw \
-  bblum/omics_notebook python3 /home/Notebook.py
-```  
-MacOS:
+  bblum/omics_notebook Rscript /home/src/Pipeline.R "/PATH/TO/OMICS NOTEBOOK" "/PATH/TO/DATA ANALYSIS DIR"
+```
+This may look like:
 ```
 docker run -it --rm \
-  -e DISPLAY=docker.for.mac.host.internal:0 \
   -u docker \
-  -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
-  -v ~/Omics_Notebook:/home:rw \
-  bblum/omics_notebook python3 /home/Notebook.py
-
+  -v ~/Documents/BU/Raghu/Omics_Notebook:/home:rw \
+  bblum/omics_notebook Rscript /home/src/Pipeline.R "/home" "/home/example"
 ```
 
-Note: GUI requires X11. If you are unable to configure X11 socket, you can create the parameters file manually. 
-
-
-Or install required software (below) and run Notebook.py.
-See "Structure" or additional documentation for more details on running in part or customizing to your needs.
+Note: GUI in docker requires X11. If you are unable to configure X11 socket, you can create the parameters file seperately.
 
 ---
 
