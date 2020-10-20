@@ -2,7 +2,7 @@
 
 1. Install git. Clone github repository:
 
-`git clone git@github.com:cnsb-boston/Omics_Notebook.git`
+`git clone https://github.com/cnsb-boston/Omics_Notebook.git`
 
 2. Install Docker. From Omics Notebook Directory, run:
 
