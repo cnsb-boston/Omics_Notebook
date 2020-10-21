@@ -403,8 +403,7 @@ if( run_gsea & species!="Other" ) { try({
   
 for(gmt_index in 1:length(gmt_files)){
     
-  dest_gmt_file2 <-file.path(gsea_working_path, gmt_files[gmt_index])
-  file.copy(from=file.path( gsub("src", "data", notebook_dir),"matched",gmt_files[gmt_index]), to= dest_gmt_file )  
+  dest_gmt_file2 <-file.path( gsub("src", "data", notebook_dir),"matched",gmt_files[gmt_index])
   
   
   for (i in 1:length(analysis_names)){
@@ -428,6 +427,9 @@ output_mummichog_subdir <- file.path(output_subdir,"Metabo_Enrichment" )
 ```
 
 `r if( length(metab_data_index)>0 ){"### Metabolite Enrichment"}`
+
+`r if( length(metab_data_index)>0 ){"While perhaps the leading tool for metabolite pathway enrichment, the MetaboAnalyst R Package is still in development and  work in progress. A recent update creates an error where the metabolic models are not available for download. If this is still the case when your analysis is run, you will see error messages below and no result files created for the metabolite enrichment analysis. In order to complete your analysis, you can take the files that beging with 'DE_matrix_' in the /Differential/files/ directory to upload to the MetaboAnalyst website (additional formatting may be required)."}`
+
 ```{r mummichog, eval=( length(metab_data_index)>0 )}
 
 output_mummichog_subdir <- file.path(output_subdir,"Metabo_Enrichment" )

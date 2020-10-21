@@ -108,6 +108,21 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
     names <- c(names, "RT"); 
     col_widths<-c(col_widths, 16);
   }
+  if ( "Adduct" %in% colnames(fData(eset)) ){ 
+    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Adduct")] );
+    names <- c(names, "Adduct"); 
+    col_widths<-c(col_widths, 8);
+  }
+  if ( "Formula" %in% colnames(fData(eset)) ){ 
+    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Formula")] );
+    names <- c(names, "Formula"); 
+    col_widths<-c(col_widths, 8);
+  }
+  if ( "Metabolite.name" %in% colnames(fData(eset)) ){ 
+    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Metabolite.name")] );
+    names <- c(names, "Metabolite.name"); 
+    col_widths<-c(col_widths, 8);
+  }
   
   if ( "MaxFC" %in% colnames(fData(eset)) ){ 
     formatted_table <- data.frame(formatted_table, fData(eset)[,c("MaxFC")] );
@@ -190,6 +205,11 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   if ( "identifier" %in% colnames(fData(eset)) ){ 
     formatted_table <- data.frame(formatted_table, fData(eset)[,c("identifier")] ); 
     names <- c(names,"identifier"); col_widths<-c(col_widths, 16);
+  }
+  if ( "KEGG" %in% colnames(fData(eset)) ){ 
+    formatted_table <- data.frame(formatted_table, fData(eset)[,c("KEGG")] );
+    names <- c(names, "KEGG"); 
+    col_widths<-c(col_widths, 8);
   }
   
   if ( "Sequence" %in% colnames(fData(eset)) ){ 
