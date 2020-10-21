@@ -21,12 +21,9 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE,
   saveRDS(data, file=output_filename); 
   
   # Save expression matrix
-  if ( "Gene" %in% colnames(fData(data[["eSet"]])) &  "Protein.names" %in% colnames(fData(data[["eSet"]])) ) {
-    output_table <- cbind(fData(data[["eSet"]])[,c("feature_identifier","Gene", "Protein.names")],exprs(data[["eSet"]]))
-  } else {  
-    output_table <- cbind( rownames(exprs(data[["eSet"]])), exprs(data[["eSet"]])) 
-  }
-  rownames(output_table) <- rownames(exprs(data[["eSet"]]))
+  select_cols<- c("Gene", "feature_identifier", "Protein", "mz","rt","Adduct", "identifier", "Metabolite.name", "KEGG")
+  select_cols<- select_cols[which(select_cols %in% colnames(fData(data[["eSet"]])) )]
+  output_table <- cbind(fData(data[["eSet"]])[,select_cols],exprs(data[["eSet"]]))
   output_filename <- file.path(outputpath,paste("Expression_matrix_",type,".txt", sep=''));
   write.table(x= output_table, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
   
@@ -42,7 +39,8 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE,
   if ( class(limmaRes) != "logical") {
     # Save expression matrix
     output_filename <- file.path(outputcontrastpath,paste("DE_matrix_",type,"_", gsub("-","_",contrast_name),".txt", sep=''));
-    select_cols<- c("Gene", "feature_identifier", "Protein", "mz", "P.Value", "adj.P.Val", "logFC", "AveExpr")
+    select_cols<- c("Gene", "feature_identifier", "Protein", "mz","rt","Adduct", "identifier", "Metabolite.name", "KEGG",
+                    "P.Value", "adj.P.Val", "logFC", "AveExpr")
     select_cols<- select_cols[which(select_cols %in% colnames(limmaRes))]
     write.table(x= limmaRes[,select_cols], file=output_filename, sep='\t',row.names=F, col.names=TRUE, quote=FALSE);
     
