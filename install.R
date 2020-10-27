@@ -34,7 +34,6 @@ install.packages("rmarkdown")
 install.packages("knitrBootstrap")
 
 install.packages("BiocManager")
-
 BiocManager::install("Biobase")
 BiocManager::install("limma")
 BiocManager::install("ComplexHeatmap")
@@ -76,6 +75,7 @@ BiocManager::install("ncdf4")
 
 install.packages("devtools")
 library(devtools)
+# Installing forked package to maintain compatability.
 devtools::install_github("cnsb-boston/MetaboAnalystR", build_vignettes=FALSE)
 
 
