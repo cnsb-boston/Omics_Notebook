@@ -44,7 +44,7 @@ This may look like:
 ```
 docker run -it --rm \
   -u docker \
-  -v ~/Documents/BU/Raghu/Omics_Notebook:/home:rw \
+  -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook Rscript /home/src/Pipeline.R "/home" "/home/example"
 ```
 
