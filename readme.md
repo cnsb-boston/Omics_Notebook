@@ -40,7 +40,7 @@ docker run -it --rm \
   -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook Rscript /home/src/Pipeline.R "/PATH/TO/OMICS NOTEBOOK" "/PATH/TO/DATA ANALYSIS DIR"
 ```
-The Analaysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container and the third line mounts the local Omics_Notebook diectory to the home folder in the container.
+The Analysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container and the third line mounts the local Omics_Notebook diectory to the home folder in the container.
 
 In the Parameters.R file, adjust the file paths for the `working_dir`, `annotation_filename`, and `notebook_dir` variables as per your filepath. The Parameters.R file included in the example directory has been updated with these changes.
 
