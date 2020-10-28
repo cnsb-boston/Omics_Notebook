@@ -51,14 +51,6 @@ docker run -it --rm \
   -v ~/Omics_Notebook:/home:rw \
   bblum/omics_notebook Rscript "/home/src/Pipeline.R" "/home" "/home/example"
 ```
-Or, to avoid manually editing the Parameters.R file, run as follows:
-```
-docker run -it --rm \
-  -u docker \
-  -v /:/:rw \
-  bblum/omics_notebook Rscript "/PATH/TO/OMICS NOTEBOOK/src/Pipeline.R" "/PATH/TO/OMICS NOTEBOOK" "/PATH/TO/DATA ANALYSIS DIR"
-```
-
 
 ---
 
