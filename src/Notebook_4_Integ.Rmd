@@ -174,8 +174,7 @@ if( run_gsea & species!="Other" ) { try({
   
 for(gmt_index in 1:length(gmt_files)){
     
-  dest_gmt_file2 <-file.path(gsea_working_path, gmt_files[gmt_index])
-  file.copy(from=file.path( gsub("src", "data", notebook_dir),"feature",gmt_files[gmt_index]), to= dest_gmt_file )  
+  dest_gmt_file2 <-file.path( gsub("src", "data", notebook_dir),"feature",gmt_files[gmt_index])
   
   analysis_names <- vector("list", length(loop_list))
   for (i in 1:length(loop_list)) {
