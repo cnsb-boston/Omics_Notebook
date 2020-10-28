@@ -37,9 +37,14 @@ Or build from Dockerfile.
 ```
 docker run -it --rm \
   -u docker \
+<<<<<<< HEAD
   -v ~/PATH/TO/OMICS NOTEBOOK:/home:rw \
   -v ~/PATH/TO/DATA ANALYSIS DIR:/data:rw \
   bblum/omics_notebook Rscript /home/src/Pipeline.R "/home" "/data"
+=======
+  -v ~/Omics_Notebook:/home:rw \
+  bblum/omics_notebook Rscript "/home/src/Pipeline.R" "/PATH/TO/OMICS NOTEBOOK" "PATH/TO/DATA ANALYSIS DIR"
+>>>>>>> c47a9944776aea69e2c7258fa42d6dd7d9753bc6
 ```
 The Analysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container and the third -v lines mount the local Omics_Notebook directory to the home directory in the container, and mount the Analysis Directory to the data directory.
 
@@ -48,10 +53,15 @@ The modified docker run command may look like:
 docker run -it --rm \
   -u docker \
   -v ~/Omics_Notebook:/home:rw \
+<<<<<<< HEAD
   -v ~/Omics_Notebook/example:/data:rw \
   bblum/omics_notebook Rscript "/home/src/Pipeline.R" "/home" "/data"
 ```
 
+=======
+  bblum/omics_notebook Rscript "/home/src/Pipeline.R" "/home" "/home/example"
+```
+>>>>>>> c47a9944776aea69e2c7258fa42d6dd7d9753bc6
 
 
 ---
