@@ -115,7 +115,8 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
   dev.off()
   
   # Save analysis
-  write.table(PC_data$rotation, file=file.path(outputfile, paste("PCA_loadings_", type,".txt", sep="")), quote=F, sep="\t" )
+  write.table(data.frame("Feature"=rownames(PC_data$rotation),PC_data$rotation),
+              file=file.path(outputfile, paste("PCA_loadings_", type,".txt", sep="")), quote=F, sep="\t" )
   
   # Run enrichment based on top 3 PCs
   if( .species!="Other" & ("Gene" %in% colnames(fData(eset))) ) { try({
