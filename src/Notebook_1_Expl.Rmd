@@ -258,7 +258,7 @@ for(i in 1:length(omicsList)){ try({
 ---
 
 `r if( length(prot_data_index)>0 | length(gene_data_index)>0 ){"### Normalize to 1st Data Set"}`
-```{r site_normalixation, eval= ( length(prot_data_index)>0 | length(gene_data_index)>0 ) }
+```{r site_normalization, eval= ( length(prot_data_index)>0 | length(gene_data_index)>0 ) }
 suppressMessages({suppressWarnings({ 
 output_links<-"";
 try({

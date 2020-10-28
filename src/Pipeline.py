@@ -226,7 +226,6 @@ class GUI(tk.Frame):
     ############################################
     # SAVE VARIABLES FILE AND CLOSE COMMAND
     def clicked_button():
-      dir_path = os.path.normpath(os.path.dirname(os.path.realpath(__file__)))
       analysis_dir = str(tk.StringVar(self, value=fileDir).get()) 
       
       variable_file = analysis_dir + "/Parameters.R"
@@ -263,7 +262,6 @@ class GUI(tk.Frame):
       outputfile.write("int_volcano_section <- " + str(isIntVl_state.get()).upper() + ";\n")
       outputfile.write("txtFolder <- " + str(txtFolder.get()).upper() + ";\n")
       
-      outputfile.write("notebook_dir <- '" + dir_path + "';\n") 
       outputfile.write("inherit_paths <- " + inherit_paths +  ";\n")
       outputfile.write("libraries_path <- '" + libraries_path +  "';\n")
       #outputfile.write("pandoc_path <- '" + pandoc_path +  "';\n")

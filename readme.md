@@ -21,7 +21,7 @@ Given complexity with R package dependencies, it may be easiest to run with the 
 
 The GUI component automates the creation of the Parameters.R file and should be run natively with Pynton3 and tkinter. While there are solutions to GUI in docker (e.g. requiring X11 and configuring X11 socket), they may be difficult to configure on all systems.
 
-`python3 /Omics_Notebook/src/Pipeline.py` Adjust path for file location.
+`python3 Omics_Notebook/src/Pipeline.py` Adjust path for file location.
 
 You will then need to adjust the file paths in the Parameters.R file to the relative path names in step iv.
 
@@ -37,27 +37,21 @@ Or build from Dockerfile.
 ```
 docker run -it --rm \
   -u docker \
-  -v ~/Omics_Notebook:/home:rw \
-  bblum/omics_notebook Rscript /home/src/Pipeline.R "/PATH/TO/OMICS NOTEBOOK" "/PATH/TO/DATA ANALYSIS DIR"
+  -v ~/PATH/TO/OMICS NOTEBOOK:/home:rw \
+  -v ~/PATH/TO/DATA ANALYSIS DIR:/data:rw \
+  bblum/omics_notebook Rscript /home/src/Pipeline.R "/home" "/data"
 ```
-The Analysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container and the third line mounts the local Omics_Notebook diectory to the home folder in the container.
-
-In the Parameters.R file, adjust the file paths for the `working_dir`, `annotation_filename`, and `notebook_dir` variables as per your filepath. The Parameters.R file included in the example directory has been updated with these changes.
+The Analysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container and the third -v lines mount the local Omics_Notebook directory to the home directory in the container, and mount the Analysis Directory to the data directory.
 
 The modified docker run command may look like:
 ```
 docker run -it --rm \
   -u docker \
   -v ~/Omics_Notebook:/home:rw \
-  bblum/omics_notebook Rscript /home/src/Pipeline.R "/home" "/home/example"
+  -v ~/Omics_Notebook/example:/data:rw \
+  bblum/omics_notebook Rscript "/home/src/Pipeline.R" "/home" "/data"
 ```
-Or, to avoid manually editing the Parameters.R file, run as follows:
-```
-docker run -it --rm \
-  -u docker \
-  -v /:/:rw \
-  bblum/omics_notebook Rscript /PATH/TO/OMICS NOTEBOOK/src/Pipeline.R "/PATH/TO/OMICS NOTEBOOK" "/PATH/TO/DATA ANALYSIS DIR"
-```
+
 
 
 ---

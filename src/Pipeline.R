@@ -25,10 +25,18 @@ index <- length(run_directories)
 notebook_dir <- file.path(run_directories[(index-1)], "src");
 analysis_dir <- file.path(run_directories[index]);
 
-
 # source run variables
 setwd(analysis_dir);
 source(file.path(analysis_dir, "Parameters.R"));
+
+
+if(analysis_dir != working_dir){
+  write(paste("annotation_filename <- '",gsub(working_dir, analysis_dir, annotation_filename), "';", sep=""),
+        file = file.path(analysis_dir, "Parameters.R"), append = T)
+  write(paste("working_dir <- '", analysis_dir, "';", sep=""),
+        file = file.path(analysis_dir, "Parameters.R"), append = T)
+}
+
 
 # Set local file paths, if not needed, set BUSCC to false
 if(inherit_paths==TRUE) {
