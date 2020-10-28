@@ -13,3 +13,6 @@ src/.Rhistory
 .DS_Store
 
 example/Parameters.R
+
+# ignore singularity containers
+*.simg

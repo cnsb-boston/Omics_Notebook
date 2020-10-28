@@ -76,7 +76,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
       print(ht1)
     }
     # Correlation
-    #draw(Heatmap(matrix=cor(emat_sel), col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
+    #draw(Heatmap(matrix=cor(emat_sel), col=mapcolor, name="Cor", top_annotation=ha_column,show_row_names=FALSE,
     #             column_title=paste(type, ": Correlation, row z score", sep='') ))
   
     # Subset features only
@@ -115,7 +115,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
       print( Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,show_row_names=FALSE,
                      cluster_columns=TRUE,
                      column_title=paste(type, ": \nHighest variation, row z score", sep='') ) )
-      print( Heatmap(matrix=emat_sel, col=mapcolor, name="", top_annotation=ha_column,show_row_names=FALSE,
+      print( Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,show_row_names=FALSE,
                      cluster_columns=FALSE,
                      column_title=paste(type, ": \nHighest variation, row z score", sep='') ) )
     }
