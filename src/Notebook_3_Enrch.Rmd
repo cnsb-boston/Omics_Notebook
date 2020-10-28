@@ -466,9 +466,10 @@ for(i in 1:length(metab_data_index)){ try({
         mSet <- Read.PeakListData(mSet, output_filename);
         mSet <- MetaboAnalystR::UpdateMummichogParameters(mSet, "0.1", ion_mode, 0.05);
         mSet <- SanityCheckMummichogData(mSet);
-      
-        mSet <- PerformMummichog(mSet, mumm_libs[mumm_lib_index], permNum=1000, dat_dir=file.path(notebook_dir, "data", "metaboAnalyst") );
-        mSet <- PerformGSEA(mSet, mumm_libs[mumm_lib_index], permNum=1000, dat_dir=file.path(notebook_dir, "data", "metaboAnalyst") );
+        
+        lib_dir <- file.path(gsub("src","data",notebook_dir), "metaboAnalyst")
+        mSet <- PerformMummichog(mSet, mumm_libs[mumm_lib_index], permNum=1000, dat_dir=lib_dir );
+        mSet <- PerformGSEA(mSet, mumm_libs[mumm_lib_index], permNum=1000, dat_dir=lib_dir );
       
         mSet <- PlotIntegPaths(mSet);
         #PreparePDFReport(mSet, usrName=analysis_name);
