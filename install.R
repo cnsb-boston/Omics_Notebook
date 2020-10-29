@@ -28,9 +28,9 @@ install.packages("UpSetR")
 install.packages("corrplot")
 install.packages("uwot")
 install.packages("cowplot")
+# install.packages("openxlsx")
 
 install.packages("devtools")
-devtools::install_version("openxlsx", version = "4.1.2", repos = "http://cran.us.r-project.org")
 
 install.packages("rmarkdown")
 install.packages("knitrBootstrap")
