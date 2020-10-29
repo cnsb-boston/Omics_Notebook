@@ -24,11 +24,13 @@ install.packages("gridExtra")
 install.packages("lattice")
 install.packages("VennDiagram")
 install.packages("heatmaply")
-install.packages("openxlsx")
 install.packages("UpSetR")
 install.packages("corrplot")
 install.packages("uwot")
 install.packages("cowplot")
+
+install.packages("devtools")
+devtools::install_version("openxlsx", version = "4.1.2", repos = "http://cran.us.r-project.org")
 
 install.packages("rmarkdown")
 install.packages("knitrBootstrap")
@@ -73,8 +75,6 @@ metanr_packages <- function(){
 metanr_packages()
 BiocManager::install("ncdf4")
 
-install.packages("devtools")
-library(devtools)
 # Installing forked package to maintain compatability.
 devtools::install_github("cnsb-boston/MetaboAnalystR", build_vignettes=FALSE)
 
