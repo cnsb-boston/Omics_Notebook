@@ -15,7 +15,6 @@ RUN apt-get update \
         r-base-dev \
         && rm -rf /var/lib/apt/lists/*
 
-
 # Install R libraries
 COPY install.R /home/install.R
 
