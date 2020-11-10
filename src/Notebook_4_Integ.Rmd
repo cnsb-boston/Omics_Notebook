@@ -76,7 +76,7 @@ for (c in 1:num_contrasts){
     met_ranked[,"rank"] <- ( -log(met_ranked[,"P.Value"]) * sign(met_ranked[,"logFC"]) )
     
     for(n in 1:nrow(met_ids)){
-      met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"]), "rank"]
+      met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"])[1], "rank"]
       
     }
     
@@ -97,7 +97,7 @@ for (c in 1:num_contrasts){
       met_ranked[,"rank"] <- ( -log(met_ranked[,"P.Value"]) * sign(met_ranked[,"logFC"]) )
     
       for(n in 1:nrow(met_ids)){
-        met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"]), "rank"]
+        met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"])[1], "rank"]
       
       }
       met_ids[,"GeneName"] <- met_ids[,"Matched.Compound"]
