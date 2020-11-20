@@ -110,7 +110,7 @@ for( i in 1:length(omicsList) ){ try({
 logfc_index <- unique(logfc_index);
 ##########################################################
 # Make differential directory
-output_contrast_subdir <- file.path(output_subdir,"Differential")
+output_contrast_subdir <- file.path(output_subdir,"2_Differential")
 output_contast_subdir_files <- file.path(output_contrast_subdir, "files")
 output_contrast_path <- file.path(working_dir, output_contrast_subdir)
 output_contrast_path_files <- file.path(output_contrast_path, "files")

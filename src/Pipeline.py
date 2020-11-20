@@ -23,7 +23,7 @@ class GUI(tk.Frame):
     ############################################
 
     # R libraries path
-    libraries_path = '/project/cnsbomic/Tools/R3.6'
+    libraries_path = '/project/cnsbomic/Tools/R3.6' # change default based on install
 
     # Pandoc path
     #pandoc_path = SET IF NEEDED
@@ -49,7 +49,7 @@ class GUI(tk.Frame):
     # DIRECTORY
     fileDir_lbl = tk.Label(self, text="Files Directory:")
     fileDir_lbl.grid(column=0, row=2, sticky=tk.E)
-    fileDir_field = tk.Entry(self, width=60)
+    fileDir_field = tk.Entry(self, width=60, state="disabled")
     fileDir_field.grid(column=1, row=2, columnspan=3, sticky=tk.W)
     if os.path.isdir(os.path.normpath(startDir) ):
       startDir = os.path.normpath(startDir)
@@ -65,7 +65,7 @@ class GUI(tk.Frame):
     # ANNOTATION FILE NAME
     nameAnn_lbl = tk.Label(self, text="Annotation file:")
     nameAnn_lbl.grid(column=0, row=5, sticky=tk.E)
-    nameAnn_field = tk.Entry(self, width=60)
+    nameAnn_field = tk.Entry(self, width=60, state="disabled")
     nameAnn_field.grid(column=1, row=5, columnspan=3, sticky=tk.W)
     def nameAnn_clicked():
        global nameAnn

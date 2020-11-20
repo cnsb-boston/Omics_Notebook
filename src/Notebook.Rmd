@@ -55,8 +55,8 @@ source("Parameters.R")
 ```{r libraries}
 # Make output subdirectories
 output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
-output_files_subdir <- paste(output_subdir,"Files", sep="/")
-output_plots_subdir <- paste(output_subdir,"Plots", sep="/")
+output_files_subdir <- paste(output_subdir,"1_Files", sep="/")
+output_plots_subdir <- paste(output_subdir,"1_Plots", sep="/")
 output_path <- file.path(working_dir, output_subdir)
 output_files_path <- file.path(working_dir, output_files_subdir)
 output_plots_path <- file.path(working_dir, output_plots_subdir)
