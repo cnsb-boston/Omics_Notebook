@@ -19,11 +19,10 @@ Given complexity with R package dependencies, it may be easiest to run with the 
 
 ##### ii. Generate Parameters.R file.
 
-The GUI component automates the creation of the Parameters.R file and should be run natively with Pynton3 and tkinter. While there are solutions to GUI in docker (e.g. requiring X11 and configuring X11 socket), they may be difficult to configure on all systems.
+The GUI component automates the creation of the Parameters.R file and should be run natively with Python3 and tkinter. While there are solutions for GUI in docker (e.g. VNC or configuring X11 socket), they may be difficult to configure on all systems.
 
 `python3 Omics_Notebook/src/Pipeline.py` Adjust path for file location.
 
-You will then need to adjust the file paths in the Parameters.R file to the relative path names in step iv.
 
 ##### iii. From Omics Notebook Directory, run:
 
@@ -41,7 +40,7 @@ docker run -it --rm \
   -v ~/PATH/TO/DATA ANALYSIS DIR:/data:rw \
   bblum/omics_notebook Rscript /home/src/Pipeline.R "/home" "/data"
 ```
-The Analysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container and the third -v lines mount the local Omics_Notebook directory to the home directory in the container, and mount the Analysis Directory to the data directory.
+The Analysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container. The third and fourth -v lines mount the local Omics_Notebook directory to the home directory in the container, and mount the Analysis Directory to the data directory.
 
 The modified docker run command may look like:
 ```
@@ -63,7 +62,7 @@ docker run -it --rm \
 
 * Install all required R packages. (See install.R)
 
-This software has been tested for use on Linux (Cent OS 6 and 7, Ubuntu 18.04) and MacOS (10.14 and 10.15)
+This software has been tested for use on Linux (Cent OS 6 and 7, Ubuntu 18.04, 20.04) and MacOS (10.14 and 10.15)
 
 
 #### Enrichment Map
@@ -74,7 +73,7 @@ This software has been tested for use on Linux (Cent OS 6 and 7, Ubuntu 18.04) a
 
 Open cytoscape. Default port for REST API is 1234. If your computer already has this port in use, open cytoscape from the command line and specity another port. 
 
-Note: it may be easier to run the scripts and import enrichment results into Cytoscape manually.
+Note: it may be easier to run the scripts and import enrichment results into Cytoscape manually. This is how the scripts are currently configured.
 
 ---
 
