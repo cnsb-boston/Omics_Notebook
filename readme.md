@@ -1,38 +1,41 @@
 ## Instructions
 
 #### 1. Install git. Clone github repository:
-
 `git clone https://github.com/cnsb-boston/Omics_Notebook.git`
 
+
 #### 2 A. Run Natively.
+Install specified versions of R and Python and all packages in install.R file.
 
-Install specified versions of R and Python and all packages in Install.R file.
-
-Run Notebook.py script, which will automate entire pipeline.
+##### i. Run Notebook.py script, which will automate entire pipeline.
 
 
 #### 2 B. Run with Docker.
-
 Given complexity with R package dependencies, it may be easiest to run with the assistance of docker. 
 
-##### i. Install Python (see version below) and Docker. 
+##### i. Install Python, tkinter (see version below) and Docker. 
 
-##### ii. Generate Parameters.R file.
-
-The GUI component automates the creation of the Parameters.R file and should be run natively with Python3 and tkinter. While there are solutions for GUI in docker (e.g. VNC or configuring X11 socket), they may be difficult to configure on all systems.
-
-`python3 Omics_Notebook/src/Pipeline.py` Adjust path for file location.
-
-
-##### iii. From Omics Notebook Directory, run:
-
-`docker run bblum/omics_notebook:latest`
-
+##### ii. From Omics Notebook Directory, run:
+`docker pull bblum/omics_notebook:latest`
 Or build from Dockerfile.
 
+##### iii. Run Notebook.py with "Docker" argument.
+`python3 Notebook.py Docker`
+
+
+Or run each component on its own, which may be easier for integrating into other workflows.
+
+##### i. Install Python, tkinter (see version below) and Docker. 
+
+##### ii. From Omics Notebook Directory, run:
+`docker pull bblum/omics_notebook:latest`
+Or build from Dockerfile.
+
+##### iii. Generate Parameters.R file.
+The GUI component automates the creation of the Parameters.R file and should be run natively with Python3 and tkinter. While there are solutions for GUI in docker (e.g. VNC or configuring X11 socket), they may be difficult to configure on all systems.
+`python3 Omics_Notebook/src/Pipeline.py` Adjust path for file location.
 
 ##### iv. Run R analysis using docker:
-
 ```
 docker run -it --rm \
   -u docker \
@@ -52,28 +55,33 @@ docker run -it --rm \
 ```
 
 
+#### 2 C. Run with Singularity.
+For use with HPC linux environments.
+
+##### i. Install Python, tkinter (see version below) and Singularity. 
+
+##### ii. Create singularity image from Docker.
+`singularity build "ON.simg" "docker://bblum/omics_notebook:latest"`
+
+##### iii. Run Notebook.py with "Docker" argument.
+`python3 Notebook.py Singularity '/Path/to/SingularityImage.simg'`
+
+
+
+
+
 ---
 
 ## Software requirements
 
-* R 3.6,  Python 3.6.
+* R 3.6,  Python 3.6, Tkinter.
 
 * Install Rstudio.
 
-* Install all required R packages. (See install.R)
+* Install all required R packages. (See install.R and respective R packages for compatibility requirements).
 
 This software has been tested for use on Linux (Cent OS 6 and 7, Ubuntu 18.04, 20.04) and MacOS (10.14 and 10.15)
 
-
-#### Enrichment Map
-
-* Install cytoscape>3.5.1.
-
-* Install enrichmentmap pipeline collection.
-
-Open cytoscape. Default port for REST API is 1234. If your computer already has this port in use, open cytoscape from the command line and specity another port. 
-
-Note: it may be easier to run the scripts and import enrichment results into Cytoscape manually. This is how the scripts are currently configured.
 
 ---
 
