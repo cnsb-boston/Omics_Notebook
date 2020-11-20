@@ -1,7 +1,7 @@
 # Enrichment Analysis 
 
 ```{r, echo=FALSE}
-enrichr_working_dir <- "EnrichR"
+enrichr_working_dir <- "3_EnrichR"
 ```
 
 `r if(enrichr_section&length(gene_data_index)>0){"### EnrichR"}`
@@ -9,7 +9,7 @@ enrichr_working_dir <- "EnrichR"
 
 run_enrichr_seperate <- TRUE;
 
-enrichr_working_dir <- "EnrichR"
+enrichr_working_dir <- "3_EnrichR"
 enrichr_working_path <- file.path(output_path, enrichr_working_dir)
 if( dir.exists(enrichr_working_path) == FALSE ) { dir.create(enrichr_working_path) }
   
@@ -119,7 +119,7 @@ for(i in 1:length(gene_data_index) ){
 ```{r echo=FALSE}
 enrichment_map <- gsea_section; # only run enrichment map if interactive session
 output_network_file <- FALSE;
-gsea_working_dir <- "GSEA"
+gsea_working_dir <- "3_GSEA"
 ```
 
 `r if( gsea_section & species!="Other" & length(gene_data_index)>0){"### GSEA and EnrichmentMap"} `
@@ -133,7 +133,7 @@ enrichment_map <- gsea_section; # only run enrichment map if interactive session
 
 if( run_gsea & species!="Other" ) { try({
   
-  gsea_working_dir <- "GSEA"
+  gsea_working_dir <- "3_GSEA"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
   
@@ -336,7 +336,7 @@ run_ksea <- length(phos_data_index)>0 & grepl("Human", species)  & runDifferenti
 try({
 output_links <- "";
 
-dir_path <- file.path(output_path, "KSEA")
+dir_path <- file.path(output_path, "3_KSEA")
 if( dir.exists(dir_path) == FALSE ) {dir.create(dir_path)}
 
 for( i in 1:length(phos_data_index) ){
@@ -368,7 +368,7 @@ for( i in 1:length(phos_data_index) ){
     try({
     KSEA.Complete(KSData, PX2, NetworKIN=TRUE, NetworKIN.cutoff=5, m.cutoff=3, p.cutoff=0.05, output_dir=dir_path)
     
-    output_links <- paste(output_links,paste("[ ",dir_name," ](",output_subdir,"/KSEA/",dir_name,"/KSEA Bar Plot.tiff)  |  ",sep=""),sep="" )
+    output_links <- paste(output_links,paste("[ ",dir_name," ](",output_subdir,"/3_KSEA/",dir_name,"/KSEA Bar Plot.tiff)  |  ",sep=""),sep="" )
     })
   }
 }
@@ -392,7 +392,7 @@ run_gsea <- gsea_section;
 
 if( run_gsea & species!="Other" ) { try({
 
-  gsea_working_dir <- "GSEA_MOMENTA"
+  gsea_working_dir <- "3_GSEA_MOMENTA"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
   
@@ -432,7 +432,7 @@ output_mummichog_subdir <- file.path(output_subdir,"Metabo_Enrichment" )
 
 ```{r mummichog, eval=( length(metab_data_index)>0 )}
 
-output_mummichog_subdir <- file.path(output_subdir,"Metabo_Enrichment" )
+output_mummichog_subdir <- file.path(output_subdir,"3_Metabo_Enrichment" )
 output_mummichog_path <- file.path(working_dir, output_mummichog_subdir)
 if( dir.exists(output_mummichog_path) == FALSE ) { dir.create(output_mummichog_path) }
 

@@ -2,7 +2,7 @@
 `r if( FALSE & gsea_section & length(gene_data_index)>1){"### ActivePathways Integrative Enrichment"} `
 ```{r, eval=(FALSE & length(gene_data_index)>1 & runDifferential & gsea_section) }
     
-gsea_working_dir <- "ActivePathways"
+gsea_working_dir <- "4_ActivePathways"
 gsea_working_path <- file.path(output_path, gsea_working_dir)
     
 
@@ -163,7 +163,7 @@ for (c in 1:num_contrasts){
 ```{r, eval=( show_metab_enrich & length(metab_data_index)>0 & length(gene_data_index)>0) }
 
 if( run_gsea & species!="Other" ) { try({
-  gsea_working_dir <- "MOMENTA_Integrated"
+  gsea_working_dir <- "4_MOMENTA_Integrated"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
   
