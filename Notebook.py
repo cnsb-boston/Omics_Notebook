@@ -14,7 +14,7 @@ r_path = os.path.normpath(notebook_path + "/src" + "/Pipeline.R")
 
 # Run pipeline scripts
 p = subprocess.Popen(args=["python3", pipeline_path], stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-analysis_dir = str(p.communicate()[0], 'utf-8').rstrip()
+analysis_dir = str(p.communicate()[0], 'utf-8').rstrip().split("\n")[-1]
 
 # 1. Run natively
 if len(sys.argv)<1 : 
@@ -24,10 +24,12 @@ if len(sys.argv)<1 :
 # 2. Run with Docker
 elif str(sys.argv[1])=="Docker" :
   print("Running with Docker.")
-  subprocess.Popen(args=["docker run -it --rm -u docker -v ", notebook_path,":/home:rw -v ",analysis_dir,":/data:rw bblum/omics_notebook Rscript '/home/src/Pipeline.R' '/home' '/data'"])
+  command = "docker run -it --rm -u docker -v "+notebook_path+":/home:rw -v "+analysis_dir+":/data:rw bblum/omics_notebook Rscript /home/src/Pipeline.R /home /data"
+  subprocess.Popen(args=command.split())
 
 # 3. Run with Singularity
 elif str(sys.argv[1])=="Singularity" and len(sys.argv)==3 :
   print("Running with Singularity.")
   singularity_image = sys.argv[2] # PATH/TO/SINGULARITY IMAGE
-  subprocess.Popen(args=["singularity run --bind ",notebook_path,":'/home':rw --bind ",analysis_dir,":'/data':rw  ",singularity_image," Rscript '/home/src/Pipeline.R' '/home' '/data'"])
+  command = "singularity run --bind "+notebook_path+":'/home':rw --bind "+analysis_dir+":'/data':rw "+singularity_image+" Rscript /home/src/Pipeline.R /home /data"]
+  subprocess.Popen(args=command.split())
