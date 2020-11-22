@@ -31,5 +31,5 @@ elif str(sys.argv[1])=="Docker" :
 elif str(sys.argv[1])=="Singularity" and len(sys.argv)==3 :
   print("Running with Singularity.")
   singularity_image = sys.argv[2] # PATH/TO/SINGULARITY IMAGE
-  command = "singularity run --bind "+notebook_path+":'/home':rw --bind "+analysis_dir+":'/data':rw "+singularity_image+" Rscript /home/src/Pipeline.R /home /data"]
+  command = "singularity run --bind "+notebook_path+":/home:rw --bind "+analysis_dir+":/data:rw "+singularity_image+" Rscript /home/src/Pipeline.R /home /data"
   subprocess.Popen(args=command.split())

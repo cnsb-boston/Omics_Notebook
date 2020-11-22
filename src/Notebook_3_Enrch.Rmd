@@ -362,7 +362,7 @@ for( i in 1:length(phos_data_index) ){
     }
     
     dir_name <- paste("KSEA_", contrast_strings[c], sep="")
-    dir_path <- file.path(output_path, "KSEA", dir_name)
+    dir_path <- file.path(output_path, "3_KSEA", dir_name)
     if( dir.exists(dir_path) == FALSE ) {dir.create(dir_path)}
     
     try({
