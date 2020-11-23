@@ -36,7 +36,7 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   plot1 <- ggplot(df, aes(x = Sample, y = Intensity)) + geom_boxplot(fill=annotCol) +
     theme_bw() + theme(axis.text.x=element_text(angle=45, hjust=1)) +  
     labs(title=paste(type, " log2 Intensity: \nBefore Normalization", sep=''));
-  plot2 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + 
+  plot2 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + theme(legend.position="none") +
     labs(title=paste(type, " log2 Intensity: \nBefore Normalization", sep=''));
   
   if( !("Batch" %in% colnames(pData(eset))) | !norm_by_batches){
@@ -87,7 +87,7 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
       theme_bw() + theme(axis.text.x=element_text(angle=45, hjust=1)) + 
       labs(title=paste(type, " log2 Intensity: \nAfter ",
                        toupper(norm)," Normalization", sep=''));
-    plot4 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + 
+    plot4 <- ggplot(df, aes(x=Intensity, colour=Sample)) + geom_density()+ theme_bw() + theme(legend.position="none") +
       labs(title=paste(type, " log2 Intensity: \nAfter ",
                        toupper(norm)," Normalization", sep=''));
   }
