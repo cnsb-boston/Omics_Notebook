@@ -66,8 +66,24 @@ For use with HPC linux environments.
 ##### iii. Run Notebook.py with "Docker" argument.
 `python3 Notebook.py Singularity '/Path/to/SingularityImage.simg'`
 
+Or run each component on its own, which may be easier for integrating into other workflows.
 
+##### i. Install Python, tkinter (see version below) and Singularity. 
 
+##### ii. Create singularity image from Docker.
+`singularity build "ON.simg" "docker://bblum/omics_notebook:latest"`
+
+##### iii. Generate Parameters.R file.
+The GUI component automates the creation of the Parameters.R file and should be run natively with Python3 and tkinter. While there are solutions for GUI in docker (e.g. VNC or configuring X11 socket), they may be difficult to configure on all systems.
+`python3 Omics_Notebook/src/Pipeline.py` Adjust path for file location.
+
+##### iv. Run R analysis using docker:
+```
+singularity run \
+  --bind ~/PATH/TO/OMICS NOTEBOOK:/home:rw \
+  --bind ~/PATH/TO/DATA ANALYSIS DIR:/data:rw \
+  /PATH/TO/ON.simg Rscript /home/src/Pipeline.R "/home" "/data"
+```
 
 
 ---
