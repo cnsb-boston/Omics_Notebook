@@ -1,6 +1,6 @@
 project_name <- 'Analysis';
-working_dir <- '/home/example'; # Directory for analysis and where data is 
-annotation_filename <- '/home/example/Annotation_3.xlsx';
+working_dir <- '/Omics_Notebook/example'; # Directory for analysis and where data is 
+annotation_filename <- '/Omics_Notebook/example/Annotation_3.xlsx';
 query_web <- TRUE;
 map_color <- 'viridis';
 zero_percent <- 0.70;
@@ -11,16 +11,15 @@ saveXlsx <- TRUE;
 runDifferential <- TRUE;
 adjpcutoff <- 0.05;
 sig_percent <- 0.010;
-enrichr_section <- TRUE;
+enrichr_section <- FALSE;
 gsea_section <- TRUE;
 all_comparisons <- TRUE;
 species <- 'Human (9606)';
-enrichmentmap_p_val <- 0.05;
-enrichmentmap_q_val <- 0.30;
 use_site_norm <- FALSE;
 int_heatmap_section <- FALSE;
 int_volcano_section <- TRUE;
 txtFolder <- FALSE;
-notebook_dir <- '/home/src';
 inherit_paths <- FALSE;
 libraries_path <- '.';
+annotation_filename <- '/data/Annotation_3.xlsx';
+working_dir <- '/data';
