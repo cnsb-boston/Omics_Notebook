@@ -165,22 +165,22 @@ class GUI(tk.Frame):
     # NUMERIC ENTRIES
     vcmd = (self.register(self.onValidate), '%d','%i','%P','%s','%S','%v','%V','%W')
 
-    emapVar_lbl = tk.Label(self, text="EnrichmentMap Parameters:")
-    emapVar_lbl.grid(column=3, columnspan=1, sticky=tk.W, row=18, pady=(20,0))
+    #emapVar_lbl = tk.Label(self, text="EnrichmentMap Parameters:")
+    #emapVar_lbl.grid(column=3, columnspan=1, sticky=tk.W, row=18, pady=(20,0))
     
-    emapVar_p_lbl = tk.Label(self, text="P Value:")
-    emapVar_p_lbl.grid(column=2, row=19, sticky=tk.E)
-    emapVar_p_start = tk.StringVar(self)
-    emapVar_p_start.set("0.05")
-    enrichmentmap_p_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=emapVar_p_start, validate='all', validatecommand=vcmd)
-    enrichmentmap_p_val.grid(column=3, row=19)
+    #emapVar_p_lbl = tk.Label(self, text="P Value:")
+    #emapVar_p_lbl.grid(column=2, row=19, sticky=tk.E)
+    #emapVar_p_start = tk.StringVar(self)
+    #emapVar_p_start.set("0.05")
+    #enrichmentmap_p_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=emapVar_p_start, validate='all', validatecommand=vcmd)
+    #enrichmentmap_p_val.grid(column=3, row=19)
 
-    emapVar_q_lbl = tk.Label(self, text="Q Value:")
-    emapVar_q_lbl.grid(column=2, row=20, sticky=tk.E)
-    emapVar_q_start = tk.StringVar(self)
-    emapVar_q_start.set("0.30")
-    enrichmentmap_q_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=emapVar_q_start, validate='all', validatecommand=vcmd)
-    enrichmentmap_q_val.grid(column=3, row=20)
+    #emapVar_q_lbl = tk.Label(self, text="Q Value:")
+    #emapVar_q_lbl.grid(column=2, row=20, sticky=tk.E)
+    #emapVar_q_start = tk.StringVar(self)
+    #emapVar_q_start.set("0.30")
+    #enrichmentmap_q_val = tk.Spinbox(self, from_=0.01, to=0.50, increment=0.01, textvariable=emapVar_q_start, validate='all', validatecommand=vcmd)
+    #enrichmentmap_q_val.grid(column=3, row=20)
 
     cutoff_lbl = tk.Label(self, text="Cut Offs:")
     cutoff_lbl.grid(column=0, columnspan=1, row=18, pady=(20,0))
@@ -254,8 +254,8 @@ class GUI(tk.Frame):
       outputfile.write("all_comparisons <- "+ str(allcomparisons_state.get()).upper() + ";\n")
       
       outputfile.write("species <- '" + str(species.get()) + "';\n")
-      outputfile.write("enrichmentmap_p_val <- " + str(enrichmentmap_p_val.get()) + ";\n")
-      outputfile.write("enrichmentmap_q_val <- " + str(enrichmentmap_q_val.get()) + ";\n")
+      #outputfile.write("enrichmentmap_p_val <- " + str(enrichmentmap_p_val.get()) + ";\n")
+      #outputfile.write("enrichmentmap_q_val <- " + str(enrichmentmap_q_val.get()) + ";\n")
       outputfile.write("use_site_norm <- " + str(useSiteNorm_state.get()).upper() + ";\n")
       
       outputfile.write("int_heatmap_section <- " + str(isIntHM_state.get()).upper() + ";\n")
