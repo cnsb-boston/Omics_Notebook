@@ -1,0 +1,127 @@
+"Pathway","Mummichog Pvals","GSEA Pvals","Combined Pvals"
+"glycine biosynthesis II",0.0047198,0.1435,0.00561976299390255
+"inosine-5'-phosphate biosynthesis II",0.0047198,0.3849,0.0132811006498384
+"glycine cleavage",0.0047198,0.1435,0.00561976299390255
+"glycine betaine degradation",0.016582,0.08478,0.010638041917637
+"folate transformations I",0.036444,0.03376,0.00947425302214583
+"citrulline-nitric oxide cycle",0.028602,0.6911,0.0973269770548013
+"glycine biosynthesis I",0.028602,0.2114,0.0369334989118971
+"taurine biosynthesis",0.028602,0.2918,0.0482900341844333
+"ubiquinol-10 biosynthesis (eukaryotic)",0.028602,0.2918,0.0482900341844333
+"tetrahydrofolate salvage from 5,10-methenyltetrahydrofolate",0.028602,0.2114,0.0369334989118971
+"zymosterol biosynthesis",0.028602,0.2918,0.0482900341844333
+"anandamide degradation",0.028602,0.003766,0.00109180278420334
+"melatonin degradation I",0.028602,0.004228,0.00121174800973925
+"urea cycle",0.028602,0.2637,0.0444034721809216
+"prostanoid biosynthesis",0.098877,0.03019,0.0203408160837157
+"folate polyglutamylation",0.076367,0.1224,0.053024224427085
+"serotonin and melatonin biosynthesis",0.076367,0.2975,0.10870096619476
+"palmitate biosynthesis I (animals)",0.076367,0.8491,0.242240193104542
+"dTMP <i>de novo</i> biosynthesis",0.076367,0.09072,0.0413753623021851
+"eumelanin biosynthesis",0.076367,0.2743,0.101924880945509
+"fatty acid &alpha;-oxidation II",0.076367,0.2194,0.0852668481931312
+"bupropion degradation",0.076367,0.4472,0.1494787661743
+"tyrosine degradation I",0.18475,0.4763,0.301868136057717
+"heme biosynthesis from uroporphyrinogen-III I",0.13615,0.6674,0.308797455719983
+"catecholamine biosynthesis",0.13615,0.6848,0.31444858680016
+"androgen biosynthesis",0.13615,0.4304,0.224846455617957
+"eicosapentaenoate biosynthesis II (metazoa)",0.13615,0.8283,0.358886449646768
+"L-carnitine biosynthesis",0.13615,0.2109,0.130659461946468
+"dopamine degradation",0.13615,0.7043,0.320710285902138
+"histidine degradation III",0.13615,0.07174,0.0549778175441047
+"leukotriene biosynthesis",0.20262,0.3769,0.272799779215745
+"morphine biosynthesis",0.20262,0.5865,0.371959315750555
+"(S)-reticuline biosynthesis II",0.20262,0.4937,0.330335626475895
+"acetone degradation I (to methylglyoxal)",0.20262,0.2848,0.222306757383291
+"nicotine degradation III",0.20262,0.3739,0.271233817097135
+"TCA cycle II (eukaryotic)",0.20262,0.1345,0.125432233254431
+"tryptophan degradation X (mammalian, via tryptamine)",0.27187,0.0985,0.123723362166348
+"noradrenaline and adrenaline degradation",0.27187,0.8972,0.588072869867257
+"phenylalanine degradation IV (mammalian, via side chain)",0.34106,0.0625,0.103347267629759
+"4-hydroxybenzoate biosynthesis",0.52847,0.3007,0.451213507947662
+"hypusine biosynthesis",0.17049,0.06751,0.0628958618902677
+"arginine biosynthesis IV",0.43039,0.001887,0.00659123872311455
+"glutamate degradation II",0.31238,0.007533,0.0165944664791269
+"uracil degradation II (reductive)",0.43039,0.3017,0.394919858686694
+"methionine salvage II (mammalia)",0.31238,0.2114,0.245495553504829
+"<i>S</i>-methyl-5-thio-&alpha;-D-ribose 1-phosphate degradation",0.17049,0.06751,0.0628958618902677
+"proline biosynthesis II (from arginine)",0.43039,0.3481,0.434224052271242
+"tyrosine biosynthesis IV",0.31238,0.6913,0.546935759762079
+"gluconeogenesis I",0.31238,0.6533,0.528409342779521
+"UDP-D-xylose and UDP-D-glucuronate biosynthesis",0.17049,0.5232,0.3047860715631
+"GDP-glucose biosynthesis",0.31238,0.0791,0.116147776952229
+"GDP-L-fucose biosynthesis II (from L-fucose)",0.17049,0.1161,0.0974330834240526
+"GDP-mannose biosynthesis",0.17049,0.1161,0.0974330834240526
+"mevalonate pathway I",0.31238,0.4123,0.392763151599581
+"coenzyme A biosynthesis",0.17049,0.5232,0.3047860715631
+"molybdenum cofactor biosynthesis",0.17049,0.1161,0.0974330834240526
+"NAD biosynthesis from 2-amino-3-carboxymuconate semialdehyde",0.31238,0.4397,0.410027281148326
+"tetrahydrobiopterin biosynthesis I",0.17049,0.1161,0.0974330834240526
+"tetrahydrobiopterin biosynthesis II",0.17049,0.1161,0.0974330834240526
+"tetrapyrrole biosynthesis II",0.31238,0.4397,0.410027281148326
+"1,25-dihydroxyvitamin D<sub>3</sub> biosynthesis",0.17049,0.06751,0.0628958618902677
+"retinol biosynthesis",0.17049,0.06751,0.0628958618902677
+"pyridoxal 5'-phosphate salvage pathway",0.17049,0.06751,0.0628958618902677
+"pregnenolone biosynthesis",0.31238,0.01057,0.0221662560545087
+"estrogen biosynthesis",0.31238,0.4397,0.410027281148326
+"glucocorticoid biosynthesis",0.17049,0.06751,0.0628958618902677
+"mineralocorticoid biosynthesis",0.17049,0.06751,0.0628958618902677
+"ceramide biosynthesis",0.31238,0.9962,0.674461601575977
+"fatty acid biosynthesis initiation II",0.17049,0.5232,0.3047860715631
+"&gamma;-linolenate biosynthesis II (animals)",0.31238,0.8351,0.611407684047084
+"oleate biosynthesis II (animals)",0.31238,0.004228,0.0100766866620265
+"stearate biosynthesis I (animals)",0.43039,0.6038,0.610063298347934
+"bile acid biosynthesis, neutral pathway",0.60993,0.05063,0.138272354325912
+"5-aminoimidazole ribonucleotide biosynthesis I",0.31238,0.3235,0.332682030469267
+"pyrimidine deoxyribonucleotides <i>de novo</i> biosynthesis I",0.31238,0.1015,0.141133278830537
+"uridine-5'-phosphate biosynthesis",0.43039,0.8776,0.745459505562874
+"salvage pathways of pyrimidine ribonucleotides",0.17049,0.1161,0.0974330834240526
+"epoxysqualene biosynthesis",0.17049,0.06751,0.0628958618902677
+"methylthiopropionate biosynthesis",0.17049,0.06751,0.0628958618902677
+"L-dopachrome biosynthesis",0.31238,0.6913,0.546935759762079
+"spermine biosynthesis",0.17049,0.5232,0.3047860715631
+"histamine biosynthesis",0.31238,0.3996,0.384570429431665
+"putrescine biosynthesis III",0.17049,0.5232,0.3047860715631
+"spermidine biosynthesis I",0.17049,0.5232,0.3047860715631
+"inositol pyrophosphates biosynthesis",0.52847,0.001845,0.00773493449234857
+"phenylethylamine degradation I",0.31238,0.01691,0.032979718530548
+"histamine degradation",0.43039,0.03165,0.0721423815733122
+"putrescine degradation III",0.60993,0.481,0.653143456909719
+"spermine and spermidine degradation I",0.31238,0.3277,0.33568076455618
+"oxidative ethanol degradation III",0.43039,0.4219,0.49136881335988
+"methylglyoxal degradation VI",0.52847,0.5604,0.656537318524245
+"methylglyoxal degradation I",0.43039,0.4623,0.520226069556324
+"2-oxoisovalerate decarboxylation to isobutanoyl-CoA",0.31238,0.9812,0.668956331391583
+"2-oxoglutarate decarboxylation to succinyl-CoA",0.17049,0.5232,0.3047860715631
+"L-dopa degradation",0.31238,0.4105,0.391609499469266
+"4-hydroxyproline degradation I",0.43039,0.04219,0.0909475762829367
+"&beta;-alanine degradation I",0.43039,0.5232,0.560890844733043
+"L-cysteine degradation I",0.52847,0.01522,0.0468355235405227
+"glutamate degradation III (via 4-aminobutyrate)",0.52847,0.7239,0.75014979641452
+"histidine degradation VI",0.31238,0.008457,0.0183242896482386
+"isoleucine degradation I",0.43039,0.4726,0.527334618996583
+"leucine degradation I",0.60993,0.8207,0.846968048684567
+"lysine degradation II",0.43039,0.6434,0.63248356919419
+"citrulline degradation",0.17049,0.5232,0.3047860715631
+"phenylalanine degradation I (aerobic)",0.31238,0.6913,0.546935759762079
+"tryptophan degradation to 2-amino-3-carboxymuconate semialdehyde",0.43039,0.2321,0.330013271024968
+"valine degradation I",0.67754,0.9757,0.934686319122798
+"pyruvate decarboxylation to acetyl CoA",0.31238,0.6533,0.528409342779521
+"glutaryl-CoA degradation",0.17049,0.5232,0.3047860715631
+"2-amino-3-carboxymuconate semialdehyde degradation to glutaryl-CoA",0.31238,0.518,0.456524979784106
+"heme degradation",0.31238,0.4186,0.396781672296913
+"sucrose degradation V (mammalian)",0.52847,0.5687,0.661842569635201
+"fatty acid &alpha;-oxidation III",0.17049,0.06751,0.0628958618902677
+"serotonin degradation",0.43039,0.07173,0.138241467591511
+"melatonin degradation II",0.52847,0.2826,0.433325134702676
+"thymine degradation",0.17049,0.5232,0.3047860715631
+"sulfite oxidation IV",0.31238,0.02537,0.0462644236226756
+"&alpha;-tocopherol degradation",0.31238,0.277,0.298289951971971
+"nicotine degradation IV",0.52847,0.8226,0.796864376604863
+"D-glucuronate degradation I",0.31238,0.2918,0.309482875865826
+"superoxide radicals degradation",0.17049,0.06751,0.0628958618902677
+"oxidized GTP and dGTP detoxification",0.31238,0.09363,0.132550792913035
+"glutamate dependent acid resistance",0.31238,0.4397,0.410027281148326
+"pyruvate fermentation to lactate",0.31238,0.4388,0.409468870832337
+"ketogenesis",0.43039,0.6772,0.65078732392792
+"pentose phosphate pathway (oxidative branch)",0.17049,0.5232,0.3047860715631

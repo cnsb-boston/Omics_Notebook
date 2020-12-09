@@ -1,0 +1,49 @@
+"Pathway","Mummichog Pvals","GSEA Pvals","Combined Pvals"
+"De novo fatty acid biosynthesis",0.28206,0.008292,0.0165077762777907
+"Leukotriene metabolism",0.33527,0.2748,0.311824256900354
+"Purine metabolism",0.28739,0.2336,0.248468095801205
+"Biopterin metabolism",0.19561,0.7985,0.4461936844137
+"Xenobiotics metabolism",0.35191,0.3153,0.354908941903476
+"TCA cycle",0.36908,0.06534,0.113944035108072
+"Fatty Acid Metabolism",0.45105,0.09122,0.172423713414901
+"Fructose and mannose metabolism",0.45105,0.1125,0.202007322032945
+"Urea cycle/amino group metabolism",0.59102,0.9577,0.888156539419156
+"Vitamin B9 (folate) metabolism",0.52672,0.002433,0.00981600132045243
+"Prostaglandin formation from arachidonate",0.74894,0.0016,0.0092591129319613
+"Glycolysis and Gluconeogenesis",0.5951,0.206,0.379896614775882
+"Pyrimidine metabolism",0.6559,0.5306,0.715354054572608
+"Glycine, serine, alanine and threonine metabolism",0.82823,0.9683,0.978953137732174
+"Androgen and estrogen biosynthesis and metabolism",0.89286,0.05968,0.209524564838281
+"Glycerophospholipid metabolism",0.9034,0.01766,0.0819725631317565
+"D4&E4-neuroprostanes formation",0.92054,0.00211,0.014070038873968
+"Tyrosine metabolism",0.97125,0.803,0.973778425691785
+"Arachidonic acid metabolism",0.99947,0.001608,0.0119464022012593
+"C5-Branched dibasic acid metabolism",0.37607,0.1243,0.189928712448666
+"Pyruvate Metabolism",0.85038,0.2613,0.556434677571035
+"Linoleate metabolism",0.98307,0.1557,0.440349688761456
+"Galactose metabolism",0.95516,0.9265,0.993112947820925
+"Histidine metabolism",0.75866,0.1267,0.321253418532205
+"Propanoate metabolism",0.88229,0.9951,0.992231102765546
+"Electron transport chain",0.2099,0.03725,0.0457494304074125
+"Drug metabolism - cytochrome P450",0.94287,0.002564,0.0169831016141408
+"Tryptophan metabolism",0.98963,0.007895,0.0457220376107952
+"Vitamin A (retinol) metabolism",0.97241,0.1601,0.445242714293145
+"Valine, leucine and isoleucine degradation",0.95516,0.3325,0.681864638867994
+"ROS Detoxification",0.2099,0.03725,0.0457494304074125
+"Ascorbate (Vitamin C) and Aldarate Metabolism",0.90745,0.1198,0.349950831819087
+"Dynorphin metabolism",0.2099,0.01016,0.0152488731811202
+"Alanine and Aspartate Metabolism",0.69373,0.04719,0.144673371582572
+"Glutathione Metabolism",0.50756,0.1962,0.329298088098957
+"Arginine and Proline Metabolism",0.97241,0.426,0.779319625685867
+"Porphyrin metabolism",0.95516,0.0597,0.220354161131549
+"Benzoate degradation via CoA ligation",0.2099,0.4654,0.324906741427043
+"Vitamin B6 (pyridoxine) metabolism",0.37607,0.006048,0.0161169213948274
+"Fatty acid activation",0.92727,0.03146,0.132281470718401
+"Aspartate and asparagine metabolism",0.97241,0.1707,0.464080140452613
+"Drug metabolism - other enzymes",0.61154,0.3775,0.569282437898168
+"Beta-Alanine metabolism",0.69373,0.7241,0.848183129054677
+"C21-steroid hormone biosynthesis and metabolism",0.99933,0.1247,0.384132035943989
+"Omega-6 fatty acid metabolism",0.2099,0.04268,0.0511993443475569
+"Phytanic acid peroxisomal oxidation",0.50756,0.02321,0.0641012045138993
+"Methionine and cysteine metabolism",0.97838,0.6511,0.924288312673226
+"Selenoamino acid metabolism",0.50756,0.2764,0.415824855427835
