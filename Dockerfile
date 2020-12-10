@@ -20,6 +20,7 @@ COPY install.R /home/install.R
 
 RUN Rscript home/install.R
 
+RUN R -e "install.packages('ActivePathways')"
 RUN R -e "devtools::install_version('openxlsx', version = '4.1.2', repos = 'http://cran.us.r-project.org')"
 
 # Create user
