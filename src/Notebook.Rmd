@@ -267,6 +267,9 @@ if( length(phos_data_index)>0 ){
 if( length(metab_data_index)>0 ){
   library(MetaboAnalystR)
 }
+if( length(gene_data_index)>1 ){
+library(ActivePathways)
+}
 }) })
 ```
 

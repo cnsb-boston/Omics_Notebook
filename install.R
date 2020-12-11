@@ -28,7 +28,6 @@ install.packages("UpSetR")
 install.packages("corrplot")
 install.packages("uwot")
 install.packages("cowplot")
-install.packages("ActivePathways")
 # install.packages("openxlsx")
 
 install.packages("devtools")
