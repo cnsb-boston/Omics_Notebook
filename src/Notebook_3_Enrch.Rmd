@@ -129,7 +129,6 @@ gsea_working_dir <- "3_GSEA"
 ## For more info: baderlab.github.io/Cytoscape_workflows/EnrichmentMapPipeline/
 
 run_gsea <- gsea_section; # if GSEA has already been run, set to false and include results in directory
-enrichment_map <- gsea_section; # only run enrichment map if interactive session
 
 if( run_gsea & species!="Other" ) { try({
   
@@ -286,6 +285,12 @@ if( run_gsea & species!="Other" ) { try({
 `r if(enrichment_map ){if( class(output_network_file)!="logical"){ "If multiple contrasts, load GSEA results into Cytoscape/EnrichmentMap manually."} } `
 
 ---
+```{r}
+gmt_files2 <- c()
+gmt_files <- c()
+
+```
+
 ```{r, eval=(length(gene_data_index)>0 & runDifferential & gsea_section) }
 
 if(dir.exists("Gene_Sets") | dir.exists(file.path("..","Gene_Sets")) ){

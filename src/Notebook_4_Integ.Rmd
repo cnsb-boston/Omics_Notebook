@@ -1,10 +1,81 @@
 
-`r if( FALSE & gsea_section & length(gene_data_index)>1){"### ActivePathways Integrative Enrichment"} `
-```{r, eval=(FALSE & length(gene_data_index)>1 & runDifferential & gsea_section) }
+`r if(gsea_section & length(gene_data_index)>1){"### ActivePathways Integrative Enrichment"} `
+```{r active_pathways, eval=(length(gene_data_index)>1 & runDifferential & gsea_section) }
     
 gsea_working_dir <- "4_ActivePathways"
 gsea_working_path <- file.path(output_path, gsea_working_dir)
-    
+if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
+
+a_pathways_gmt <- dest_gmt_file # large generic gene set
+if( length(gmt_files2) > 0 ){ a_pathways_gmt <- c(a_pathways_gmt, gmt_files2) } # Add Custom gene sets if there
+if( length(gmt_files) > 0 ){ a_pathways_gmt <- c(a_pathways_gmt, file.path( gsub("src", "data", notebook_dir),"matched",gmt_files)) } # Add MOMENTA gene sets
+a_paths_gmt_names <- gsub("(.*/\\s*(.*$))","\\2", gsub(".gmt|.GMT","",a_pathways_gmt) )
+
+for(c in 1:length(loop_list)) { try({ #perform for each contrast
+  # Get p values from first omics genes
+  scores <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c])[,c("Gene", "P.Value")]
+  colnames(scores) <- c("Gene", omicsList[[ gene_data_index[1] ]][["dataType"]] )
+  scores <- scores[order(scores[,2], decreasing = F),]
+  scores <- scores[!duplicated(scores[,1]),]
+  # add rest of gene data types into same scores matrix
+  for(i in 2:length(gene_data_index) ){
+    dat2 <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c])[,c("Gene", "P.Value")]
+    colnames(dat2) <- c("Gene", omicsList[[ gene_data_index[i] ]][["dataType"]] )
+    dat2 <- dat2[order(dat2[,2], decreasing = F),]
+    dat2 <- dat2[!duplicated(dat2[,1]),]
+    scores <- merge(scores, dat2, by="Gene", all=T)
+  }
+  scores[is.na(scores)] <- 1
+  row.names(scores)<- scores[,"Gene"]
+  scores <- scores[,-1]
+  scores <- as.matrix(scores)
+  # run active pathways for each gmt_file
+  for( gmt_index in 1:length(a_pathways_gmt) ){
+    out_table <- ActivePathways(scores, a_pathways_gmt[gmt_index],geneset.filter = c(10, 500))
+    out_table <- out_table[ order(out_table$adjusted.p.val, decreasing = F),]
+    out_table$overlap <- apply(out_table, 1, function(x) paste(as.character(unlist(x["overlap"])), collapse=","))
+    out_table$evidence <- apply(out_table, 1, function(x) paste(as.character(unlist(x["evidence"])), collapse=","))
+    gene_columns <- colnames(out_table)[grepl("Genes_", colnames(out_table))]
+    for(g_column in 1:length(gene_columns)){
+      out_table[,gene_columns[g_column] ] <- apply(out_table, 1, function(x) paste(as.character(unlist(x[ gene_columns[g_column] ])), collapse=","))
+    } 
+    out_filename <- file.path(gsea_working_path,paste(gsub("-","_",contrast_strings[c]),"_",substr(a_paths_gmt_names[gmt_index],1,20),gmt_index,".txt", sep="") )
+    write.table(out_table, file=out_filename, row.names = F, col.names = T, quote = F, sep = "\t")
+  }
+}) }
+
+if(statistic_index=='F'){ try({ #repeat for F statistic
+  # Get p values from first omics genes
+  scores <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust="BH", n=Inf,sort.by='F')[,c("Gene", "P.Value")]
+  colnames(scores) <- c("Gene", omicsList[[ gene_data_index[1] ]][["dataType"]] )
+  scores <- scores[order(scores[,2], decreasing = F),]
+  scores <- scores[!duplicated(scores[,1]),]
+  # add rest of gene data types into same scores matrix
+  for(i in 2:length(gene_data_index) ){
+    dat2 <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust="BH", n=Inf, sort.by='F')[,c("Gene", "P.Value")]
+    colnames(dat2) <- c("Gene", omicsList[[ gene_data_index[i] ]][["dataType"]] )
+    dat2 <- dat2[order(dat2[,2], decreasing = F),]
+    dat2 <- dat2[!duplicated(dat2[,1]),]
+    scores <- merge(scores, dat2, by="Gene", all=T)
+  }
+  scores[is.na(scores)] <- 1
+  row.names(scores)<- scores[,"Gene"]
+  scores <- scores[,-1]
+  scores <- as.matrix(scores)
+  # run active pathways for each gmt_file
+  for( gmt_index in 1:length(a_pathways_gmt) ){
+    out_table <- ActivePathways(scores, a_pathways_gmt[gmt_index],geneset.filter = c(10, 500))
+    out_table <- out_table[ order(out_table$adjusted.p.val, decreasing = F),]
+    out_table$overlap <- apply(out_table, 1, function(x) paste(as.character(unlist(x["overlap"])), collapse=","))
+    out_table$evidence <- apply(out_table, 1, function(x) paste(as.character(unlist(x["evidence"])), collapse=","))
+    gene_columns <- colnames(out_table)[grepl("Genes_", colnames(out_table))]
+    for(g_column in 1:length(gene_columns)){
+      out_table[,gene_columns[g_column] ] <- apply(out_table, 1, function(x) paste(as.character(unlist(x[ gene_columns[g_column] ])), collapse=","))
+    } 
+    out_filename <- file.path(gsea_working_path,paste("Fstatistic","_",substr(a_paths_gmt_names[gmt_index],1,20),".txt", sep="") )
+    write.table(out_table, file=out_filename, row.names = F, col.names = T, quote = F, sep = "\t")
+  }
+}) }
 
 
 ```
