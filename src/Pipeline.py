@@ -112,12 +112,22 @@ class GUI(tk.Frame):
     runEnrichr_state = tk.BooleanVar()
     runEnrichr_state.set(True)
     runEnrichr = ttk.Checkbutton(self, text="Run EnrichR", var=runEnrichr_state)
-    runEnrichr.grid(column=1, row=10, pady=(10,0), sticky=tk.W)
+    runEnrichr.grid(column=1, row=10, pady=(10,10), sticky=tk.W)
     
     runGSEA_state = tk.BooleanVar()
     runGSEA_state.set(True)
     runGSEA = ttk.Checkbutton(self, text="Run GSEA", var=runGSEA_state)
-    runGSEA.grid(column=2, row=10, pady=(10,0), sticky=tk.W)
+    runGSEA.grid(column=2, row=10, pady=(10,10), sticky=tk.W)
+    
+    runMOMENTA_state = tk.BooleanVar()
+    runMOMENTA_state.set(True)
+    runMOMENTA = ttk.Checkbutton(self, text="Run MOMENTA", var=runMOMENTA_state)
+    runMOMENTA.grid(column=3, row=10, pady=(10,10), sticky=tk.W)
+    
+    runActPath_state = tk.BooleanVar()
+    runActPath_state.set(False)
+    runActPath = ttk.Checkbutton(self, text="Run ActivePathways", var=runActPath_state)
+    runActPath.grid(column=4, row=10, pady=(10,10), sticky=tk.W)
     
     allcomparisons_state = tk.BooleanVar()
     allcomparisons_state.set(True)
@@ -127,7 +137,7 @@ class GUI(tk.Frame):
     useSiteNorm_state = tk.BooleanVar()
     useSiteNorm_state.set(False)
     useSiteNorm = ttk.Checkbutton(self, text="Use Normalized to 1st Data", var=useSiteNorm_state)
-    useSiteNorm.grid(column=3, row=11,columnspan=2, pady=(10,10), sticky=tk.W)
+    useSiteNorm.grid(column=3, row=11,columnspan=2, pady=(20,0), sticky=tk.W)
     
     incShinyNorm_state = tk.BooleanVar()
     incShinyNorm_state.set(False) # adjust when working
@@ -251,6 +261,8 @@ class GUI(tk.Frame):
       
       outputfile.write("enrichr_section <- " + str(runEnrichr_state.get()).upper() + ";\n")
       outputfile.write("gsea_section <- " + str(runGSEA_state.get()).upper() + ";\n")
+      outputfile.write("gsea_MOMENTA_section <- " + str(runMOMENTA_state.get()).upper() + ";\n")
+      outputfile.write("activePathways_section <- " + str(runActPath_state.get()).upper() + ";\n")
       outputfile.write("all_comparisons <- "+ str(allcomparisons_state.get()).upper() + ";\n")
       
       outputfile.write("species <- '" + str(species.get()) + "';\n")
