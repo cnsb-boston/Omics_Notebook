@@ -1,6 +1,6 @@
 
-`r if(gsea_section & length(gene_data_index)>1){"### ActivePathways Integrative Enrichment"} `
-```{r active_pathways, eval=(length(gene_data_index)>1 & runDifferential & gsea_section) }
+`r if(activePathways_section & length(gene_data_index)>1){"### ActivePathways Integrative Enrichment"} `
+```{r active_pathways, eval=(length(gene_data_index)>1 & runDifferential & activePathways_section) }
     
 gsea_working_dir <- "4_ActivePathways"
 gsea_working_path <- file.path(output_path, gsea_working_dir)

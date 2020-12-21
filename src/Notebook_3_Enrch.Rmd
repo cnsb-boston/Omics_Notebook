@@ -387,15 +387,13 @@ for( i in 1:length(phos_data_index) ){
 
 ---
 ```{r echo=FALSE}
-show_metab_enrich <- grepl(paste("Human", "Mouse", "Fruit Fly", "Yeast", "E. coli", sep="|"),species)
+show_metab_enrich <- ( grepl(paste("Human", "Mouse", "Fruit Fly", "Yeast", "E. coli", sep="|"),species) & gsea_MOMENTA_section )
 ```
 
-`r if( (show_metab_enrich& length(gene_data_index)>0 & runDifferential) ){"### GSEA for Metabolomic Models"} `
+`r if( (show_metab_enrich& length(gene_data_index)>0 & runDifferential) ){"### GSEA for Metabolomic Models (MOMENTA)"} `
 ```{r gsea_met_section, eval=(show_metab_enrich & length(gene_data_index)>0 & runDifferential) }
 
-run_gsea <- gsea_section; 
-
-if( run_gsea & species!="Other" ) { try({
+if( gsea_MOMENTA_section & species!="Other" ) { try({
 
   gsea_working_dir <- "3_GSEA_MOMENTA"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
