@@ -141,9 +141,9 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
     } 
     if(length(DiffList)>1){ try({
       DiffList_F <- DiffList_F[match(rownames(DiffList[[1]]),rownames(DiffList_F)),];
-      formatted_table <- data.frame(formatted_table, DiffList_F[,"F"])
-      names <- c(names, "F-Statistic");
-      col_widths<-c(col_widths, 8);
+      formatted_table <- data.frame(formatted_table, DiffList_F[,c("F","adj.P.Val")])
+      names <- c(names, "F-Statistic", "F-Stat adj.P.Val");
+      col_widths<-c(col_widths, 8,8);
     }) }
     try({ if(class(DiffList_T)!="NULL"){
       DiffList_T <- DiffList_T[match(rownames(DiffList[[1]]),rownames(DiffList_T)),];
