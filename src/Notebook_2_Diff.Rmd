@@ -369,7 +369,7 @@ for(i in 1:length(omicsList)){ try({
     
     if( !( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]]))   ){ 
       top_sum$Gene <- toupper(top_sum$Gene)
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name)
+      saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F)
     }
   }
   
@@ -393,7 +393,7 @@ for(i in 1:length(omicsList)){ try({
   
     if(!( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ try({
       top_sum$Gene <- toupper(top_sum$Gene)
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name)
+      saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F)
     }) }
   }
     # TimeSeries
@@ -408,7 +408,7 @@ for(i in 1:length(omicsList)){ try({
   
       if(!( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ try({
         top_sum$Gene <- toupper(top_sum$Gene)
-        saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name)
+        saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F)
       }) }
     })
   }

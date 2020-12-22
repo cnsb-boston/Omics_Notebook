@@ -14,11 +14,13 @@
 #' @examples
 #' 
 #' @export
-saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE, 
+saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE, saveRDS=TRUE,
                       limmaRes=FALSE, contrast_name=FALSE, outputcontrastpath=output_contrast_path_files){
   # Save eSet RDS  
-  output_filename <- file.path(outputpath, paste("Data_",type,".RDS", sep=""));             
-  saveRDS(data, file=output_filename); 
+  if( saveRDS ){
+    output_filename <- file.path(outputpath, paste("Data_",type,".RDS", sep=""));             
+    saveRDS(data, file=output_filename); 
+  }
   
   # Save expression matrix
   select_cols<- c("Gene", "feature_identifier", "Protein", "mz","rt","Adduct", "identifier", "Metabolite.name", "KEGG")
@@ -40,7 +42,7 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE,
     # Save expression matrix
     output_filename <- file.path(outputcontrastpath,paste("DE_matrix_",type,"_", gsub("-","_",contrast_name),".txt", sep=''));
     select_cols<- c("Gene", "feature_identifier", "Protein", "mz","rt","Adduct", "identifier", "Metabolite.name", "KEGG",
-                    "P.Value", "adj.P.Val", "logFC", "AveExpr")
+                    "P.Value", "adj.P.Val", "logFC", "AveExpr","F","B")
     select_cols<- select_cols[which(select_cols %in% colnames(limmaRes))]
     write.table(x= limmaRes[,select_cols], file=output_filename, sep='\t',row.names=F, col.names=TRUE, quote=FALSE);
     
