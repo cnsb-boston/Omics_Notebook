@@ -24,7 +24,7 @@ for(i in 1:length(gene_data_index) ){
       if (nrow(top_sum)<sig_cutoff){ top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust="BH", n=sig_cutoff, sort.by='p', coef=loop_list[c]); }
     })
     if( class(top_sum)=="logical" ){
-      top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,paste("logfc_",gsub("-","_",contrast_strings[c]),sep="")],
+      top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,paste0("logfc_",contrast_strings_file[c])],
                             Gene=fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene, 
                             feature_identifier =fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
       top_sum <- top_sum[top_sum[,"Gene"]!="", ]
@@ -116,6 +116,7 @@ for(i in 1:length(gene_data_index) ){
 `r if(enrichr_section&length(gene_data_index)>0){paste("For EnrichR results, see ", enrichr_working_dir, " directory.  ", sep="")}`    
 
 ---
+
 ```{r echo=FALSE}
 enrichment_map <- gsea_section; # only run enrichment map if interactive session
 output_network_file <- FALSE;
@@ -132,6 +133,8 @@ run_gsea <- gsea_section; # if GSEA has already been run, set to false and inclu
 
 if( run_gsea & species!="Other" ) { try({
   
+  case_modifier <- if(grepl("Mouse|Human", species)) "_Uppercase_" else "_"
+
   gsea_working_dir <- "3_GSEA"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
@@ -140,7 +143,7 @@ if( run_gsea & species!="Other" ) { try({
     counter<-1;                       
     for (j in 1:length(gene_data_index)) {
       for (k in 1:length(loop_list)) {
-        analysis_names[[counter]] <- paste(omicsList[[ gene_data_index[j] ]][["dataType"]], "_", gsub("-", "_", contrast_strings[k]), sep="") ;
+        analysis_names[[counter]] <- paste0(omicsList[[ gene_data_index[j] ]][["dataType"]], "_", contrast_strings_file[k]) ;
         counter <- counter+1;
       }
     }
@@ -148,51 +151,23 @@ if( run_gsea & species!="Other" ) { try({
     counter<-1;                       
     for (j in 1:length(gene_data_index)) {
       for (k in 1:length(loop_list)) {
-        if(grepl("Mouse", species) | grepl("Human", species)){ 
-          rnk_files[[counter]] <- file.path(paste(output_contrast_path_files,"/GSEA_",omicsList[[ gene_data_index[j] ]][["dataType"]],
-                                                  "_",gsub("-","_",contrast_strings[k]),".rnk", sep=""))
-        } else {
-          rnk_files[[counter]] <- file.path(paste(output_contrast_path_files,"/GSEA_",
-                                                  omicsList[[ gene_data_index[j] ]][["dataType"]],"_Uppercase_",
-                                                  gsub("-","_",contrast_strings[k]),".rnk", sep=""))
-        }
+        rnk_files[[counter]] <- file.path(paste0(output_contrast_path_files,"/GSEA_",
+                                                omicsList[[ gene_data_index[j] ]][["dataType"]],case_modifier,
+                                                contrast_strings_file[k],".rnk"))
         counter <- counter+1;
       }
     }
    if(length(gene_data_index)>1 & length(contrastgroups)>1){ 
     for (i in 1:length(loop_list)) {
-      analysis_names[[length(analysis_names)+1]] <- paste("Combined_",gsub("-", "_", contrast_strings[i]),sep="")
+      analysis_names[[length(analysis_names)+1]] <- paste0("Combined_",contrast_strings_file[i])
     }
     for (i in 1:length(loop_list)){
-        if(grepl("Mouse", species) | grepl("Human", species)){ 
-          rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
-                                                        paste("GSEA_combined_",gsub("-","_",contrast_strings[i]),".rnk", sep="") ))
-        } else {
-          rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
-                                                        paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[i]),".rnk", sep="") ))
-        }
+      rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
+                                               paste0("GSEA",case_modifier,"combined_",contrast_strings_file[i],".rnk") ))
     }
   }
   
-  if(grepl("Mouse", species) | grepl("Human", species)){  suppressWarnings({ suppressMessages({
-    # Only if you need a new GMT file
-    if(grepl("Mouse", species)){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Mouse/symbol/"}
-    if(grepl("Human", species)){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/"}
-    filenames = getURL(gmt_url)   #list all the files on the server
-    tc = textConnection(filenames)
-    contents = readLines(tc)
-    close(tc)
-    #get the gmt that has all the pathways and does not include terms inferred from electronic annotations(IEA), start with gmt file that has pathways only
-    rx = gregexpr("(?<=<a href=\")(.*.GOBP_AllPathways_no_GO_iea.*.)(.gmt)(?=\">)",contents, perl = TRUE)
-    gmt_file = unlist(regmatches(contents, rx))
-    dest_gmt_file <- file.path(gsea_working_path,gmt_file)
-    if(!file.exists(dest_gmt_file)) { download.file(paste(gmt_url,gmt_file,sep=""),destfile=dest_gmt_file) }
-  }) }) } else { try({
-    geneset_lookup <-  read.delim(file.path(gsub("src", "data", notebook_dir),"geneset_table.txt"))
-    gmt_file <- as.character(geneset_lookup[geneset_lookup[,"Species"]==species,"GeneSet"])
-    dest_gmt_file <-file.path(gsea_working_path, gmt_file)
-    file.copy(from=file.path( gsub("src", "data", notebook_dir), "species_genesets",gmt_file), to= dest_gmt_file )  
-  }) }
+  dest_gmt_file <- fetchGMT(gsea_working_path, species)
   
   for (i in 1:length(analysis_names)){
     analysis_name <- analysis_names[[i]]
@@ -297,18 +272,11 @@ if(dir.exists("Gene_Sets") | dir.exists(file.path("..","Gene_Sets")) ){
   
   gmt_files2 <- c()
   gmt_names <- c()
-  
-  if( dir.exists("Gene_Sets") ){
-    gmt_files_add <- list.files("Gene_Sets")[grepl(".GMT", toupper(list.files("Gene_Sets")) )]
-    gmt_names <- c(gmt_names, gsub(".gmt","", gmt_files_add))
-    gmt_files2 <- c(gmt_files2, file.path("Gene_sets",gmt_files_add))
-  }
-  if( dir.exists(file.path("..","Gene_Sets")) ){
-    gmt_files_add <- list.files(file.path("..","Gene_Sets"))[grepl(".GMT", toupper(list.files(file.path("..","Gene_Sets"))) )]
-    gmt_names <- c(gmt_names, gsub(".gmt|.GMT","", gmt_files_add))
-    gmt_files2 <- c(gmt_files2, file.path("..","Gene_Sets",gmt_files_add))
-  }
-  
+
+  gmt_dirs <- c("Gene_Sets",file.path("..","Gene_Sets"))
+  gmt_files2 <- list.files(gmt_dirs,".*.GMT",full.names=T,ignore.case=T)
+  gmt_names <- sub(".gmt$","",basename(gmt_files2),ignore.case=T)
+
   if(length(gmt_files2)>0){
     
     gsea_working_dir <- "GSEA_Custom"
@@ -352,28 +320,28 @@ for( i in 1:length(phos_data_index) ){
       top_sum <- topTable(omicsList[[ phos_data_index[i] ]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
       PX2 <- top_sum[,c("Protein","Gene","Sequence.window")]
       colnames(PX2) <- c("Protein", "Gene", "Peptide")
-      PX2[,"Residue.Both"] <- paste(top_sum[,"Amino.acid"],top_sum[,"Position"], sep="")
+      PX2[,"Residue.Both"] <- paste0(top_sum[,"Amino.acid"],top_sum[,"Position"])
       PX2[,"p"] <- top_sum[,"P.Value"]
       PX2[,"FC"] <- 2^top_sum[,"logFC"]
     })
     if( class(PX2)=="logical" ){
       PX2 <- fData(omicsList[[ phos_data_index[i] ]][["eSet"]])[,c("Protein","Gene","Sequence.window")]
       colnames(PX2) <- c("Protein", "Gene", "Peptide")
-      PX2[,"Residue.Both"] <- paste(fData(omicsList[[ phos_data_index[i] ]][["eSet"]])[,"Amino.acid"],
-                                    fData(omicsList[[ phos_data_index[i] ]][["eSet"]])[,"Position"], sep="")
+      PX2[,"Residue.Both"] <- paste0(fData(omicsList[[ phos_data_index[i] ]][["eSet"]])[,"Amino.acid"],
+                                    fData(omicsList[[ phos_data_index[i] ]][["eSet"]])[,"Position"])
       PX2[,"p"] <- "NULL";
-      contrast_grab <- grep( paste("logfc_", gsub("-","_",contrast_strings[c]), sep=""), colnames(fData(omicsList[[ phos_data_index[i] ]][["eSet"]]) ) )
+      contrast_grab <- grep( paste0("logfc_", contrast_strings_file[c]), colnames(fData(omicsList[[ phos_data_index[i] ]][["eSet"]]) ) )
       PX2[,"FC"] <- 2^(fData(omicsList[[ phos_data_index[i] ]][["eSet"]])[,contrast_grab] )    
     }
     
-    dir_name <- paste("KSEA_", contrast_strings[c], sep="")
+    dir_name <- paste0("KSEA_", contrast_strings[c])
     dir_path <- file.path(output_path, "3_KSEA", dir_name)
     if( dir.exists(dir_path) == FALSE ) {dir.create(dir_path)}
     
     try({
     KSEA.Complete(KSData, PX2, NetworKIN=TRUE, NetworKIN.cutoff=5, m.cutoff=3, p.cutoff=0.05, output_dir=dir_path)
     
-    output_links <- paste(output_links,paste("[ ",dir_name," ](",output_subdir,"/3_KSEA/",dir_name,"/KSEA Bar Plot.tiff)  |  ",sep=""),sep="" )
+    output_links <- paste0(output_links,paste("[ ",dir_name," ](",output_subdir,"/3_KSEA/",dir_name,"/KSEA Bar Plot.tiff)  |  ",sep=""))
     })
   }
 }
@@ -446,8 +414,8 @@ suppressWarnings({ suppressMessages({
 for(i in 1:length(metab_data_index)){ try({
   for(mumm_lib_index in 1:length(mumm_libs)) {
     for (c in 1:length(loop_list)){ try({
-      analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
-                             "_",gsub("-","_",contrast_strings[c]), sep="" )
+      analysis_name <- paste0(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
+                             "_",contrast_strings_file[c])
       
       if(contrast_strings[1]!="Abundance"){ 
         output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, analysis_name)
@@ -458,8 +426,8 @@ for(i in 1:length(metab_data_index)){ try({
         input_data <- na.omit(topTable(omicsList[[ metab_data_index[i] ]][["fit"]],
                                        adjust="BH", n=5000, sort.by='p', coef=c)[,c("mz", "P.Value", "t")] );
         colnames(input_data) <- c("m.z", "p.value", "t.score")
-        output_filename <- file.path(output_mummichog_path,paste("mummichog_",omicsList[[ metab_data_index[i] ]][["dataType"]],
-                                                                 "_",gsub("-","_",contrast_strings[c]),".txt", sep=""));
+        output_filename <- file.path(output_mummichog_path,paste0("mummichog_",omicsList[[ metab_data_index[i] ]][["dataType"]],
+                                                                 "_",contrast_strings_file[c],".txt"));
         write.table(x=input_data, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
       
         if( grepl("Negative.Ion", omicsList[[ metab_data_index[i] ]][["dataFormat"]] ) ) { ion_mode<-"negative" } else { ion_mode<-"positive"}
@@ -514,8 +482,8 @@ for(i in 1:length(metab_data_index)){ try({
         input_data <- data.frame(m.z= fData(omicsList[[ metab_data_index[i] ]][["eSet"]])$mz,
                                  rank= rowMeans(exprs(omicsList[[ metab_data_index[i] ]][["eSet"]])) )
         input_data <- input_data[order(input_data[,"rank"], decreasing=T), ]
-        output_filename <- file.path(output_mummichog_path,paste("mummichog_",omicsList[[ metab_data_index[i] ]][["dataType"]],
-                                                                 "_",gsub("-","_",contrast_strings[c]),".txt", sep=""));
+        output_filename <- file.path(output_mummichog_path,paste0("mummichog_",omicsList[[ metab_data_index[i] ]][["dataType"]],
+                                                                 "_",contrast_strings_file[c],".txt"));
         write.table(x=input_data[,"m.z"], file=output_filename, sep='\t',row.names=FALSE, col.names=FALSE, quote=FALSE)
         
       }
