@@ -301,7 +301,7 @@ if(dir.exists("Gene_Sets") | dir.exists(file.path("..","Gene_Sets")) ){
   if( dir.exists("Gene_Sets") ){
     gmt_files_add <- list.files("Gene_Sets")[grepl(".GMT", toupper(list.files("Gene_Sets")) )]
     gmt_names <- c(gmt_names, gsub(".gmt","", gmt_files_add))
-    gmt_files2 <- c(gmt_files2, file.path("Gene_sets",gmt_files_add))
+    gmt_files2 <- c(gmt_files2, file.path("Gene_Sets",gmt_files_add))
   }
   if( dir.exists(file.path("..","Gene_Sets")) ){
     gmt_files_add <- list.files(file.path("..","Gene_Sets"))[grepl(".GMT", toupper(list.files(file.path("..","Gene_Sets"))) )]
@@ -311,7 +311,7 @@ if(dir.exists("Gene_Sets") | dir.exists(file.path("..","Gene_Sets")) ){
   
   if(length(gmt_files2)>0){
     
-    gsea_working_dir <- "GSEA_Custom"
+    gsea_working_dir <- "3_GSEA_Custom"
     gsea_working_path <- file.path(output_path, gsea_working_dir)
     if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
     
