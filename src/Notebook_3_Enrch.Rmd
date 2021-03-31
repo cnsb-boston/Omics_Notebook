@@ -279,7 +279,7 @@ if(dir.exists("Gene_Sets") | dir.exists(file.path("..","Gene_Sets")) ){
 
   if(length(gmt_files2)>0){
     
-    gsea_working_dir <- "GSEA_Custom"
+    gsea_working_dir <- "3_GSEA_Custom"
     gsea_working_path <- file.path(output_path, gsea_working_dir)
     if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
     
