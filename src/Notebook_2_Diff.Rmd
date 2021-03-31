@@ -6,14 +6,9 @@
 # Make contrasts between groups
 contrast_strings <- c();
 if(all_comparisons == TRUE & length(contrastgroups>1) ){
-  for (j in 1:(length(contrastgroups)-1)){
-    for (k in (j+1):length(contrastgroups)){
-      contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[j], sep=''));
-  }  }
+  contrast_strings <- sapply(combn(contrastgroups,2,simplify=F),FUN=function(l)paste(l,collapse="-"))
 } else if(all_comparisons == FALSE & length(contrastgroups>1) ){
-  for (k in 2:length(contrastgroups)){
-      contrast_strings <- c(contrast_strings, paste(contrastgroups[k],'-',contrastgroups[1], sep=''));
-  } 
+  contrast_strings <- paste(contrastgroups[2:length(contrastgroups)], contrastgroups[1], sep='-')
 } else if( length(contrastgroups) ==1 ){
   contrast_strings <- contrastgroups
 }
@@ -349,208 +344,128 @@ for(i in 1:length(omicsList)){
 ---
 
 ### Save Data
-```{r save_files_diff }
+```{r save_files_diff, results='hide'}
+
+ttable=function(ol,coef){
+  topTable(ol, adjust="BH", n=Inf, sort.by='p', coef=coef)
+}
+
+fttable=function(ol,coef){
+  top_sum <- topTableF(ol, adjust="BH", n=Inf, sort.by='F'); 
+  top_sum[,"logFC"] <- top_sum[,"F"]
+  top_sum
+}
+
+timetable=function(ol,coef){
+  top_sum <- topTable(ol, adjust="BH", n=Inf, sort.by='F', coef=coef); 
+  top_sum[,"logFC"] <- top_sum[,"F"]
+  top_sum
+}
+
+genfile=function(i,contrast_name,coef,tsum,fd){
+  top_sum <- FALSE;
+  try({ top_sum <- tsum(omicsList[[i]][["fit"]], coef); })
+  if( class(top_sum)=="logical" ){ try({
+    top_sum <- data.frame(logFC=fd(fData(omicsList[[i]][["eSet"]]),contrast_name),
+                        Mean=rowMeans(exprs(omicsList[[i]][["eSet"]])), 
+                        feature_identifier=fData(omicsList[[i]][["eSet"]])[,"feature_identifier"] );
+    if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$Gene <- fData(omicsList[[i]][["eSet"]])$Gene }
+    if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$mz <- fData(omicsList[[i]][["eSet"]])$mz }
+  })}
+  
+  saveFiles(data=omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
+  
+  if( !( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]]))   ){ 
+    top_sum$Gene <- toupper(top_sum$Gene)
+    saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F)
+  }
+}
+
 # Save data 
-for(i in 1:length(omicsList)){ try({
-  # Contrasts
-  for (c in 1:length(loop_list)){
-    top_sum <- FALSE;
-    contrast_name <- contrast_strings[c];
-    try({ top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c]); })
-    if( class(top_sum)=="logical" ){ try({
-      top_sum <- data.frame(logFC= fData(omicsList[[i]][["eSet"]])[,paste("logfc_",gsub("-","_",contrast_strings[c]),sep="")],
-                          Mean=rowMeans(exprs(omicsList[[i]][["eSet"]])), 
-                          feature_identifier =fData(omicsList[[i]][["eSet"]])[,"feature_identifier"] );
-      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$Gene <- fData(omicsList[[i]][["eSet"]])$Gene }
-      if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$mz <- fData(omicsList[[i]][["eSet"]])$mz }
-    })}
-    
-    saveFiles(data=omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
-    
-    if( !( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]]))   ){ 
-      top_sum$Gene <- toupper(top_sum$Gene)
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F)
-    }
-  }
-  
-  # MaxFC or F-statistic
+iters=do.call("rbind",
+  lapply(1:length(omicsList),function(oi){
+    t(sapply(1:length(loop_list),function(li){
+      data.frame(omics=oi,loop=li)
+    }))
+  })
+)
+
+bplapply(1:nrow(iters),FUN=function(ii){ try({
+  i=iters$omics[i]
+  c=iters$loop[i]
+  genfile(i,contrast_strings[c],loop_list[c],ttable,function(ol,cn){ol[,paste("logfc_",gsub("-","_",cn),sep="")]});
+})})
+
+if(statistic_index=='F' || time_index>0){
+bplapply(1:length(omicsList),FUN=function(i){ try({
   if(statistic_index=='F'){
-    top_sum <- FALSE;
-    try({ 
-      top_sum <- topTableF(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F'); 
-      top_sum[,"logFC"] <- top_sum[,"F"]
-      contrast_name <- "Overall"
-      })
-    if( class(top_sum)=="logical" ){ try({
-      top_sum <- data.frame(logFC= fData(omicsList[[i]][["eSet"]])[,"MaxFC"],
-                            Mean=rowMeans(exprs(omicsList[[i]][["eSet"]])), 
-                            feature_identifier =fData(omicsList[[i]][["eSet"]])[,"feature_identifier"] );
-      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$Gene <- fData(omicsList[[i]][["eSet"]])$Gene }
-      if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ top_sum$mz <- fData(omicsList[[i]][["eSet"]])$mz }
-    })}
-    
-    saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
-  
-    if(!( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ try({
-      top_sum$Gene <- toupper(top_sum$Gene)
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F)
-    }) }
+    genfile(i,"Overall",NULL,fttable,function(ol,cn){ol[,"MaxFC"]});
   }
-    # TimeSeries
   if(time_index>0){
-    top_sum <- FALSE;
-    try({ 
-      top_sum <- topTable(omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F', coef=time_start:time_end); 
-      top_sum[,"logFC"] <- top_sum[,"F"]
-      contrast_name <- "Timecourse_Overall"
-    
-      saveFiles(omicsList[[i]], limmaRes=top_sum, type=omicsList[[i]][["dataType"]], contrast_name=contrast_name)
-  
-      if(!( grepl("Human", species) ) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ try({
-        top_sum$Gene <- toupper(top_sum$Gene)
-        saveFiles(omicsList[[i]], limmaRes=top_sum, type=paste(omicsList[[i]][["dataType"]],"_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F)
-      }) }
-    })
+    genfile(i,"Timecourse_Overall",time_start:time_end,timetable,NULL);
   }
-  
-}) }
+})})}
 
 # Save combined ranked lists for GSEA, for each contrast
-if(length(gene_data_index)>1){
-  
-  for (c in 1:length(loop_list) ){ try({
+gsea_ranked_data=function(contrast_name, rcols){
+  do.call("rbind", lapply(1:length(gene_data_index),FUN=function(i){
     top_sum <- FALSE;
-    contrast_name <- contrast_strings[c];
     try({ 
-      top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=loop_list[c]);
-      ranked <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
+      top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=loop_list[c]);
+      ranked <- cbind(top_sum[,"Gene"], rcols(top_sum)) 
     })
     if( class(top_sum)=="logical" ){ try({
-      top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[1] ]][["eSet"]])[,paste("logfc_",gsub("-","_",contrast_strings[c]),sep="")],
-                          Gene=fData(omicsList[[ gene_data_index[1] ]][["eSet"]])$Gene, 
-                          feature_identifier =fData(omicsList[[ gene_data_index[1] ]][["eSet"]])[,"feature_identifier"] );
+      top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,paste("logfc_",gsub("-","_",contrast_name),sep="")],
+                        Gene=fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene, 
+                        feature_identifier =fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
       ranked <- top_sum[,c("Gene","logFC")]
     })}
+    ranked
+  }))
+}
 
-    for(i in 2:length(gene_data_index) ){
-      top_sum <- FALSE;
-      try({ 
-        top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=loop_list[c]);
-        ranked1 <- cbind(top_sum[,"Gene"], sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])) 
-      })
-      if( class(top_sum)=="logical" ){ try({
-        top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,paste("logfc_",gsub("-","_",contrast_strings[c]),sep="")],
-                          Gene=fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene, 
-                          feature_identifier =fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
-        ranked1 <- top_sum[,c("Gene","logFC")]
-      })}
-
-      ranked <- rbind(ranked, ranked1)
-    }
-    colnames(ranked)<-c("GeneName", "rank")
-    ranked <- ranked[ranked[,"GeneName"]!="", ]
-    ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",gsub("-","_",contrast_strings[c]),".rnk", sep=""));
+write_gsea_data=function(ranked, contrast_name, secondary_outfile){
+  colnames(ranked)<-c("GeneName", "rank")
+  ranked <- ranked[ranked[,"GeneName"]!="", ]
+  ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
+  ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
+  ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
+  output_filename <- file.path(output_contrast_path_files,paste("GSEA_",contrast_name,".rnk", sep=""));
+  write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+    
+  if(is.function(secondary_outfile)){
+    secondary_outfile(ranked,contrast_name);
+  }
+   
+  if(!( grepl("Human", species)) ){ 
+    output_filename <- file.path(output_contrast_path_files,paste0("GSEA_Uppercase_",contrast_name,".rnk"));
+    ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
     write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
     
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",gsub("-","_",contrast_strings[c]),"_AbsVal.rnk", sep=''));
+    if(is.function(secondary_outfile)){
+      secondary_outfile(ranked,paste0("Uppercase_",contrast_name));
+    }
+  }
+}
+
+gen_gsea_file=function(contrast_name, rcols, secondary_outfile){
+  write_gsea_data(gsea_ranked_data(contrast_name, rcols), paste0("combined_",contrast_name), secondary_outfile)
+}
+ 
+contrast_secondary=function(ranked,contrast_name){
+    output_filename <- file.path(output_contrast_path_files,paste0("GSEA_combined_",contrast_name,"_AbsVal.rnk"));
     ranked_pval<- ranked
     ranked_pval[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
     write.table(x=ranked_pval,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
-    
-    if(!( grepl("Human", species)) ){ 
-      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",
-                                                                    gsub("-","_",contrast_strings[c]),".rnk", sep=""));
-      ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
-      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-      
-      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[c]),
-                                                                    "_AbsVal.rnk", sep=''));
-      ranked_pval<- ranked
-      ranked_pval[,"rank"] <- abs(as.numeric(ranked[,"rank"]))
-      write.table(x=ranked_pval,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
-    }
-  }) } 
-  
-  
-  # Save ranked list for overall variation across all conditions
-  if (statistic_index=="F"){ try({
-    top_sum <- FALSE;
-    contrast_name <- "Overall"
-    try({ 
-      top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='B');
-      ranked <- cbind(top_sum[,"Gene"],top_sum[,"F"] ) 
-    })
-    if( class(top_sum)=="logical" ){ try({
-      top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[1] ]][["eSet"]])[,"MaxFC"],
-                          Gene=fData(omicsList[[ gene_data_index[1] ]][["eSet"]])$Gene, 
-                          feature_identifier =fData(omicsList[[ gene_data_index[1] ]][["eSet"]])[,"feature_identifier"] );
-      ranked <- top_sum[,c("Gene","logFC")]
-    })}
-
-    for(i in 2:length(gene_data_index) ){
-      top_sum <- FALSE;
-      try({ 
-        top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='B');
-        ranked1 <- cbind(top_sum[,"Gene"], top_sum[,"F"])
-      })
-      if( class(top_sum)=="logical" ){ try({
-        top_sum <- data.frame(logFC= fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"MaxFC"],
-                          Gene=fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene, 
-                          feature_identifier =fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
-        ranked1 <- top_sum[,c("Gene","logFC")]
-      })}
-
-      ranked <- rbind(ranked, ranked1)
-    }
-    colnames(ranked)<-c("GeneName", "rank")
-    ranked <- ranked[ranked[,"GeneName"]!="", ]
-    ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,".rnk", sep=""));
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-    
-    if(!( grepl("Human", species)) ){ 
-      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",contrast_name,".rnk", sep=""));
-      ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
-      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-    }
-  }) }
-  # Save ranked list for overall variation across time trajectory
-  if (time_index>0){ try({
-    top_sum <- FALSE;
-    contrast_name <- "Timecourse_Overall"
-    try({ 
-      top_sum <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust.method="BH", n=Inf, coef=time_start:time_end);
-      ranked <- cbind(top_sum[,"Gene"],top_sum[,"F"] ) 
-    })
-
-    for(i in 2:length(gene_data_index) ){
-      top_sum <- FALSE;
-      try({ 
-        top_sum <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, coef=time_start:time_end);
-        ranked1 <- cbind(top_sum[,"Gene"], top_sum[,"F"])
-      })
-
-      ranked <- rbind(ranked, ranked1)
-    }
-    colnames(ranked)<-c("GeneName", "rank")
-    ranked <- ranked[ranked[,"GeneName"]!="", ]
-    ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-    ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-    ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-    output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_",contrast_name,".rnk", sep=""));
-    write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-    
-    if(!( grepl("Human", species)) ){ 
-      output_filename <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",contrast_name,".rnk", sep=""));
-      ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
-      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-    }
-  }) }
+}
+ 
+if(length(gene_data_index)>1){
+  cnames=gsub("-","_",contrast_strings[c])
+  for (c in 1:length(loop_list) ){ try({
+    gen_gsea_file(cnames[c], function(top_sum){sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])},contrast_secondary)
+  })}
+  gen_gsea_file("Timecourse_Overall", function(top_sum){top_sum[,"F"]},NULL)
+  gen_gsea_file("Overall", function(top_sum){top_sum[,"F"]},NULL)
 }
 
 # Save excel file summary for collaborators
