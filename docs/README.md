@@ -144,10 +144,15 @@ The makeEset function should be modified to parse additional input data formats.
 
 ---
 
+## GUI Instructions
+
+![GUI Instructions](/SupplementaryInformation.pdf)
+
+---
 
 ## Software requirements for running natively.
 
-In general, this software is designed to make use of containerization of managing the many R package installation requirements and dependencies. It also permits use of this software on local computers or shared (e.g., HPC or cloud) computing resources with Docker or Singularity. However, the following will be updated as needed.
+In general, this software is designed to make use of containerization for managing the many R package installation requirements and dependencies. It also permits use of this software on local computers or shared (e.g., HPC or cloud) computing resources with Docker or Singularity. However, the following will be updated as needed.
 
 * R 3.6,  Python 3.6, Tkinter.
 
