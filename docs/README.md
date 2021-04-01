@@ -149,7 +149,7 @@ In this way, the r markdown reports can be generated automatically with wrapper 
 
 ## GUI Instructions
 
-<object data="SupplementaryInformation.pdf" type="application/pdf" width="100%"> 
+<object data="https://github.com/cnsb-boston/Omics_Notebook/blob/main/docs/SupplementaryInformation.pdf" type="application/pdf" width="100%"> 
 </object>
 
 ---
