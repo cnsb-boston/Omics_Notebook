@@ -108,6 +108,15 @@ In the second sheet of the annotation file, the sample names are repeated. Addit
 This list can be extended for custom analysis.
 
 ---
+
+#### Input Data
+
+Data files should be either .txt or .csv, with data column names specified in the annotation file. All other columns will be used as annotation. Columns with HGNC gene symbols should be called "Gene", columns with uniprot ID's should be called "Protein." The script will parse the MaxQuant output to create Gene and Protein columns if the fasta file was correctly configured. Example data, annotation file, and output are provided in "example/".
+
+The makeEset function should be modified to parse additional input data formats. 
+
+---
+
 #### Custom Input Parameters
 
 Omics Notebook will automatically search for the following in the Analysis Directory to perform additional analysis or offer customization.
@@ -136,17 +145,11 @@ For cutsome analysis, it may be easier to use "Pipeline.py" to generate a "Param
 
 In this way, the r markdown reports can be generated automatically with wrapper scripts or manually with R studio. 
 
-#### Input Data
-
-Data files should be either .txt or .csv, with data column names specified in the annotation file. All other columns will be used as annotation. Columns with HGNC gene symbols should be called "Gene", columns with uniprot ID's should be called "Protein." The script will parse the MaxQuant output to create Gene and Protein columns if the fasta file was correctly configured. Example data, annotation file, and output are provided in "example/".
-
-The makeEset function should be modified to parse additional input data formats. 
-
 ---
 
 ## GUI Instructions
 
-![GUI Instructions](/SupplementaryInformation.pdf)
+![GUI Instructions](SupplementaryInformation.pdf)
 
 ---
 
