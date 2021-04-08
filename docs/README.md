@@ -112,6 +112,7 @@ This list can be extended for custom analysis. See /docs/SupplementaryInformatio
 #### Input Data
 
 Data files should be either .txt or .csv, with data column names, corresponding to samples, specified in the annotation file. All other columns in the data files will be used as annotation. Standardized annotation currently configured for analysis is as follows:
+
 * Columns with HGNC gene symbols should be called "Gene". 
 * Columns with uniprot ID's should be called "Protein." 
 
