@@ -29,9 +29,8 @@ analysis_dir <- file.path(run_directories[index]);
 setwd(analysis_dir);
 source(file.path(analysis_dir, "Parameters.R"));
 
-
 if(analysis_dir != working_dir){
-  write(paste("annotation_filename <- '",gsub(working_dir, analysis_dir, annotation_filename), "';", sep=""),
+  write(paste("annotation_filename <- '",file.path(analysis_dir,basename(annotation_filename)), "';", sep=""),
         file = file.path(analysis_dir, "Parameters.R"), append = T)
   write(paste("working_dir <- '", analysis_dir, "';", sep=""),
         file = file.path(analysis_dir, "Parameters.R"), append = T)
