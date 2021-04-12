@@ -105,9 +105,23 @@ In the second sheet of the annotation file, the sample names are repeated. Addit
 * TimeSeries: if a numeric value, will run limma as for a time series analysis. Will only work with 2 Groups. Code may be edited for other analyses. If there is 1 group, enter the time point as "Group."
 * Pairs: if "Pairs" is found, will try to run differential analysis accounting for paired samples.
 
-This list can be extended for custom analysis.
+This list can be extended for custom analysis. See /docs/SupplementaryInformation.pdf for screen shots and additional instructions.
 
 ---
+
+#### Input Data
+
+Data files should be either .txt or .csv, with data column names, corresponding to samples, specified in the annotation file. All other columns in the data files will be used as annotation. Standardized annotation currently configured for analysis is as follows:
+
+* Columns with HGNC gene symbols should be called "Gene". 
+* Columns with uniprot ID's should be called "Protein." 
+
+The script will parse the MaxQuant output to create Gene and Protein columns if the fasta file was correctly configured. Example data, annotation file, and output are provided in "example/".
+
+The makeEset function should be modified to parse additional input data formats. 
+
+---
+
 #### Custom Input Parameters
 
 Omics Notebook will automatically search for the following in the Analysis Directory to perform additional analysis or offer customization.
@@ -136,18 +150,17 @@ For cutsome analysis, it may be easier to use "Pipeline.py" to generate a "Param
 
 In this way, the r markdown reports can be generated automatically with wrapper scripts or manually with R studio. 
 
-#### Input Data
+---
 
-Data files should be either .txt or .csv, with data column names specified in the annotation file. All other columns will be used as annotation. Columns with HGNC gene symbols should be called "Gene", columns with uniprot ID's should be called "Protein." The script will parse the MaxQuant output to create Gene and Protein columns if the fasta file was correctly configured. Example data, annotation file, and output are provided in "example/".
+## GUI Instructions
 
-The makeEset function should be modified to parse additional input data formats. 
+Read /docs/SupplementaryInformation.pdf for screen shots and instructions.
 
 ---
 
-
 ## Software requirements for running natively.
 
-In general, this software is designed to make use of containerization of managing the many R package installation requirements and dependencies. It also permits use of this software on local computers or shared (e.g., HPC or cloud) computing resources with Docker or Singularity. However, the following will be updated as needed.
+In general, this software is designed to make use of containerization for managing the many R package installation requirements and dependencies. It also permits use of this software on local computers or shared (e.g., HPC or cloud) computing resources with Docker or Singularity. However, the following will be updated as needed.
 
 * R 3.6,  Python 3.6, Tkinter.
 

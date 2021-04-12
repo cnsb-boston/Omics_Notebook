@@ -79,6 +79,7 @@ if(statistic_index=='F'){ try({ #repeat for F statistic
 
 
 ```
+`r if(activePathways_section & length(gene_data_index)>1){paste("For ActivePathways results, see ", gsea_working_dir ," directory.  ", sep="")} `
 
 ---
 
@@ -125,9 +126,10 @@ if(saveXlsx==TRUE){
 }
 ```
 
-`r if( length(metab_data_index)>1 ) {"### Make combined ranked list with metabolites"}`
 
 ```{r eval=( length(metab_data_index)>1 ) }
+
+### Make combined ranked list with metabolites
 
 rnk_files <-vector("list", num_contrasts)
 
@@ -271,7 +273,7 @@ for(gmt_index in 1:length(gmt_files)){
 }) } 
 
 ```
-
+`r if( ( show_metab_enrich & length(metab_data_index)>0 & length(gene_data_index)>0) ){paste("For complete prot/met integrative GSEA results, see ", gsea_working_dir ," directory.  ", sep="")} `
 
 ---
 
