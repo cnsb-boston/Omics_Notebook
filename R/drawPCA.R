@@ -30,7 +30,10 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
   
   # Make PCA plot
   
-  
+  basic_theme <- theme(legend.position="none", axis.text=element_blank(), axis.line=element_blank(), axis.ticks=element_blank(),
+                       panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border=element_blank(), 
+                       axis.title=element_text(size=8) )
+ 
   pca_graph <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,x_axis], y=PC_data$x[,y_axis]))+ 
     { if( "Group2" %in% colnames(pData(eset)) ) { geom_point(aes(shape=pData(eset)$Group2,colour=pData(eset)$Group)); }} +
     { if( "Group2" %in% colnames(pData(eset)) ) { scale_shape_manual(values=1:length(unique(pData(eset)$Group2))) } else { geom_point(aes(colour=pData(eset)$Group)); }} + 
@@ -41,15 +44,9 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
        y=paste(y_axis, sprintf(" (%2.0f%%)", percent_variance[y_axis]), sep=""));
   
   gg_dist_1 <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,x_axis], fill=pData(eset)$Group)) + 
-    geom_density(alpha=0.4, size=0.2) + ylab(paste(x_axis, "Density", sep="\n") ) + theme_bw() + 
-    theme(legend.position="none", axis.text=element_blank(), axis.line=element_blank(), axis.ticks=element_blank(),
-          panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border=element_blank(), 
-          axis.title=element_text(size=8) )
+    geom_density(alpha=0.4, size=0.2) + ylab(paste(x_axis, "Density", sep="\n") ) + theme_bw() + basic_theme
   gg_dist_2 <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,y_axis], fill=pData(eset)$Group)) + 
-    geom_density(alpha=0.4, size=0.2) + ylab(paste(y_axis, "Density", sep="\n") ) + theme_bw() +
-    theme(legend.position="none", axis.text=element_blank(), axis.line=element_blank(), axis.ticks=element_blank(),
-          panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border=element_blank(), 
-          axis.title=element_text(size=8) )
+    geom_density(alpha=0.4, size=0.2) + ylab(paste(y_axis, "Density", sep="\n") ) + theme_bw() + basic_theme
     
   try({
   pca_graph2 <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,y_axis], y=PC_data$x[,"PC3"]))+ 
@@ -62,10 +59,7 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
        y=paste("PC3", sprintf(" (%2.0f%%)", percent_variance["PC3"]), sep=""));
   
   gg_dist_3 <- ggplot(data=as.data.frame(PC_data$x), aes(x=PC_data$x[,"PC3"], fill=pData(eset)$Group)) + 
-    geom_density(alpha=0.4, size=0.2) + ylab(paste("PC3", "Density", sep="\n") ) + theme_bw() +
-    theme(legend.position="none", axis.text=element_blank(), axis.line=element_blank(), axis.ticks=element_blank(),
-          panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border=element_blank(), 
-          axis.title=element_text(size=8) )
+    geom_density(alpha=0.4, size=0.2) + ylab(paste("PC3", "Density", sep="\n") ) + theme_bw() + basic_theme
   })
   
   # Identify most variable hits for loadings graph
@@ -124,30 +118,10 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
     gsea_working_dir <- "PCA_Loading_GSEA"
     gsea_working_path <- file.path(outputfile, gsea_working_dir)
     if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
+    dest_gmt_file <- fetchGMT(gsea_working_path, .species)
   
     analysis_names <- c(paste(type, "PC1", sep="_"), paste(type, "PC2", sep="_"), paste(type, "PC3", sep="_") )
 
-    if(grepl("Mouse", .species) | grepl("Human", .species)){  suppressWarnings({ suppressMessages({
-      # Only if you need a new GMT file
-      if(grepl("Mouse", .species)){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Mouse/symbol/"}
-      if(grepl("Human", .species)){gmt_url = "http://download.baderlab.org/EM_Genesets/current_release/Human/symbol/"}
-      filenames = getURL(gmt_url)   #list all the files on the server
-      tc = textConnection(filenames)
-      contents = readLines(tc)
-      close(tc)
-      #get the gmt that has all the pathways and does not include terms inferred from electronic annotations(IEA), start with gmt file that has pathways only
-      rx = gregexpr("(?<=<a href=\")(.*.GOBP_AllPathways_no_GO_iea.*.)(.gmt)(?=\">)",contents, perl = TRUE)
-      gmt_file = unlist(regmatches(contents, rx))
-      dest_gmt_file <- file.path(gsea_working_path,gmt_file)
-      if(!file.exists(dest_gmt_file) ){ download.file(paste(gmt_url,gmt_file,sep=""),destfile=dest_gmt_file) }
-    }) }) } else { try({
-      geneset_lookup <-  read.delim(file.path(gsub("src", "data", notebook_dir),"geneset_table.txt"))
-      gmt_file <- as.character(geneset_lookup[geneset_lookup[,"Species"]==species,"GeneSet"])
-      dest_gmt_file <-file.path(gsea_working_path, gmt_file)
-      if(!file.exists(dest_gmt_file) ){ file.copy(from=file.path( gsub("src", "data", notebook_dir), "species_genesets",gmt_file),
-                                                  to= dest_gmt_file )  }
-    }) }
-  
     for (i in 1:length(analysis_names)){
       analysis_name <- analysis_names[[i]]
       ranked_vector <- PC_data$rotation[,i]

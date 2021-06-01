@@ -21,40 +21,30 @@ getUniprotAnnotation <- function(IDs){
                        "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID",
                        "BioCyc_ID", "Ensembl_ID", "ChEMBL_ID", "IntAct_ID","STRING_ID")
   
-  # create data frame for storing info
-  annotUniprot <- data.frame(matrix(ncol=length(uniprot_col_names)+1))
-  colnames(annotUniprot) <- c("ENTRY", uniprot_col_names)
-  
   # List of uniprot IDs (remove duplicates for speed)
   IDs_unique <- IDs[!duplicated(IDs)] #get unique IDs
+
+  id_groups=split(IDs_unique,factor((1:length(IDs_unique)) %/% 100))
   
   # Query uniprot server 100 entries at a time
-  for (i in 1: (length(IDs_unique) %/% 100)  ){ try({
-    info_url<-paste("https://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
-                    "&query=accession%3A",paste(IDs_unique[ (1 + 100*(i-1)) : (100*i) ], collapse="+OR+accession%3A"), sep="")
+  annotUniprot <- do.call("rbind",lapply(id_groups,FUN=function(q_ids){ try({
+    ret <- NULL
+    info_url<-paste0("https://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
+                    "&query=accession%3A",paste(q_ids, collapse="+OR+accession%3A"))
     if(url.exists(info_url)==TRUE){
       invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE, quote=""))) )
-      if (class(info_annot) != 'try-error') { if(dim(info_annot)[2]==length(uniprot_columns)+1){
-        if(colnames(info_annot)[2]=="Function..CC."){ colnames(info_annot) <- colnames(annotUniprot)
-                                                      annotUniprot <- rbind(annotUniprot, info_annot) }
-      } }
+      if (class(info_annot) != 'try-error' &&
+          dim(info_annot)[2]==length(uniprot_columns)+1 &&
+          colnames(info_annot)[2]=="Function..CC."){
+        colnames(info_annot) <- colnames(annotUniprot)
+        ret <- info_annot
+      }
     }
     Sys.sleep(2)
-  }) }
-  try({
-  info_url<-paste("https://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
-                  "&query=accession%3A",paste(IDs_unique[ ((length(IDs) %/% 100)*100) : (((length(IDs_unique) %/% 100)*100) + (length(IDs_unique) %% 100))],
-                                              collapse="+OR+accession%3A"), sep="")
-  if(url.exists(info_url)==TRUE){
-    invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE, quote=""))) )
-    if (class(info_annot) != 'try-error') {  if(dim(info_annot)[2]==length(uniprot_columns)+1){
-      if(colnames(info_annot)[2]=="Function..CC."){ colnames(info_annot) <- colnames(annotUniprot)
-                                                    annotUniprot <- rbind(annotUniprot, info_annot) }
-    } }
-  }
-  })
-  annotUniprot <- annotUniprot[-1,] #remove first row (NAs)
-  
+    ret
+  }) 
+  }))
+ 
   # make data frame corresponding to original ID list
   annotatedUniprot <- data.frame(matrix(ncol=length(uniprot_col_names)+1, nrow=length(IDs)))
   colnames(annotatedUniprot) <- colnames(annotUniprot)

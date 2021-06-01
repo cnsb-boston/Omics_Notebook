@@ -105,7 +105,7 @@ library(ComplexHeatmap)
 library(RCurl)
 library(fgsea)
 library(BiocParallel)
-register(SerialParam())
+register(MulticoreParam(workers=as.integer(Sys.getenv("NSLOTS"))))
 library(httr)
 library(RJSONIO)
 
@@ -325,25 +325,17 @@ if(length(contrastgroups)<=1){
       
       }
       
-      colnames(ranked)<-c("GeneName", "rank")
-      ranked <- ranked[ranked[,"GeneName"]!="", ]
-      ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
-      ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
-      ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
-      output_filename <- file.path(output_contrast_path_files,paste("GSEA_",omicsList[[i]][["dataType"]],"_",
-                                                                    gsub("-","_",contrast_strings),".rnk", sep=""));
-      write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-    
-      if(!( grepl("Human", species)) & "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){ 
-        output_filename <- file.path(output_contrast_path_files,paste("GSEA_Uppercase_",omicsList[[i]][["dataType"]],"_",
-                                                                      gsub("-","_",contrast_strings),".rnk", sep=""));
-        ranked[,"GeneName"] <- toupper(ranked[,"GeneName"])
-        write.table(x=ranked, file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-     }
+      species_backup=species
+      ## XXX should this check be done when there are multiple contrasts too?
+      if(!("Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])))) species="xx";
+      write_gsea_data(ranked, paste(omicsList[[i]][["dataType"]],contrast_strings,sep="_"), NULL)
+      species=species_backup
     } 
     }
   }
 }
+
+contrast_strings_file <- gsub("-","_",contrast_strings)
 
 ```
 
