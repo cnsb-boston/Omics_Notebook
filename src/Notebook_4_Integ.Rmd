@@ -11,24 +11,21 @@ if( length(gmt_files2) > 0 ){ a_pathways_gmt <- c(a_pathways_gmt, gmt_files2) } 
 if( length(gmt_files) > 0 ){ a_pathways_gmt <- c(a_pathways_gmt, file.path( gsub("src", "data", notebook_dir),"matched",gmt_files)) } # Add MOMENTA gene sets
 a_paths_gmt_names <- gsub("(.*/\\s*(.*$))","\\2", gsub(".gmt|.GMT","",a_pathways_gmt) )
 
-for(c in 1:length(loop_list)) { try({ #perform for each contrast
-  # Get p values from first omics genes
-  scores <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c])[,c("Gene", "P.Value")]
-  colnames(scores) <- c("Gene", omicsList[[ gene_data_index[1] ]][["dataType"]] )
-  scores <- scores[order(scores[,2], decreasing = F),]
-  scores <- scores[!duplicated(scores[,1]),]
-  # add rest of gene data types into same scores matrix
-  for(i in 2:length(gene_data_index) ){
-    dat2 <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=loop_list[c])[,c("Gene", "P.Value")]
-    colnames(dat2) <- c("Gene", omicsList[[ gene_data_index[i] ]][["dataType"]] )
-    dat2 <- dat2[order(dat2[,2], decreasing = F),]
-    dat2 <- dat2[!duplicated(dat2[,1]),]
-    scores <- merge(scores, dat2, by="Gene", all=T)
-  }
+write_ap_file=function(ttable,outname){
+  merge_scores <- function(x,y) merge(x, y, by="Gene", all=T)
+
+  scores <- Reduce(merge_scores, lapply(1:length(gene_data_index),function(i){
+    dat <- ttable(omicsList[[ gene_data_index[i] ]][["fit"]])
+    colnames(dat) <- c("Gene", omicsList[[ gene_data_index[i] ]][["dataType"]] )
+    dat <- dat[order(dat[,2], decreasing = F),]
+    dat[!duplicated(dat[,1]),]
+  }))
+
   scores[is.na(scores)] <- 1
   row.names(scores)<- scores[,"Gene"]
   scores <- scores[,-1]
   scores <- as.matrix(scores)
+
   # run active pathways for each gmt_file
   for( gmt_index in 1:length(a_pathways_gmt) ){
     out_table <- ActivePathways(scores, a_pathways_gmt[gmt_index],geneset.filter = c(10, 500))
@@ -39,42 +36,22 @@ for(c in 1:length(loop_list)) { try({ #perform for each contrast
     for(g_column in 1:length(gene_columns)){
       out_table[,gene_columns[g_column] ] <- apply(out_table, 1, function(x) paste(as.character(unlist(x[ gene_columns[g_column] ])), collapse=","))
     } 
-    out_filename <- file.path(gsea_working_path,paste(gsub("-","_",contrast_strings[c]),"_",substr(a_paths_gmt_names[gmt_index],1,20),gmt_index,".txt", sep="") )
+    out_filename <- file.path(gsea_working_path,paste0(outname,"_",substr(a_paths_gmt_names[gmt_index],1,20),gmt_index,".txt") )
     write.table(out_table, file=out_filename, row.names = F, col.names = T, quote = F, sep = "\t")
   }
+}
+
+
+#perform for each contrast
+for(c in 1:length(loop_list)) { try({
+  contrast_ttable=function(dat) topTable(dat, adjust="BH", n=Inf, sort.by='p', coef=loop_list[c])[,c("Gene", "P.Value")]
+  write_ap_file(contrast_ttable,contrast_strings_file[c])
 }) }
 
-if(statistic_index=='F'){ try({ #repeat for F statistic
-  # Get p values from first omics genes
-  scores <- topTable(omicsList[[ gene_data_index[1] ]][["fit"]], adjust="BH", n=Inf,sort.by='F')[,c("Gene", "P.Value")]
-  colnames(scores) <- c("Gene", omicsList[[ gene_data_index[1] ]][["dataType"]] )
-  scores <- scores[order(scores[,2], decreasing = F),]
-  scores <- scores[!duplicated(scores[,1]),]
-  # add rest of gene data types into same scores matrix
-  for(i in 2:length(gene_data_index) ){
-    dat2 <- topTable(omicsList[[ gene_data_index[i] ]][["fit"]], adjust="BH", n=Inf, sort.by='F')[,c("Gene", "P.Value")]
-    colnames(dat2) <- c("Gene", omicsList[[ gene_data_index[i] ]][["dataType"]] )
-    dat2 <- dat2[order(dat2[,2], decreasing = F),]
-    dat2 <- dat2[!duplicated(dat2[,1]),]
-    scores <- merge(scores, dat2, by="Gene", all=T)
-  }
-  scores[is.na(scores)] <- 1
-  row.names(scores)<- scores[,"Gene"]
-  scores <- scores[,-1]
-  scores <- as.matrix(scores)
-  # run active pathways for each gmt_file
-  for( gmt_index in 1:length(a_pathways_gmt) ){
-    out_table <- ActivePathways(scores, a_pathways_gmt[gmt_index],geneset.filter = c(10, 500))
-    out_table <- out_table[ order(out_table$adjusted.p.val, decreasing = F),]
-    out_table$overlap <- apply(out_table, 1, function(x) paste(as.character(unlist(x["overlap"])), collapse=","))
-    out_table$evidence <- apply(out_table, 1, function(x) paste(as.character(unlist(x["evidence"])), collapse=","))
-    gene_columns <- colnames(out_table)[grepl("Genes_", colnames(out_table))]
-    for(g_column in 1:length(gene_columns)){
-      out_table[,gene_columns[g_column] ] <- apply(out_table, 1, function(x) paste(as.character(unlist(x[ gene_columns[g_column] ])), collapse=","))
-    } 
-    out_filename <- file.path(gsea_working_path,paste("Fstatistic","_",substr(a_paths_gmt_names[gmt_index],1,20),".txt", sep="") )
-    write.table(out_table, file=out_filename, row.names = F, col.names = T, quote = F, sep = "\t")
-  }
+#repeat for F statistic
+if(statistic_index=='F'){ try({
+  fstat_ttable=function(dat) topTable(dat, adjust="BH", n=Inf,sort.by='F')[,c("Gene", "P.Value")]
+  write_ap_file(fstat_ttable,"Fstatistic")
 }) }
 
 
@@ -83,15 +60,25 @@ if(statistic_index=='F'){ try({ #repeat for F statistic
 
 ---
 
-```{r eval=( length(metab_data_index)>0)}
+```{r eval=( length(metab_data_index)>0), results='hide'}
 
 # Get potential id's and save a new annotation file. 
 
-for(mumm_lib_index in 1:length(mumm_libs)) { 
-    for(i in 1:length(metab_data_index) ){ try({
+iters=do.call("rbind",
+  lapply(1:length(mumm_libs),function(mum){
+    t(sapply(1:length(metab_data_index),function(mi){
+      data.frame(mumm_lib_index=mum,met_ind=mi)
+    }))
+  })
+)
+
+bplapply(1:nrow(iters),FUN=function(ii){
+  mumm_lib_index=iters$mumm_lib_index[ii]
+  i=iters$met_ind[ii]
+  try({
       analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]], sep="" )
       
-      output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, paste(analysis_name, "_",gsub("-","_",contrast_strings[1]), sep=""))
+      output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, paste0(analysis_name, "_",contrast_strings_file[1]))
       output_mummichog_path_tmp <- file.path(working_dir, output_mummichog_subdir_tmp)
       met_ids <- read.delim(file.path(output_mummichog_path_tmp, "mummichog_matched_compound_all.csv"),
                             header=TRUE, stringsAsFactors = F, sep=",")
@@ -109,8 +96,8 @@ for(mumm_lib_index in 1:length(mumm_libs)) {
       write.table(fData(omicsList[[ metab_data_index[i] ]][["eSet"]])[,c("feature_identifier", "mz", id_column_name)],
                   file=output_filename, quote=F, sep="\t", row.names=F)
     
-    }) }
-}
+  })
+})
 
 # Save excel file summary for collaborators
 if(saveXlsx==TRUE){    
@@ -135,30 +122,9 @@ rnk_files <-vector("list", num_contrasts)
 
 for (c in 1:num_contrasts){
   for(mumm_lib_index in 1:length(mumm_libs)) { try({
-    i <- 1
-    analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
-                           "_",gsub("-","_",contrast_strings[c]), sep="" )
-      
-    output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, analysis_name)
-    output_mummichog_path_tmp <- file.path(working_dir, output_mummichog_subdir_tmp)
-    met_ids <- read.delim(file.path(output_mummichog_path_tmp, "mummichog_matched_compound_all.csv"),
-                          header=TRUE, stringsAsFactors = F, sep=",")
-  
-    met_ranked <- na.omit(topTable(omicsList[[ metab_data_index[i] ]][["fit"]], adjust="BH", n=Inf,
-                                   sort.by='p', coef=loop_list[c])[,c("mz", "P.Value", "logFC")] );
-    met_ranked[,"rank"] <- ( -log(met_ranked[,"P.Value"]) * sign(met_ranked[,"logFC"]) )
-    
-    for(n in 1:nrow(met_ids)){
-      met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"])[1], "rank"]
-      
-    }
-    
-    met_ids_out <- met_ids[,c("Matched.Compound", "rank")]
-    colnames(met_ids_out) <- c("GeneName", "rank")
-    if(length(metab_data_index)>1){
-    for(i in 2:length(metab_data_index)){ 
-      analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
-                             "_",gsub("-","_",contrast_strings[c]), sep="" )
+    met_ids_out <- do.call("rbind",lapply(1:length(metab_data_index),function(i){
+      analysis_name <- paste0(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
+                             "_", contrast_strings_file[c])
       
       output_mummichog_subdir_tmp <- file.path(output_mummichog_subdir, analysis_name)
       output_mummichog_path_tmp <- file.path(working_dir, output_mummichog_subdir_tmp)
@@ -173,37 +139,37 @@ for (c in 1:num_contrasts){
         met_ids[n,"rank"] <- met_ranked[which(met_ids[n,"Query.Mass"] == met_ranked[,"mz"])[1], "rank"]
       
       }
-      met_ids[,"GeneName"] <- met_ids[,"Matched.Compound"]
-      met_ids_out <- rbind(met_ids_out, met_ids[,c("GeneName", "rank")])
-    } }
+
+      met_ids <- met_ids[,c("Matched.Compound", "rank")]
+      colnames(met_ids) <- c("GeneName", "rank")
+      met_ids
+    }))
     
-    output_filename <- paste("Met_Ranked_", mumm_libs[mumm_lib_index],"_",
-                             gsub("-","_",contrast_strings[c]), "_Combined.rnk", sep="" )
+    output_filename <- paste0("Met_Ranked_", mumm_libs[mumm_lib_index],"_", contrast_strings_file[c], "_Combined.rnk")
     
     write.table(met_ids_out, file=file.path(output_mummichog_path, output_filename), sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
     rnk_files[[c]] <- c(rnk_files[[c]], file.path(output_mummichog_path, output_filename) )
     names(rnk_files[[c]])[length(rnk_files[[c]])] <- mumm_libs[mumm_lib_index]
+
+    if(length(gene_data_index)==0){
+      next;
+    }
     
     if(length(gene_data_index)>1){
-      if(grepl("Human", species) ){ 
-        gene_file <- file.path(output_contrast_path_files,paste("GSEA_combined_",gsub("-","_",contrast_strings[c]),".rnk", sep="") )
-      } else {
-        gene_file <- file.path(output_contrast_path_files,paste("GSEA_combined_Uppercase_",gsub("-","_",contrast_strings[c]),".rnk", sep="") )
-      }
+      gene_file <- "GSEA_combined_"
     } else {
-      if(grepl("Human", species)){ 
-          gene_file <- file.path(paste(output_contrast_path_files,"/GSEA_",omicsList[[ gene_data_index[1] ]][["dataType"]],
-                                       "_",gsub("-","_",contrast_strings[c]),".rnk", sep=""))
-      } else {
-          gene_file <- file.path(paste(output_contrast_path_files,"/GSEA_",omicsList[[ gene_data_index[1] ]][["dataType"]],
-                                       "_Uppercase_",gsub("-","_",contrast_strings[c]),".rnk", sep=""))
-      }
+      gene_file <- paste0("GSEA_",omicsList[[ gene_data_index[1] ]][["dataType"]],"_")
     }
+    if(!grepl("Human", species)){ 
+      gene_file <- paste0(gene_file,"Uppercase_")
+    }
+
+    fname_suffix <- paste0(contrast_strings_file[c], ".rnk")
+    gene_file <- file.path(output_contrast_path_files,paste0(gene_file,fname_suffix))
       
     gene_rnk <- read.delim(gene_file, stringsAsFactors = F, header=T)
     
-    output_filename <- paste("Integrated_Ranked_", mumm_libs[mumm_lib_index],"_",
-                             gsub("-","_",contrast_strings[c]), ".rnk", sep="" )
+    output_filename <- paste0("Integrated_Ranked_", mumm_libs[mumm_lib_index], "_", fname_suffix)
     
     write.table(rbind(gene_rnk,met_ids_out), file=file.path(output_mummichog_path, output_filename),
                 sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
@@ -251,7 +217,7 @@ for(gmt_index in 1:length(gmt_files)){
   
   analysis_names <- vector("list", length(loop_list))
   for (i in 1:length(loop_list)) {
-    analysis_names[[i]] <- paste("Combined_",gmt_names[gmt_index],"_",gsub("-", "_", contrast_strings[i]),sep="")
+    analysis_names[[i]] <- paste0("Combined_",gmt_names[gmt_index],"_",contrast_strings_file[i])
   }
 
   rnk_files_select <-vector("list", length(loop_list))

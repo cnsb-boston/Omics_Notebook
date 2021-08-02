@@ -99,3 +99,39 @@ runGSEA <- function (rnk, gmt,
   write.table(fgsea_out, file=output_filename, sep="\t", row.names=FALSE, quote=FALSE);
   
 }) }
+
+#-------------------------------------------------
+#' Fetch a new GMT file
+#'
+#' Fetch a new GMT file for a given species if it does not yet exist at the target destination
+#' 
+#' @param dest_path path to store the gmt file in
+#' @param .species species to use for the download
+#'
+#' @return the gmt file path
+#' 
+#' @examples
+#' 
+#' @export
+fetchGMT <- function(dest_path,.species="Other"){
+  if(grepl("Mouse|Human", .species)){  suppressWarnings({ suppressMessages({
+    # Only if you need a new GMT file
+    gmt_url = sub("(Mouse|Human).*","http://download.baderlab.org/EM_Genesets/current_release/\\1/symbol/",.species)
+    filenames = getURL(gmt_url)   #list all the files on the server
+    tc = textConnection(filenames)
+    contents = readLines(tc)
+    close(tc)
+    #get the gmt that has all the pathways and does not include terms inferred from electronic annotations(IEA), start with gmt file that has pathways only
+    rx = gregexpr("(?<=<a href=\")(.*.GOBP_AllPathways_no_GO_iea.*.)(.gmt)(?=\">)",contents, perl = TRUE)
+    gmt_file = unlist(regmatches(contents, rx))
+    dest_gmt_file <- file.path(dest_path,gmt_file)
+    if(!file.exists(dest_gmt_file)) { download.file(paste0(gmt_url,gmt_file),destfile=dest_gmt_file) }
+  }) }) } else { try({
+    geneset_lookup <-  read.delim(file.path(gsub("src", "data", notebook_dir),"geneset_table.txt"))
+    gmt_file <- as.character(geneset_lookup[geneset_lookup[,"Species"]==.species,"GeneSet"])
+    dest_gmt_file <-file.path(dest_path, gmt_file)
+    if(!file.exists(dest_gmt_file)) { file.copy(from=file.path( gsub("src", "data", notebook_dir), "species_genesets",gmt_file),
+                                                to= dest_gmt_file ) }
+  }) }
+  dest_gmt_file
+}

@@ -68,179 +68,113 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   emat_sel[emat_sel > 2] <- 2
   
   # Create the data table
-  formatted_table<-""
+  d=list()
+  d$formatted_table<-""
   if ( "feature_identifier" %in% colnames(fData(eset)) ) {  
-    formatted_table <- data.frame( fData(eset)[,c("feature_identifier")],emat_sel )
-    names <- c("Feature", colnames(exprs(eset))  )
+    d$formatted_table <- data.frame( fData(eset)[,c("feature_identifier")],emat_sel )
+    d$names <- c("Feature", colnames(exprs(eset))  )
   } else if ( "Gene" %in% colnames(fData(eset)) ) {  
-    formatted_table <- data.frame( fData(eset)[,c("Gene")],emat_sel )
-    names <- c("Gene", colnames(exprs(eset))  )
+    d$formatted_table <- data.frame( fData(eset)[,c("Gene")],emat_sel )
+    d$names <- c("Gene", colnames(exprs(eset))  )
   } else { 
-    formatted_table <- data.frame(  rownames(exprs(eset)),emat_sel )
-    names <- c("Feature", colnames(exprs(eset))  )
+    d$formatted_table <- data.frame(  rownames(exprs(eset)),emat_sel )
+    d$names <- c("Feature", colnames(exprs(eset))  )
   }
-  col_widths <- c(20, rep(4, ncol(eset)));
-  
-  if ( "Gene" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Gene")] );
-    names <- c(names, "Gene");
-    col_widths<-c(col_widths, 16);
+  d$col_widths <- c(20, rep(4, ncol(eset)));
+
+  fillOutputTable <- function(outlist, fieldmap_v){
+    fieldmap=matrix(byrow=T,ncol=3,data=fieldmap_v)
+    valid_inds=fieldmap[,1] %in% colnames(fData(eset))
+    if(any(valid_inds)) {
+      fieldmap=matrix(fieldmap[valid_inds,],ncol=3)
+      outlist$formatted_table <- data.frame(outlist$formatted_table, fData(eset)[,fieldmap[,1]]);
+      outlist$names <- c(outlist$names, fieldmap[,2])
+      outlist$col_widths<-c(outlist$col_widths, as.integer(fieldmap[,3]));
+    }
+    outlist
   }
-  if ( "Protein.names" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Protein.names")] );
-    names <- c(names, "Protein");
-    col_widths<-c(col_widths, 50);
+ 
+  grepadd <- function(outlist,regex,colsize){
+    cname <- grep(regex, colnames(fData(eset)), value=T)
+    if(length(cname)>0){
+      fillOutputTable(outlist, matrix(t(c(cname,cname,rep(colsize,length(cname))),ncol=3)))
+    } else outlist
   }
-  if ( "Protein" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Protein")] );
-    names <- c(names, "Uniprot"); 
-    col_widths<-c(col_widths, 16);
-  }
-  
-  if ( "mz" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("mz")] );
-    names <- c(names, "MZ"); 
-    col_widths<-c(col_widths, 16);
-  }
-  
-  if ( "rt" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("rt")] );
-    names <- c(names, "RT"); 
-    col_widths<-c(col_widths, 16);
-  }
-  if ( "Adduct" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Adduct")] );
-    names <- c(names, "Adduct"); 
-    col_widths<-c(col_widths, 8);
-  }
-  if ( "Formula" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Formula")] );
-    names <- c(names, "Formula"); 
-    col_widths<-c(col_widths, 8);
-  }
-  if ( "Metabolite.name" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Metabolite.name")] );
-    names <- c(names, "Metabolite.name"); 
-    col_widths<-c(col_widths, 8);
-  }
-  
-  if ( "MaxFC" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("MaxFC")] );
-    names <- c(names, "MaxFC"); 
-    col_widths<-c(col_widths, 8);
-  }
-  
-  col_index <- length(names)
-  
+
+  d <- fillOutputTable(d, c(
+    "Gene", "Gene", 16,
+    "Protein.names", "Protein", 50,
+    "Protein", "Uniprot", 16,
+    "mz", "MZ", 16,
+    "rt", "RT", 16,
+    "Adduct", "Adduct", 8,
+    "Formula", "Formula", 8,
+    "Metabolite.name", "Metabolite.name", 8,
+    "MaxFC", "MaxFC", 8
+  ))
+
+  col_index <- length(d$names)
+
   if(class(limmaFit)=="MArrayLM") { 
     for (i in 1:length(DiffList)) {
       DiffList[[i]] <- DiffList[[i]][match(rownames(DiffList[[1]]),rownames(DiffList[[i]])),];
-      formatted_table <- data.frame(formatted_table, DiffList[[i]][,c("P.Value","adj.P.Val","logFC")] );
-      names <- c(names, "P.Value","adj.P.Val","logFC");
-      col_widths<-c(col_widths, 8,8,8);
+      d$formatted_table <- data.frame(d$formatted_table, DiffList[[i]][,c("P.Value","adj.P.Val","logFC")] );
+      d$names <- c(d$names, "P.Value","adj.P.Val","logFC");
+      d$col_widths<-c(d$col_widths, 8,8,8);
     } 
     if(length(DiffList)>1){ try({
       DiffList_F <- DiffList_F[match(rownames(DiffList[[1]]),rownames(DiffList_F)),];
-      formatted_table <- data.frame(formatted_table, DiffList_F[,c("F","adj.P.Val")])
-      names <- c(names, "F-Statistic", "F-Stat adj.P.Val");
-      col_widths<-c(col_widths, 8,8);
+      d$formatted_table <- data.frame(d$formatted_table, DiffList_F[,c("F","adj.P.Val")])
+      d$names <- c(d$names, "F-Statistic", "F-Stat adj.P.Val");
+      d$col_widths<-c(d$col_widths, 8,8);
     }) }
     try({ if(class(DiffList_T)!="NULL"){
       DiffList_T <- DiffList_T[match(rownames(DiffList[[1]]),rownames(DiffList_T)),];
-      formatted_table <- data.frame(formatted_table, DiffList_T[,"F"])
-      names <- c(names, "F-Statistic:Time Trajectory");
-      col_widths<-c(col_widths, 8);
+      d$formatted_table <- data.frame(d$formatted_table, DiffList_T[,"F"])
+      d$names <- c(d$names, "F-Statistic:Time Trajectory");
+      d$col_widths<-c(d$col_widths, 8);
     } }, silent=T)
-  }else if ( any( grepl("logfc_", colnames(fData(eset))) )){
-    formatted_table <- data.frame(formatted_table, fData(eset)[,grepl("logfc_", colnames(fData(eset)) )]); 
-    names <- c(names, colnames(fData(eset))[grepl("logfc_", colnames(fData(eset)) )])
-    col_widths <- c(col_widths, rep(8, sum(grepl("logfc_", colnames(fData(eset)) ) )))
+  } else{
+    d <- grepadd(d,"logfc_",8)
   }
   
-  if ( any( grepl("mummichogID_", colnames(fData(eset))) )){
-    formatted_table <- data.frame(formatted_table, fData(eset)[,grepl("mummichogID_", colnames(fData(eset)) )]); 
-    names <- c(names, colnames(fData(eset))[grepl("mummichogID_", colnames(fData(eset)) )])
-    col_widths <- c(col_widths, rep(8, sum(grepl("mummichogID_", colnames(fData(eset)) ) )))
-  }
-  if ( "Fasta.headers" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Fasta.headers")]); 
-    names <- c(names,"Fasta_Headers"); col_widths<-c(col_widths, 8);
-  }
-  if ( "Uniprot_Function" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Uniprot_Function")]); 
-    names <- c(names,"Uniprot_Function"); col_widths<-c(col_widths, 50);
-  }
-  if ( "Uniprot_Cellular_Location" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Uniprot_Cellular_Location")] ); 
-    names <- c(names,"Uniprot_Cellular_Location"); col_widths<-c(col_widths, 50);
-  }
-  if ( "Uniprot_Disease" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Uniprot_Disease")] );
-    names <- c(names,"Uniprot_Disease"); col_widths<-c(col_widths, 50);
-  }
-  if ( "GO_biological_process" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("GO_biological_process")] ); 
-    names <- c(names,"GO_biological_process"); col_widths<-c(col_widths, 50);
-  }
-  if ( "GO_molecular_function" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("GO_molecular_function")] ); 
-    names <- c(names,"GO_molecular_function"); col_widths<-c(col_widths, 50);
-  }
-  if ( "GO_cellular_component" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("GO_cellular_component")] ); 
-    names <- c(names,"GO_cellular_component"); col_widths<-c(col_widths, 50);
-  }
-  if ( "GO_ID" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("GO_ID")] ); 
-    names <- c(names,"GO_ID"); col_widths<-c(col_widths, 8);
-  }
-  if ( "ReactomeID" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("ReactomeID")] ); 
-    names <- c(names,"ReactomeID"); col_widths<-c(col_widths, 8);
-  } 
-  if ( "KEGG_ID" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("KEGG_ID")] ); 
-    names <- c(names,"KEGG_ID"); col_widths<-c(col_widths, 8);
-  }
-  if ( "identifier" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("identifier")] ); 
-    names <- c(names,"identifier"); col_widths<-c(col_widths, 16);
-  }
-  if ( "KEGG" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("KEGG")] );
-    names <- c(names, "KEGG"); 
-    col_widths<-c(col_widths, 8);
-  }
-  
-  if ( "Sequence" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Sequence")] ); 
-    names <- c(names,"Sequence"); col_widths<-c(col_widths, 16);
-  }
-  
-  if ( "Proteins" %in% colnames(fData(eset)) ){ 
-    formatted_table <- data.frame(formatted_table, fData(eset)[,c("Proteins")] ); 
-    names <- c(names,"Proteins"); col_widths<-c(col_widths, 16);
-  }
-  
+  d <- grepadd(d,"mummichogID_",8)
+  d <- fillOutputTable(d, c(
+    "Fasta.headers", "Fasta_Headers", 8,
+    "Uniprot_Function", "Uniprot_Function", 50,
+    "Uniprot_Cellular_Location", "Uniprot_Cellular_Location", 50,
+    "Uniprot_Disease", "Uniprot_Disease", 50,
+    "GO_biological_process", "GO_biological_process", 50,
+    "GO_molecular_function", "GO_molecular_function", 50,
+    "GO_cellular_component", "GO_cellular_component", 50,
+    "GO_ID", "GO_ID", 8,
+    "ReactomeID", "ReactomeID", 8,
+    "KEGG_ID", "KEGG_ID", 8,
+    "identifier", "identifier", 16,
+    "KEGG", "KEGG", 8,
+    "Sequence", "Sequence", 16,
+    "Proteins", "Proteins", 16
+  ))
   # Add phospho site probabilities and data
   try({ 
     if(grepl("Sites", data_format)) { 
-      formatted_table <- data.frame(formatted_table, fData(eset)[,"Localization.prob"],
-                                    fData(eset)[,grep("Probabilities", colnames(fData(eset)))],
-                                    paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep=""),
-                                    fData(eset)[,"Sequence.window"] ) 
-      names <- c(names, "Localization Probability","Site Probabilities", "Amino Acid", "Peptide Sequence")
-      col_widths <- c(col_widths, 16, 16, 16, 16)
+      fData(eset)[,"AAPos"]=paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep="")
+      d <- fillOutputTable(d, c(
+        "Localization.prob", "Localization Probability", 16,
+        "Probabilities","Site Probabilities", 16,
+        "AAPos", "Amino Acid", 16,
+        "Sequence.window", "Peptide Sequence", 16))
     }
   })
 
-  formatted_table<- data.frame(formatted_table, exprs(eset) );  
-  names <- c(names,colnames(eset) );
-  col_widths <- c(col_widths, rep(4, ncol(eset)));
-  
+  formatted_table<- data.frame(d$formatted_table, exprs(eset) );  
+  names <- c(d$names,colnames(eset) );
+  col_widths <- c(d$col_widths, rep(4, ncol(eset)));
   
   formatted_table <- data.frame(formatted_table, stringsAsFactors=FALSE)
   colnames(formatted_table) <-  make.unique(toupper(names));
+
+  #write(paste("dim",paste0(dim(formatted_table),collapse=" "),"names",length(names),"width",length(col_widths)),stderr())
   
   # Write data table to sheet
   writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
