@@ -13,6 +13,9 @@
 drawVenn <- function(item_list, item_name, outputpath=output_plots_path){
   fill_col <- rainbow(length(item_list))
   futile.logger::flog.threshold(ERROR);
+  if (length(item_list) > 5){
+    item_list <- item_list[1:5]
+  }
   venn <- venn.diagram( x=item_list, filename=NULL,lty="blank",# height=2000, width=2000, 
                         cat.default.pos="outer", 
                         fill=fill_col,
