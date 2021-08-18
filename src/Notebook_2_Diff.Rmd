@@ -462,7 +462,7 @@ contrast_secondary=function(ranked,contrast_name){
 if(length(gene_data_index)>1){
   cnames=gsub("-","_",contrast_strings[c])
   for (c in 1:length(loop_list) ){ try({
-    gen_gsea_file(cnames[c], function(top_sum){sign(top_sum[,"logFC"]) * -log10(top_sum[,"adj.P.Val"])},contrast_secondary)
+    gen_gsea_file(cnames[c], function(top_sum){sign(top_sum[,"logFC"]) * -log10(top_sum[,"P.Value"])},contrast_secondary)
   })}
   gen_gsea_file("Timecourse_Overall", function(top_sum){top_sum[,"F"]},NULL)
   gen_gsea_file("Overall", function(top_sum){top_sum[,"F"]},NULL)
