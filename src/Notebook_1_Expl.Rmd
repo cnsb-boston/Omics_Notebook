@@ -256,13 +256,12 @@ normdata <- function(item_name,data_index){
   }
 }
 # Take first data set for normalization
+dataname=c("eSet",rep(siteNorm,length(data_index)-1))
 if(length(prot_data_index)>1){
   normdata(item_name="Protein",data_index=prot_data_index)
-  dataname=c("eSet",rep("siteNorm",length(prot_data_index)-1))
   drawcorplot(item_name="Protein",data_index=prot_data_index,dataname=dataname)
 } else {
   normdata(item_name="Gene",data_index=gene_data_index)
-  dataname=c("eSet",rep("siteNorm",length(gene_data_index)-1))
   drawcorplot(item_name="Gene",data_index=gene_data_index,dataname=dataname)
 }
 

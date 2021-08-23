@@ -105,7 +105,7 @@ library(ComplexHeatmap)
 library(RCurl)
 library(fgsea)
 library(BiocParallel)
-register(MulticoreParam(workers=as.integer(Sys.getenv("NSLOTS",1))))
+register(MulticoreParam(workers=as.integer(Sys.getenv("NSLOTS"))))
 library(httr)
 library(RJSONIO)
 
