@@ -67,14 +67,15 @@ if(statistic_index=='F'){ try({
 iters=do.call("rbind",
   lapply(1:length(mumm_libs),function(mum){
     t(sapply(1:length(metab_data_index),function(mi){
-      data.frame(mumm_lib_index=mum,met_ind=mi)
+      c(mum,mi)
     }))
   })
 )
+colnames(iters)=c("mumm_lib_index","met_ind")
 
 bplapply(1:nrow(iters),FUN=function(ii){
-  mumm_lib_index=iters$mumm_lib_index[ii]
-  i=iters$met_ind[ii]
+  mumm_lib_index=iters[ii,"mumm_lib_index"]
+  i=iters[ii,"met_ind"]
   try({
       analysis_name <- paste(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]], sep="" )
       
