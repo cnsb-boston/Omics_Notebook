@@ -133,7 +133,7 @@ run_gsea <- gsea_section; # if GSEA has already been run, set to false and inclu
 
 if( run_gsea & species!="Other" ) { try({
   
-  case_modifier <- if(grepl("Mouse|Human", species)) "_Uppercase_" else "_"
+  case_modifier <- if(!grepl("Mouse|Human", species)) "_Uppercase_" else "_"
 
   gsea_working_dir <- "3_GSEA"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
