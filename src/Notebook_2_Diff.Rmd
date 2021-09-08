@@ -6,7 +6,7 @@
 # Make contrasts between groups
 contrast_strings <- c();
 if(all_comparisons == TRUE & length(contrastgroups>1) ){
-  contrast_strings <- sapply(combn(contrastgroups,2,simplify=F),FUN=function(l)paste(l,collapse="-"))
+  contrast_strings <- sapply(combn(rev(contrastgroups),2,simplify=F),FUN=function(l)paste(l,collapse="-"))
 } else if(all_comparisons == FALSE & length(contrastgroups>1) ){
   contrast_strings <- paste(contrastgroups[2:length(contrastgroups)], contrastgroups[1], sep='-')
 } else if( length(contrastgroups) ==1 ){
