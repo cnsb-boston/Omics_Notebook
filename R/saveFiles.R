@@ -49,8 +49,8 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE, sa
     if("Gene"%in% colnames(limmaRes)){
       # ranked list with direction
       output_filename <- file.path(outputcontrastpath,paste("GSEA_",type,"_", gsub("-","_",contrast_name),".rnk", sep=''));
-      if( "adj.P.Val" %in% colnames(limmaRes) ){
-        ranked <- cbind(limmaRes[,"Gene"],sign(limmaRes[,"logFC"]) * -log10(limmaRes[,"adj.P.Val"]))
+      if( "P.Value" %in% colnames(limmaRes) ){
+        ranked <- cbind(limmaRes[,"Gene"],sign(limmaRes[,"logFC"]) * -log10(limmaRes[,"P.Value"]))
       } else {
         ranked <- cbind(limmaRes[,"Gene"],limmaRes[,"logFC"] )
       }
