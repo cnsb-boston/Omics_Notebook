@@ -20,6 +20,8 @@ getUniprotAnnotation <- function(IDs){
   uniprot_col_names <- c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
                        "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID",
                        "BioCyc_ID", "Ensembl_ID", "ChEMBL_ID", "IntAct_ID","STRING_ID")
+
+  colnames_annotUniprot <- c("ENTRY", uniprot_col_names)
   
   # List of uniprot IDs (remove duplicates for speed)
   IDs_unique <- IDs[!duplicated(IDs)] #get unique IDs
@@ -36,7 +38,7 @@ getUniprotAnnotation <- function(IDs){
       if (class(info_annot) != 'try-error' &&
           dim(info_annot)[2]==length(uniprot_columns)+1 &&
           colnames(info_annot)[2]=="Function..CC."){
-        colnames(info_annot) <- colnames(annotUniprot)
+        colnames(info_annot) <- colnames_annotUniprot
         ret <- info_annot
       }
     }
@@ -47,7 +49,7 @@ getUniprotAnnotation <- function(IDs){
  
   # make data frame corresponding to original ID list
   annotatedUniprot <- data.frame(matrix(ncol=length(uniprot_col_names)+1, nrow=length(IDs)))
-  colnames(annotatedUniprot) <- colnames(annotUniprot)
+  colnames(annotatedUniprot) <- colnames_annotUniprot
   annotatedUniprot[,"ENTRY"] <- IDs
   for (r in 1:nrow(annotatedUniprot)){ if(sum(annotUniprot[,"ENTRY"]==annotatedUniprot[r,"ENTRY"])!=0) {
     annotatedUniprot[r,uniprot_col_names] <-annotUniprot[which(annotUniprot[,"ENTRY"]==annotatedUniprot[r,"ENTRY"])[1],uniprot_col_names]
