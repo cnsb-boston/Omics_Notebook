@@ -110,7 +110,7 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
     "Adduct", "Adduct", 8,
     "Formula", "Formula", 8,
     "Metabolite.name", "Metabolite.name", 8,
-    "MaxFC", "MaxFC", 8
+    "logfc_overall", "MaxFC", 8
   ))
 
   col_index <- length(d$names)
