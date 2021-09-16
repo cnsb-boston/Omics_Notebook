@@ -99,7 +99,7 @@ for( i in 1:length(omicsList) ){ try({
       logfc_index <- c(logfc_index, col_name)
     }
   }
-  fData(omicsList[[i]][["eSet"]])[,"MaxFC"] <- apply(fData(omicsList[[i]][["eSet"]])[,grep("mean", colnames(fData(omicsList[[i]][["eSet"]])))], 1, function(x) max(x)/min(x))
+  fData(omicsList[[i]][["eSet"]])[,"logFC_Overall"] <- apply(fData(omicsList[[i]][["eSet"]])[,grep("mean", colnames(fData(omicsList[[i]][["eSet"]])))], 1, function(x) max(x)/min(x))
 }) }
 
 logfc_index <- unique(logfc_index);
