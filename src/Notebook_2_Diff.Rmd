@@ -99,7 +99,7 @@ for( i in 1:length(omicsList) ){ try({
       logfc_index <- c(logfc_index, col_name)
     }
   }
-  fData(omicsList[[i]][["eSet"]])[,"logfc_overall"] <- apply(fData(omicsList[[i]][["eSet"]])[,grep("mean", colnames(fData(omicsList[[i]][["eSet"]])))], 1, function(x) max(x)/min(x))
+  fData(omicsList[[i]][["eSet"]])[,"logfc_Overall"] <- apply(fData(omicsList[[i]][["eSet"]])[,grep("mean", colnames(fData(omicsList[[i]][["eSet"]])))], 1, function(x) max(x)/min(x))
 }) }
 
 logfc_index <- unique(logfc_index);
@@ -246,7 +246,7 @@ for(i in 1:length(omicsList)){
   output_links <- paste(output_links, "  \n", sep="" );
 }
 
-# Heatmaps for logfc_overall and F statistic
+# Heatmaps for logfc_Overall and F statistic
 if(statistic_index=="F"){
 for(i in 1:length(omicsList)){
   sig_cutoff <- round(sig_percent*nrow(omicsList[[i]][["eSet"]]), digits=0)
@@ -283,8 +283,8 @@ for(i in 1:length(omicsList)){
     output_links <- paste(output_links, add_link, sep=" | " ); 
   }) }
   try({  
-    top_sum <- rownames( exprs(omicsList[[i]][["eSet"]])[order( abs(fData(omicsList[[i]][["eSet"]])[,"logfc_overall"]), decreasing=TRUE),] )[1:sig_cutoff]
-    type_name <- paste(omicsList[[i]][["dataType"]],"logfc_overall", sep="_");
+    top_sum <- rownames( exprs(omicsList[[i]][["eSet"]])[order( abs(fData(omicsList[[i]][["eSet"]])[,"logfc_Overall"]), decreasing=TRUE),] )[1:sig_cutoff]
+    type_name <- paste(omicsList[[i]][["dataType"]],"logfc_Overall", sep="_");
     title_add <- paste("Top ", (sig_percent*100), "%", sep="")
     
     # run heatmap function
@@ -400,7 +400,7 @@ bplapply(1:nrow(iters),FUN=function(ii){ try({
 if(statistic_index=='F' || time_index>0){
 bplapply(1:length(omicsList),FUN=function(i){ try({
   if(statistic_index=='F'){
-    genfile(i,"Overall",NULL,fttable,function(ol,cn){ol[,"logfc_overall"]});
+    genfile(i,"Overall",NULL,fttable,function(ol,cn){ol[,"logfc_Overall"]});
   }
   if(time_index>0){
     genfile(i,"Timecourse_Overall",time_start:time_end,timetable,NULL);
