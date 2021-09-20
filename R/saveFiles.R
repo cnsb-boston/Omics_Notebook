@@ -55,9 +55,10 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE, sa
         ranked <- cbind(limmaRes[,"Gene"],limmaRes[,"logFC"] )
       }
       colnames(ranked)<-c("GeneName", "rank")
-      ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
       ranked <- ranked[ranked[,"GeneName"]!="", ]
+      ranked <- ranked[order(abs(as.numeric(ranked[,"rank"])), decreasing=TRUE),]
       ranked <- ranked[!duplicated(ranked[,"GeneName"]),]
+      ranked <- ranked[order(as.numeric(ranked[,"rank"]), decreasing=TRUE),]
       write.table(x=ranked,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
       
       # ranked list without direction
