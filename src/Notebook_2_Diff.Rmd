@@ -4,42 +4,66 @@
 ```{r limma}
 
 # Make contrasts between groups
+# contrastgroups are created from the first row of the annotation file, specifying biological groups of interested for differential analysis.
+# contrast_strings will hold all of the contrast names for the differential analysis.
 contrast_strings <- c();
 if(all_comparisons == TRUE & length(contrastgroups>1) ){
+  # We generate a list of contrasts based on all groups present. 
+  # We assume the first (left most in annotation file) is control to handle cases where the order and directionality is important.
   contrast_strings <- sapply(combn(rev(contrastgroups),2,simplify=F),FUN=function(l)paste(l,collapse="-"))
 } else if(all_comparisons == FALSE & length(contrastgroups>1) ){
+  # If all_comparisons is set to false, we compare all groups to the first (control) group.
   contrast_strings <- paste(contrastgroups[2:length(contrastgroups)], contrastgroups[1], sep='-')
 } else if( length(contrastgroups) ==1 ){
+  # This is a last catch all if there is only one biological group listed.
   contrast_strings <- contrastgroups
 }
+# To track the number of contrasts.
 num_contrasts <- length(contrast_strings);
+# To track the coefficients from the differential analysis for downstream plots and files.
 loop_list <- 1:num_contrasts
 
+# This case is for TimeSeries experiments, with TimeSeries information on the second page of the annotation sheet.
+# time_index will track the number of time points in the experiment.
 time_index <- 0;
 if("TimeSeries" %in% colnames(annot)){ 
+  # For the default case, given challenges of very large sample sizes, we assume that there are more timepoints than replicates for a given timepoint.
+  # We will create a time variable shorter than the number of unique TimeSeries, so we have sufficient degrees of freedom for the linear model.
+  # If there are many replicates (>3) for each time point, consider entering them as groups, or edit the following if needed.
   time_index<- length(unique(annot[,"TimeSeries"]))-2;
+  # The next two variables track the start and end coefficients for the time variable in the model.
   time_start <- 3+time_index
   time_end<- 2+(time_index*2)
+  # We adjust the coefficients for downstream plots/files so we are examining the time series.
   loop_list<- time_start:time_end
+  # We make contrast strings based on the TimeSeries variable.
   new_strings <- c()
   for ( k in 1:length(contrast_strings)){
     for( l in 1:time_index){
       new_strings <- c(new_strings, paste(contrast_strings[k], "_Time_", l, sep=""))
     }
   }
+  # We add these strings together.
   contrast_strings <- c(new_strings, contrast_strings)
 }
 
-if(num_contrasts>1 | time_index>0){ statistic_index <- "F";
-} else { statistic_index <- "t"; }
+# If we have multiple contrasts/coefficients, we will want to analyze the data using the F-statistic to analyze features that change the most over all the groups.
+if(num_contrasts>1 | time_index>0){ 
+  statistic_index <- "F";
+} else { 
+  statistic_index <- "t"; 
+}
 
 ##########################################################
 
 # Limma for DE
+# Use limma for differential analysis for each omics data set in omicsList.
 for(i in 1:length(omicsList)){ try({
   eset <- omicsList[[i]][["eSet"]]
   IsThereTime <- FALSE; 
   # Create a model matrix and lmFit based on group - For more complex models, edit the following code in this chunk.
+  
+  # This will try to fit a model for the TimeSeries case, where there are groups changing over time.
   if(time_index>0 ){ try({
     eset<- eset[,which(pData(eset)$Group %in% contrastgroups)]
     f <- factor(pData(eset)$Group, levels=unique(contrastgroups)); 
@@ -50,6 +74,8 @@ for(i in 1:length(omicsList)){ try({
     IsThereTime <- TRUE
   }) }
     
+  # If there is no TimeSeries (either not present or the model fails), we will next chech to see if we are doing a "Paired" analysis.
+  # This is added with a "Pairs" entry on the second page of the annotation sheet to specify which samples are matched.
   if(IsThereTime == FALSE){
     if("Pairs" %in% colnames(pData(eset)) ){
       f <- factor(pData(eset)$Group)
@@ -58,9 +84,12 @@ for(i in 1:length(omicsList)){ try({
       fit1 <- lmFit( eset, design);
       fit1 <- eBayes(fit1);
       
+      # We adjust these variables for the case where there are paired samples.
       loop_list <- (length(levels(p))+1): ncol(design)
       contrast_strings <- colnames(design)[loop_list]
     } else {
+      # This last case is for the model without TimeSeries or Pairs
+      # This is the default case, for comparisons/contrasts between two or more groups.
       f <- factor(pData(eset)$Group)#, levels=unique(pData(eset)$Group)); 
       design <- model.matrix(~ 0 + f);
       colnames(design) <- make.names(levels(f));
@@ -76,21 +105,28 @@ for(i in 1:length(omicsList)){ try({
   #start_col <- end_col - (3+length(contrast_list))
   #print(topTable(fit1, adjust="BH")[,seq(start_col, end_col)])
   
+  # Save the fit in the omicsList object for the corresponding data set
   omicsList[[i]][[7]] <- fit1
   names(omicsList[[i]])[7] <- "fit";
 }) } 
 
 ##########################################################
 # Calculate log fold change in case limma fails
+# For the case where the differential analysis fails (e.g., due to too few samples per group), we calculate an average value for each group,
+# and then calculate a simple difference between all groups.
 logfc_index <- c();
 for( i in 1:length(omicsList) ){ try({
+  # This first loop calculates a mean value per group.
   for( j in 1:length(contrastgroups) ){
     if( sum(pData(omicsList[[i]][["eSet"]])$Group==contrastgroups[j])>1 ){
-      fData(omicsList[[i]][["eSet"]])[,paste("mean_",contrastgroups[j],sep="")] <- rowMeans(exprs(omicsList[[i]][["eSet"]])[,pData(omicsList[[i]][["eSet"]])$Group==contrastgroups[j] ] )
+      fData(omicsList[[i]][["eSet"]])[,paste("mean_",contrastgroups[j],sep="")] <-
+        rowMeans(exprs(omicsList[[i]][["eSet"]])[,pData(omicsList[[i]][["eSet"]])$Group==contrastgroups[j] ] )
     } else {
-      fData(omicsList[[i]][["eSet"]])[,paste("mean_",contrastgroups[j],sep="")] <- exprs(omicsList[[i]][["eSet"]])[,pData(omicsList[[i]][["eSet"]])$Group==contrastgroups[j] ] 
+      fData(omicsList[[i]][["eSet"]])[,paste("mean_",contrastgroups[j],sep="")] <-
+        exprs(omicsList[[i]][["eSet"]])[,pData(omicsList[[i]][["eSet"]])$Group==contrastgroups[j] ] 
     }
   }
+  # This loop creates a log fold change between each two groups. (Log fold change for log transformed values is approximately the difference.)
   for( j in 1:(length(contrastgroups)-1) ){
     for( k in 2:(length(contrastgroups)) ){
       col_name <- paste("logfc_",contrastgroups[k],"_",contrastgroups[j],sep="");
@@ -99,10 +135,13 @@ for( i in 1:length(omicsList) ){ try({
       logfc_index <- c(logfc_index, col_name)
     }
   }
-  fData(omicsList[[i]][["eSet"]])[,"logfc_Overall"] <- apply(fData(omicsList[[i]][["eSet"]])[,grep("mean", colnames(fData(omicsList[[i]][["eSet"]])))], 1, function(x) max(x)/min(x))
+  # We calculate a maximum fold change value across all groups as a way to see which features are changing most across all groups.
+  # This is analogous to the F-statistic from the differential analysis.
+  fData(omicsList[[i]][["eSet"]])[,"logfc_Overall"] <- apply(fData(omicsList[[i]][["eSet"]])[,grep("mean", colnames(fData(omicsList[[i]][["eSet"]])))],
+                                                             1, function(x) max(x) - min(x))
 }) }
-
 logfc_index <- unique(logfc_index);
+
 ##########################################################
 # Make differential directory
 output_contrast_subdir <- file.path(output_subdir,"2_Differential")
@@ -180,7 +219,7 @@ for(i in 1:length(omicsList)){
     
     type_name <- paste(omicsList[[i]][["dataType"]],logfc_index[c], sep="_");
     
-    # run Volcan function
+    # run Volcano function
     if(fc_cutoff==0){ tmp <- 1 } else { tmp <- fc_cutoff }
     drawMDPlot(dat=top_sum, type=type_name, subset_rows=subset_rows, cutoff=tmp );
     
