@@ -18,22 +18,21 @@
 ############################################
 
 # Get Notebook directory - if running pipeline
-run_directories <- commandArgs(trailingOnly=FALSE)
+args <- commandArgs(trailingOnly=TRUE)
 
-index <- length(run_directories)
-
-notebook_dir <- file.path(run_directories[(index-1)], "src");
-analysis_dir <- file.path(run_directories[index]);
+notebook_dir <- file.path(args[1], "src");
+analysis_dir <- file.path(args[2]);
+param_file=file.path(analysis_dir,if(length(args)>2)args[3] else "Parameters.R")
 
 # source run variables
 setwd(analysis_dir);
-source(file.path(analysis_dir, "Parameters.R"));
+source(param_file);
 
 if(analysis_dir != working_dir){
   write(paste("annotation_filename <- '",file.path(analysis_dir,basename(annotation_filename)), "';", sep=""),
-        file = file.path(analysis_dir, "Parameters.R"), append = T)
+        file = param_file, append = T)
   write(paste("working_dir <- '", analysis_dir, "';", sep=""),
-        file = file.path(analysis_dir, "Parameters.R"), append = T)
+        file = param_file, append = T)
 }
 
 
@@ -57,6 +56,7 @@ rmarkdown::render(file.path(notebook_dir,'Notebook.Rmd'),
                   envir=new.env(),
                   knit_root_dir=analysis_dir,
                   intermediates_dir=analysis_dir,
+                  params=list(param_file=param_file),
                   output_file=paste(gsub("\\.","",make.names(project_name)),"_",gsub("-","",Sys.Date()),".html", sep=""),
                   output_dir=analysis_dir);
 

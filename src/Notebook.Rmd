@@ -2,6 +2,8 @@
 title: "Multi-Omics Data Analysis Notebook"
 author: "CNSB"
 date: "`r Sys.Date()`"
+params:
+  param_file: "Parameters.R"
 output:
   html_document:
     theme: united
@@ -45,11 +47,11 @@ search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_
                       "MSigDB_Oncogenic_Signatures");
 
 debug_opt <- FALSE
-source("Parameters.R")
+source(params$param_file)
 
 ```
 
-```{r, code=readLines(file.path(working_dir, "Parameters.R")) }
+```{r, code=readLines(params$param_file) }
 ```
 
 ```{r libraries}
