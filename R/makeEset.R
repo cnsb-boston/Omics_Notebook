@@ -123,6 +123,12 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     data[,"Gene"] <- apply(data, 1, function(x) {
       if(grepl(';', x["Gene.names"])){ substr(x["Gene.names"], 0, unlist(gregexpr(';', x["Gene.names"]))[1]-1)
       } else {x["Gene.names"]} } );
+  } else if("Fasta.headers" %in% colnames(data)){ # For species that have Uniprot but not MQ gene annotations
+    uni=grepl("^(sp|tr)\\|",data[,"Fasta.headers"])
+    if(any(uni)){
+      data[,"Gene"]=""
+      data[uni,"Gene"]=sub("^..\\|.*\\|([^_]*).*","\\1",data[uni,"Fasta.headers"])
+    }
   }
   # make feature identifiers/rownames
   if( "Gene" %in% colnames(data) ){
