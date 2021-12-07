@@ -17,7 +17,7 @@ p = subprocess.Popen(args=["python3", pipeline_path], stderr=subprocess.STDOUT, 
 analysis_dir = str(p.communicate()[0], 'utf-8').rstrip().split("\n")[-1]
 
 # 1. Run natively
-if len(sys.argv)<1 : 
+if len(sys.argv)<=1 : 
   print("Running natively.")
   subprocess.Popen(args=["Rscript", r_path, notebook_path, analysis_dir])
 
