@@ -364,7 +364,8 @@ if( exists("combined_met") && combined_met && length(mz_data_index) > 1 ){ # mak
     rownames(rd)=rn
     ret=ExpressionSet(assayData=rd)
     pData(ret)=pData(x)
-    fr=rbind(fData(x),fData(y))
+    inds=intersect(colnames(fData(x)),colnames(fData(y)))
+    fr=rbind(fData(x)[,inds],fData(y)[,inds])
     rownames(fr)=rn
     fData(ret)=fr
     ret
