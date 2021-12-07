@@ -372,6 +372,7 @@ if( exists("combined_met") && combined_met && length(mz_data_index) > 1 ){ # mak
   }
   newi=length(omicsList)+1
   mz_data_index=c(mz_data_index,newi)
+  metab_data_index=c(metab_data_index,newi)
   omicsList[[newi]]=list(eSet=merge_eset(omicsList[[mz_data_index[1]]],omicsList[[mz_data_index[2]]]),dataType="met_combined",dataFormat="Metabolomics (combined)")
   omicsList[[newi]][["topVariable"]]=variationPlot(eset=omicsList[[newi]][["eSet"]], type=omicsList[[newi]][["dataType"]]);
 }
