@@ -356,6 +356,25 @@ Click below to view SD vs Mean and Pairs plots: `r { output_links }`
 ```{r heatmaps_qc, results='hide'}
 output_links<-"";
 
+if( exists("combined_met") && combined_met && length(mz_data_index) > 1 ){ # make combined eset for metabolomics
+  merge_eset=function(xl,yl){
+    x=xl$eSet; y=yl$eSet
+    rn=c(paste(xl$dataType,rownames(exprs(x))),paste(yl$dataType,rownames(exprs(y))))
+    rd=rbind(exprs(x),exprs(y))
+    rownames(rd)=rn
+    ret=ExpressionSet(assayData=rd)
+    pData(ret)=pData(x)
+    fr=rbind(fData(x),fData(y))
+    rownames(fr)=rn
+    fData(ret)=fr
+    ret
+  }
+  newi=length(omicsList)+1
+  mz_data_index=c(mz_data_index,newi)
+  omicsList[[newi]]=list(eSet=merge_eset(omicsList[[mz_data_index[1]]],omicsList[[mz_data_index[2]]]),dataType="met_combined",dataFormat="Metabolomics (combined)")
+  omicsList[[newi]][["topVariable"]]=variationPlot(eset=omicsList[[newi]][["eSet"]], type=omicsList[[newi]][["dataType"]]);
+}
+
 # If there's a directory called "Subset_Lists" make feature lists based on text files
 subset_genes=FALSE;
 if( dir.exists("Subset_Lists") ){ try({

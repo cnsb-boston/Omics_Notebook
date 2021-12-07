@@ -134,6 +134,11 @@ class GUI(tk.Frame):
     allcomparisons = ttk.Checkbutton(self, text="All Comparisons (if False, All to First)", var=allcomparisons_state)
     allcomparisons.grid(column=1, row=7, columnspan=1, pady=(10,10), sticky=tk.W)
     
+    combinedMet_state = tk.BooleanVar()
+    combinedMet_state.set(False)
+    combinedMet = ttk.Checkbutton(self, text="Combined Metabolomics", var=combinedMet_state)
+    combinedMet.grid(column=1, row=11, columnspan=1, pady=(20,0), sticky=tk.W)
+    
     useSiteNorm_state = tk.BooleanVar()
     useSiteNorm_state.set(False)
     useSiteNorm = ttk.Checkbutton(self, text="Use Normalized to 1st Data", var=useSiteNorm_state)
@@ -264,6 +269,7 @@ class GUI(tk.Frame):
       outputfile.write("gsea_MOMENTA_section <- " + str(runMOMENTA_state.get()).upper() + ";\n")
       outputfile.write("activePathways_section <- " + str(runActPath_state.get()).upper() + ";\n")
       outputfile.write("all_comparisons <- "+ str(allcomparisons_state.get()).upper() + ";\n")
+      outputfile.write("combined_met <- "+ str(combinedMet_state.get()).upper() + ";\n")
       
       outputfile.write("species <- '" + str(species.get()) + "';\n")
       #outputfile.write("enrichmentmap_p_val <- " + str(enrichmentmap_p_val.get()) + ";\n")
