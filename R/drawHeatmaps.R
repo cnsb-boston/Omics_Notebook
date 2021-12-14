@@ -17,7 +17,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
                          outputpath=output_plots_path,
                          mapcolor=map_color, subset=FALSE, k_clust=0, 
                          outputcontrastpath=output_contrast_path, limmaSig=FALSE, 
-                         show_row_names=TRUE, cluster_samples=TRUE){
+                         show_row_names=NULL, cluster_samples=TRUE){
   
   eset <- eset[,order(pData(eset)$Group)]
   
@@ -42,6 +42,20 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
   if(mapcolor=="viridis"){mapcolor <- viridis(11); maponeway <- viridis(11);
   } else {mapcolor <- (rev(brewer.pal(11, mapcolor)));
           maponeway <- rev(brewer.pal(9, "Blues")) }
+
+  isBigMap=function(emat){
+    ncol(emat)>50 || nrow(emat)>100
+  }
+
+  getHeatmap=function(`matrix`,name="Z-score",show_row_names.=show_row_names,column_title,
+                      cluster_columns=cluster_samples,split=NULL,title_names="",col=mapcolor) {
+    Heatmap(`matrix`=`matrix`, col=col, name=name, top_annotation=ha_column,
+            show_row_names=if(is.null(show_row_names.)) !isBigMap(`matrix`) else show_row_names.,
+            row_labels=substring(rownames(`matrix`),0,50),
+            cluster_columns=cluster_columns, use_raster=isBigMap(`matrix`), split=split,
+            row_names_gp=gpar(fontsize=4),
+            column_title=paste(type, ": ", title_names, "\n", column_title, sep='') )
+  }
   
   # Standard Heatmaps
   if(class(limmaSig)=="logical"){
@@ -52,27 +66,20 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     emat_sel <- na.omit(t(scale(t(exprs(eset))))) # Z-score across rows
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2
-    ht1 <- Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,show_row_names=FALSE,
-                   cluster_columns=cluster_samples, use_raster= ncol(emat_sel)>50,
-                   row_names_gp=gpar(fontsize=4),
-                   column_title=paste(type, ": \nAll features, row z score", sep='') )
+    ht1 <- getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=cluster_samples,
+                      column_title="All features, row z score")
     print(ht1)
     
-    print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,show_row_names=FALSE,
-            cluster_columns=FALSE, use_raster= ncol(emat_sel)>50,
-            row_names_gp=gpar(fontsize=4),
-            column_title=paste(type, ": \nAll features, row z score", sep='') ))
-    
+    print(getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=FALSE,
+                     column_title="All features, row z score"))
     
     #Optional k clustering
     if(k_clust !=0){
       kclus <- kmeans(emat_sel, 3);
       split <- paste0("Cluster ", kclus$cluster)
-      ht1 <-Heatmap(matrix=(emat_sel), col=mapcolor, name="Z-score", top_annotation=ha_column,
-                    cluster_columns=cluster_samples, use_raster= ncol(emat_sel)>50,
-                    show_row_names=show_row_names,row_names_gp=gpar(fontsize=4), 
-                    split=split,#km=k_clust,
-                    column_title=paste(type, ": \nAll features, row z score", sep='') )
+      ht1 <-getHeatmap(matrix=emat_sel, cluster_columns=cluster_samples,
+                       split=split,#km=k_clust,
+                       column_title="All features, row z score")
       print(ht1)
     }
     # Correlation
@@ -86,14 +93,10 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
         emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
         emat_sel[emat_sel < -2] <- -2
         emat_sel[emat_sel > 2] <- 2
-        print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
-                      cluster_columns=TRUE,show_row_names=show_row_names, use_raster= ncol(emat_sel)>50,
-                      row_names_gp=gpar(fontsize=4),
-                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
-        print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
-                      cluster_columns=FALSE,show_row_names=show_row_names, use_raster= ncol(emat_sel)>50,
-                      row_names_gp=gpar(fontsize=4),
-                      column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
+        print(getHeatmap(matrix=emat_sel, cluster_columns=TRUE,
+                         column_title=,"Subset, row z score", title_names=names(subset)[k]))
+        print(getHeatmap(matrix=emat_sel, cluster_columns=FALSE,
+                         column_title=,"Subset, row z score", title_names=names(subset)[k]))
         # print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
         #               cluster_columns=TRUE,show_row_names=show_row_names,cluster_rows=F,
         #               row_names_gp=gpar(fontsize=4),
@@ -112,22 +115,18 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
       emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
       emat_sel[emat_sel < -2] <- -2
       emat_sel[emat_sel > 2] <- 2
-      print( Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,show_row_names=FALSE,
-                     cluster_columns=TRUE, use_raster= ncol(emat_sel)>50,
-                     column_title=paste(type, ": \nHighest variation, row z score", sep='') ) )
-      print( Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,show_row_names=FALSE,
-                     cluster_columns=FALSE, use_raster= ncol(emat_sel)>50,
-                     column_title=paste(type, ": \nHighest variation, row z score", sep='') ) )
+      print( getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=TRUE,
+                        column_title="Highest variation, row z score"))
+      print( getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=FALSE,
+                        column_title="Highest variation, row z score"))
     }
   
     # all features, log2 intensity
     emat_sel <- na.omit(exprs(eset))
-    print(Heatmap(matrix=emat_sel, col=maponeway, name="Value", top_annotation=ha_column,show_row_names=FALSE,
-                  cluster_columns=TRUE, use_raster= ncol(emat_sel)>50,
-                  column_title=paste(type, ": \nAll features, log2 Value", sep='') ))
-    print(Heatmap(matrix=emat_sel, col=maponeway, name="Value", top_annotation=ha_column,show_row_names=FALSE,
-                  cluster_columns=FALSE, use_raster= ncol(emat_sel)>50,
-                  column_title=paste(type, ": \nAll features, log2 Value", sep='') ))
+    print(getHeatmap(matrix=emat_sel, col=maponeway, name="Value", show_row_names=FALSE,
+                     cluster_columns=TRUE, column_title="All features, log2 Value"))
+    print(getHeatmap(matrix=emat_sel, col=maponeway, name="Value", show_row_names=FALSE,
+                     cluster_columns=FALSE, column_title="All features, log2 Value"))
   
     tmp<-dev.off();
     return(ht1);
@@ -142,16 +141,10 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2 
-    print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
-                  cluster_columns=TRUE, use_raster= ncol(emat_sel)>50,
-                  show_row_names=show_row_names,
-                  row_names_gp=gpar(fontsize=4),
-                  column_title=paste(type, ": \n", title_add," Differential Features, z score", sep='') ))
-    print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
-                  cluster_columns=FALSE, use_raster= ncol(emat_sel)>50,
-                  show_row_names=show_row_names,
-                  row_names_gp=gpar(fontsize=4),
-                  column_title=paste(type, ": \n", title_add," Differential Features, z score", sep='') ))
+    print(getHeatmap(matrix=emat_sel, cluster_columns=TRUE,
+          title_names=title_add, column_title="Differential Features, z score"))
+    print(getHeatmap(matrix=emat_sel, cluster_columns=FALSE,
+          title_names=title_add, column_title="Differential Features, z score"))
     tmp<-dev.off();
   }
 }
