@@ -186,6 +186,7 @@ if(!file.exists(annotation_filename)){
 }
 annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
 contrastgroups <- unique(gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3])))) );
+contrast_strings <- c();
 annot<-annot[c(-1,-4),];
 
 # Make omicsList object
