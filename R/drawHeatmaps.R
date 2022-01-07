@@ -94,9 +94,9 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
         emat_sel[emat_sel < -2] <- -2
         emat_sel[emat_sel > 2] <- 2
         print(getHeatmap(matrix=emat_sel, cluster_columns=TRUE,
-                         column_title=,"Subset, row z score", title_names=names(subset)[k]))
+                         column_title="Subset, row z score", title_names=names(subset)[k]))
         print(getHeatmap(matrix=emat_sel, cluster_columns=FALSE,
-                         column_title=,"Subset, row z score", title_names=names(subset)[k]))
+                         column_title="Subset, row z score", title_names=names(subset)[k]))
         # print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
         #               cluster_columns=TRUE,show_row_names=show_row_names,cluster_rows=F,
         #               row_names_gp=gpar(fontsize=4),

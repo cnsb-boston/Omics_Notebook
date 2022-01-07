@@ -13,7 +13,7 @@
 #' @export
 drawXYCorr <- function(item_list, item_name, outputpath=output_plots_path, file_name="", subset_genes=FALSE){
   
-  plotXYCorr <- function(sublist=NULL, expanded_title=FALSE){
+  plotXYCorr <- function(sublist=NULL, expanded_title=NULL){
     for (j in 1:(length(item_list)-1)){
       for (k in (j+1):length(item_list)){
         # make data to plot
@@ -22,9 +22,10 @@ drawXYCorr <- function(item_list, item_name, outputpath=output_plots_path, file_
         title=paste0("Avg. ",item_name, " ", file_name)
         if(!is.null(sublist)){
           plot_data <- plot_data[which(plot_data[,item_name] %in% sublist),]
-          if(expanded_title) title=paste0(title," in ",expanded_title,": \n",
+          if(!is.null(expanded_title)) title=paste0(title," in ",expanded_title,": \n",
                                           names(item_list)[j]," vs. ",names(item_list)[k])
         }
+        if(nrow(plot_data)==0){ next; }
         # density colors
         x<-densCols(plot_data[,2], plot_data[,3],colramp=colorRampPalette(c("black","white")))
         plot_data$Density <- col2rgb(x)[1,] + 1L

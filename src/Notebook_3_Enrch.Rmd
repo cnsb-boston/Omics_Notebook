@@ -121,6 +121,40 @@ for(i in 1:length(gene_data_index) ){
 enrichment_map <- gsea_section; # only run enrichment map if interactive session
 output_network_file <- FALSE;
 gsea_working_dir <- "3_GSEA"
+
+if(gsea_section || gsea_MOMENTA_section){
+  case_modifier <- if(!grepl("Mouse|Human", species)) "_Uppercase_" else "_"
+
+  analysis_names <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
+  counter<-1;                       
+  for (j in 1:length(gene_data_index)) {
+    for (k in 1:length(loop_list)) {
+      analysis_names[[counter]] <- paste0(omicsList[[ gene_data_index[j] ]][["dataType"]], "_", contrast_strings_file[k]) ;
+      counter <- counter+1;
+    }
+  }
+  rnk_files <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
+  counter<-1;                       
+  for (j in 1:length(gene_data_index)) {
+    for (k in 1:length(loop_list)) {
+      rnk_files[[counter]] <- file.path(paste0(output_contrast_path_files,"/GSEA_",
+                                              omicsList[[ gene_data_index[j] ]][["dataType"]],case_modifier,
+                                              contrast_strings_file[k],".rnk"))
+      counter <- counter+1;
+    }
+  }
+  
+  if(length(gene_data_index)>1 & length(contrastgroups)>1){ 
+    for (i in 1:length(loop_list)) {
+      analysis_names[[length(analysis_names)+1]] <- paste0("Combined_",contrast_strings_file[i])
+    }
+    for (i in 1:length(loop_list)){
+      rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
+                                               paste0("GSEA",case_modifier,"combined_",contrast_strings_file[i],".rnk") ))
+    }
+  }
+}
+
 ```
 
 `r if( gsea_section & species!="Other" & length(gene_data_index)>0){"### GSEA and EnrichmentMap"} `
@@ -132,41 +166,11 @@ gsea_working_dir <- "3_GSEA"
 run_gsea <- gsea_section; # if GSEA has already been run, set to false and include results in directory
 
 if( run_gsea & species!="Other" ) { try({
-  
-  case_modifier <- if(!grepl("Mouse|Human", species)) "_Uppercase_" else "_"
 
   gsea_working_dir <- "3_GSEA"
   gsea_working_path <- file.path(output_path, gsea_working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
-  
-    analysis_names <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
-    counter<-1;                       
-    for (j in 1:length(gene_data_index)) {
-      for (k in 1:length(loop_list)) {
-        analysis_names[[counter]] <- paste0(omicsList[[ gene_data_index[j] ]][["dataType"]], "_", contrast_strings_file[k]) ;
-        counter <- counter+1;
-      }
-    }
-    rnk_files <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
-    counter<-1;                       
-    for (j in 1:length(gene_data_index)) {
-      for (k in 1:length(loop_list)) {
-        rnk_files[[counter]] <- file.path(paste0(output_contrast_path_files,"/GSEA_",
-                                                omicsList[[ gene_data_index[j] ]][["dataType"]],case_modifier,
-                                                contrast_strings_file[k],".rnk"))
-        counter <- counter+1;
-      }
-    }
-   if(length(gene_data_index)>1 & length(contrastgroups)>1){ 
-    for (i in 1:length(loop_list)) {
-      analysis_names[[length(analysis_names)+1]] <- paste0("Combined_",contrast_strings_file[i])
-    }
-    for (i in 1:length(loop_list)){
-      rnk_files <- append(rnk_files, file.path(output_contrast_path_files,
-                                               paste0("GSEA",case_modifier,"combined_",contrast_strings_file[i],".rnk") ))
-    }
-  }
-  
+ 
   dest_gmt_file <- fetchGMT(gsea_working_path, species)
   
   for (i in 1:length(analysis_names)){
