@@ -110,6 +110,7 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
     "Adduct", "Adduct", 8,
     "Formula", "Formula", 8,
     "Metabolite.name", "Metabolite.name", 8,
+    "MS.MS.assigned", "MS.MS.assigned", 8,
     "logfc_Overall", "MaxFC", 8
   ))
 
