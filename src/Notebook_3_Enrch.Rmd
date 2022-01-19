@@ -122,7 +122,7 @@ enrichment_map <- gsea_section; # only run enrichment map if interactive session
 output_network_file <- FALSE;
 gsea_working_dir <- "3_GSEA"
 
-if(gsea_section || gsea_MOMENTA_section){
+if(length(gene_data_index)>0  && (gsea_section || gsea_MOMENTA_section)){
   case_modifier <- if(!grepl("Mouse|Human", species)) "_Uppercase_" else "_"
 
   analysis_names <- vector("list", (length(loop_list)*length(gene_data_index)) ) ;
