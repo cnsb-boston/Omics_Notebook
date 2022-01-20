@@ -368,15 +368,18 @@ Click below to view SD vs Mean and Pairs plots: `r { output_links }`
 output_links<-"";
 
 if( exists("combined_met") && combined_met && length(mz_data_index) > 1 ){ # make combined eset for metabolomics
+  intersect_rbind=function(xm,ym){
+    inds=intersect(colnames(xm),colnames(ym))
+    rbind(xm[,inds],ym[,inds])
+  }
   merge_eset=function(xl,yl){
     x=xl$eSet; y=yl$eSet
     rn=c(paste(xl$dataType,rownames(exprs(x))),paste(yl$dataType,rownames(exprs(y))))
-    rd=rbind(exprs(x),exprs(y))
+    rd=intersect_rbind(exprs(x),exprs(y))
     rownames(rd)=rn
     ret=ExpressionSet(assayData=rd)
     pData(ret)=pData(x)
-    inds=intersect(colnames(fData(x)),colnames(fData(y)))
-    fr=rbind(fData(x)[,inds],fData(y)[,inds])
+    fr=intersect_rbind(fData(x),fData(y))
     rownames(fr)=rn
     fData(ret)=fr
     ret
@@ -539,8 +542,10 @@ if(saveXlsx==TRUE){
   wbOut <- createWorkbook()
   
   for(i in 1:length(omicsList)){
-    eSet=omicsList[[i]][["eSet"]][,order(pData(omicsList[[i]][["eSet"]])$Group)]
-    writeDataToSheets(wb=wbOut, eset=eSet, type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]);
+    if(omicsList[[i]][["dataType"]]!="met_combined"){
+      eSet=omicsList[[i]][["eSet"]][,order(pData(omicsList[[i]][["eSet"]])$Group)]
+      writeDataToSheets(wb=wbOut, eset=eSet, type=omicsList[[i]][["dataType"]], data_format=omicsList[[i]][["dataFormat"]]);
+    }
   } 
   
   output_filename=file.path(output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary", ".xlsx", sep=""))
