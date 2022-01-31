@@ -72,7 +72,7 @@ metanr_packages <- function(){
   }
   if((length(new_pkgs)<1)){ print("No new packages added...") }
 }
-metanr_packages()
+#metanr_packages()
 BiocManager::install("ncdf4")
 
 # Installing forked package to maintain compatability.

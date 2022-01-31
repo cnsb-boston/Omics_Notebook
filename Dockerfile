@@ -1,4 +1,4 @@
-FROM rocker/r-ver:3.6.1
+FROM rocker/r-ver:4.1.1
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -13,15 +13,12 @@ RUN apt-get update \
         python3 \
         python3-tk \
         r-base-dev \
+        libglpk-dev \
+        libzmq5 \
         && rm -rf /var/lib/apt/lists/*
 
-# Install R libraries
-COPY install.R /home/install.R
-
-RUN Rscript home/install.R
-
-RUN R -e "install.packages('ActivePathways')"
-RUN R -e "devtools::install_version('openxlsx', version = '4.1.2', repos = 'http://cran.us.r-project.org')"
+RUN R -e "options(repos = c(CRAN = 'https://cran.rstudio.com')); install.packages('remotes')"
+RUN R -e "remotes::install_github('cnsb-boston/Omics_Notebook',repos='https://cran.rstudio.com')"
 
 # Create user
  RUN useradd -ms /bin/bash docker

@@ -1,0 +1,20 @@
+Package: OmicsNotebook
+Type: Package
+Title: What the package does (short line)
+Version: 2.0
+Date: 2022-01-28
+Depends: R (>= 3.6)
+Imports: KSEAapp, MetaboAnalystR, ActivePathways, R.utils, matrixStats, Biobase,
+    limma, splines, knitr, ggplot2, cowplot, uwot, ggrepel, calibrate,
+    preprocessCore, RColorBrewer, viridis, reshape2, tidyr, tidyselect, dplyr,
+    stringr, grid, gridExtra, lattice, VennDiagram, UpSetR, corrplot,
+    heatmaply, scales, edgeR, Glimma, openxlsx, ComplexHeatmap, RCurl, fgsea,
+    BiocParallel, httr, RJSONIO, enrichR, RCy3, PTXQC, data.table, rmarkdown
+BiocViews:
+Remotes: cnsb-boston/KSEAapp, cnsb-boston/MetaboAnalystR@a53e9b2, cnsb-boston/preprocessCore, reimandlab/ActivePathways
+Maintainer: Christian Heckendorf <heckend@bu.edu>
+Authors@R: c(person("Ben", "Blum", , role=c("aut", "cre"), email="bblum@bu.edu"),
+    person("Christian", "Heckendorf", role="ctb"))
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
+

@@ -97,7 +97,7 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   grepadd <- function(outlist,regex,colsize){
     cname <- grep(regex, colnames(fData(eset)), value=T)
     if(length(cname)>0){
-      fillOutputTable(outlist, matrix(t(c(cname,cname,rep(colsize,length(cname))),ncol=3)))
+      fillOutputTable(outlist, matrix(t(c(cname,cname,rep(colsize,length(cname)))),ncol=3))
     } else outlist
   }
 

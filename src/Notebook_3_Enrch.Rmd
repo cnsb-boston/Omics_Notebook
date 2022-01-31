@@ -418,6 +418,8 @@ suppressWarnings({ suppressMessages({
 for(i in 1:length(metab_data_index)){ try({
   for(mumm_lib_index in 1:length(mumm_libs)) {
     for (c in 1:length(loop_list)){ try({
+      if(omicsList[[ metab_data_index[i] ]][["dataType"]] == "met_combined") next;
+
       analysis_name <- paste0(mumm_libs[mumm_lib_index],"_",omicsList[[ metab_data_index[i] ]][["dataType"]],
                              "_",contrast_strings_file[c])
       
@@ -438,13 +440,14 @@ for(i in 1:length(metab_data_index)){ try({
       
         mSet <- InitDataObjects("mass_all", "mummichog", FALSE);
         #SetPeakFormat("mpt")
+        mSet <- UpdateInstrumentParameters(mSet, 0.1, ion_mode)
         mSet <- Read.PeakListData(mSet, output_filename);
-        mSet <- MetaboAnalystR::UpdateMummichogParameters(mSet, "0.1", ion_mode, 0.05);
         mSet <- SanityCheckMummichogData(mSet);
+        mSet <- SetPeakEnrichMethod(mSet, "integ");
+        mSet <- SetMummichogPval(mSet, 0.05);
         
         lib_dir <- file.path(gsub("src","data",notebook_dir), "metaboAnalyst")
-        mSet <- PerformMummichog(mSet, mumm_libs[mumm_lib_index], permNum=1000, dat_dir=lib_dir );
-        mSet <- PerformGSEA(mSet, mumm_libs[mumm_lib_index], permNum=1000, dat_dir=lib_dir );
+        mSet <- PerformPSEA(mSet, mumm_libs[mumm_lib_index], "current", permNum=1000);
       
         mSet <- PlotIntegPaths(mSet);
         #PreparePDFReport(mSet, usrName=analysis_name);
