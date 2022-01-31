@@ -22,7 +22,7 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   
   # Make colors for sample names
   annotLab <- data.frame(Group = factor(pData(eset)$Group));
-  annotCol <- list(Group = gsub('.{2}$','', rainbow(length(levels(factor(pData(eset)$Group)))) ) )
+  annotCol <- list(Group = rainbow(length(levels(factor(pData(eset)$Group)))) )
   sampleCols <- annotCol$Group[1:length(levels(factor(pData(eset)$Group)))][factor(pData(eset)$Group)];
   mapcolor <- rev(brewer.pal(7, "RdYlBu"))
   
@@ -190,13 +190,12 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   } #}
   
   # Rotate text for sample names
-  for (c in 1:ncol(eset)){
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"),
-             rows=2, cols=c+1)
-  }
-  for (c in 1:ncol(eset)){
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=sampleCols[c], textRotation=90, halign="center", valign="top"),
-             rows=2, cols=(c + ( length(names) - ncol(eset) )  ) )
+  for (ci in 1:ncol(eset)){
+    fgfill=if(is.na(sampleCols[ci])) NULL else sampleCols[ci]
+    for(c_offset in c(1, (length(names) - ncol(eset)))){
+      addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=fgfill, textRotation=90, halign="center", valign="top"),
+             rows=2, cols=ci+c_offset)
+    }
   }
 
   # Merge cells and add Intensity title
