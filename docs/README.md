@@ -1,5 +1,8 @@
 ## Instructions
 
+For additional information, see:
+https://github.com/cnsb-boston/Omics_Notebook_Docs
+
 #### 1. Install git. Clone github repository:
 `git clone https://github.com/cnsb-boston/Omics_Notebook.git`
 
