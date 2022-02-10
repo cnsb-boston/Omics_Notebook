@@ -11,6 +11,7 @@
 #' 
 #' @examples
 #' 
+#' @import ggplot2
 #' @export
 drawEnrichment <- function(enrichment_results, type, label, outputpath=output_contrast_path ) {
   

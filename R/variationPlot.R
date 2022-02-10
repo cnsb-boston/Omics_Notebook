@@ -12,8 +12,7 @@
 #' @examples
 #' 
 #' @export
-variationPlot <- function(eset, type, outputpath=output_plots_path, 
-                                percent_choice=0.1) {
+variationPlot <- function(eset, type, outputpath=output_plots_path, percent_choice=0.1) {
   emat<-exprs(eset)
   MEAN <- apply(emat, 1, mean)
   STDEV <- apply(emat, 1, sd)
@@ -44,8 +43,8 @@ variationPlot <- function(eset, type, outputpath=output_plots_path,
   dev.off()
   })
   try({
-  output_filename<-file.path(outputpath, paste("pairs_",type,".tiff", sep=""))
-  tiff(output_filename)
+  output_filename<-file.path(outputpath, paste("pairs_",type,".png", sep=""))
+  png(output_filename)
   pairs(emat, pch=".")
   dev.off()
   })

@@ -14,6 +14,7 @@
 #' 
 #' @examples
 #' 
+#' @import Biobase
 #' @export
 interactiveVolcano <- function(eset, fit=NULL, limmaSig, dt=NULL, type, outputcontrastpath=output_contrast_path, col ){
   
@@ -42,23 +43,18 @@ interactiveVolcano <- function(eset, fit=NULL, limmaSig, dt=NULL, type, outputco
   if("Uniprot" %in% colnames(fData(eset))) { annot_columns <- c(annot_columns, "Uniprot"); }
   if("mz" %in% colnames(fData(eset))) { annot_columns <- c(annot_columns, "mz"); }
   if(length(annot_columns)==1) { annot_columns <- c(annot_columns, "feature_identifier"); }
-  
+
+  args=list(counts=exprs(eset), groups=pData(eset)$Group, #sample.cols=pData(eset)$Group,
+           side.ylab="Normalized Intensity", anno=fData(eset)[,annot_columns],
+           side.main='feature_identifier', html=paste("Volcano-Plot_",type, sep=""),
+           folder="InteractivePlots", path=outputcontrastpath, launch=FALSE)
+
   if(class(fit)!="NULL"){
-    glXYPlot(x=fit$coef[,col], y=fit$lod[,col], xlab="logFC", status=dt[,col], counts=exprs(eset),
-           groups=pData(eset)$Group, ylab="logOdds", #sample.cols=pData(eset)$Group,
-           side.ylab="Normalized Intensity",
-           anno=fData(eset)[,annot_columns], side.main='feature_identifier',
-           html=paste("Volcano-Plot_",type, sep=""),
-           folder="InteractivePlots", path=outputcontrastpath, launch=FALSE  );
+    args2=list(x=fit$coef[,col], y=fit$lod[,col], xlab="logFC", ylab="logOdds", status=dt[,col])
   } else {
-    glXYPlot(x=limmaSig$Mean, y=limmaSig$logFC, xlab="Mean",ylab="log2FC", #status=dt[,col], 
-             counts=exprs(eset),
-             groups=pData(eset)$Group, #sample.cols=pData(eset)$Group,
-             side.ylab="Normalized Intensity",
-             anno=fData(eset)[,annot_columns], side.main='feature_identifier',
-             html=paste("Volcano-Plot_",type, sep=""),
-             folder="InteractivePlots", path=outputcontrastpath, launch=FALSE  );
+    args2=list(x=limmaSig$Mean, y=limmaSig$logFC, xlab="Mean", ylab="log2FC")
   }
+  do.call(Glimma::glXYPlot,merge.lists(args,args2))
   
 }
 

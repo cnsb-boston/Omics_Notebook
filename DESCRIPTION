@@ -17,4 +17,4 @@ Authors@R: c(person("Ben", "Blum", , role=c("aut", "cre"), email="bblum@bu.edu")
     person("Christian", "Heckendorf", role="ctb"))
 Description: More about what it does (maybe more than one line)
 License: What license is it under?
-
+LazyData: yes

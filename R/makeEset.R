@@ -66,7 +66,7 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     for (i in 1:length(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type])){
       cols.keep <- colnames(data)[grep(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type][i],
                                        colnames(data) )];  
-      data1 <- cbind(data1, melt(data[, cols.keep], measure.vars=cols.keep,
+      data1 <- cbind(data1, reshape2::melt(data[, cols.keep], measure.vars=cols.keep,
                                  variable.name=paste("Phospho.Site.", i-1, sep=''),
                                  value.name=annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type][i] ));
     }

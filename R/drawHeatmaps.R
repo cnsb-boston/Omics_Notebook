@@ -12,6 +12,7 @@
 #' 
 #' @examples
 #' 
+#' @import Biobase
 #' @export
 drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="", 
                          outputpath=output_plots_path,
@@ -23,7 +24,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
   
   # Annotation Colors
   annotLab <- data.frame(Group = factor(pData(eset)$Group, levels=unique(pData(eset)$Group)));
-  annotCol <- list(Group = rainbow(length(levels(factor(pData(eset)$Group)))))
+  annotCol <- list(Group = grDevices::rainbow(length(levels(factor(pData(eset)$Group)))))
   try({ if("ColorsHex" %in% colnames(pData(eset))) {
     if( checkColor(pData(eset)[,"ColorsHex"]) ){
       annotCol <- list( Group=unique(pData(eset)[,"ColorsHex"])[1:length(levels(factor(pData(eset)$Group)))] )
@@ -33,15 +34,16 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
   
   if("Group2" %in% colnames(pData(eset))){
     annotLab[,"Group2"] <- factor(pData(eset)$Group2, levels=unique(pData(eset)$Group2))
-    annotCol <- append(annotCol, list(Group2=gray.colors(length(levels(factor(pData(eset)$Group2)))) ))
+    annotCol <- append(annotCol, list(Group2=grDevices::gray.colors(length(levels(factor(pData(eset)$Group2)))) ))
     names(annotCol$Group2) <- levels(factor(annotLab$Group2))
   }
   
-  ha_column <- HeatmapAnnotation(df=annotLab, col=annotCol)
+  ComplexHeatmap::ht_opt("message", FALSE)
+  ha_column <- ComplexHeatmap::HeatmapAnnotation(df=annotLab, col=annotCol)
   
-  if(mapcolor=="viridis"){mapcolor <- viridis(11); maponeway <- viridis(11);
-  } else {mapcolor <- (rev(brewer.pal(11, mapcolor)));
-          maponeway <- rev(brewer.pal(9, "Blues")) }
+  if(mapcolor=="viridis"){mapcolor <- viridisLite::viridis(11); maponeway <- viridisLite::viridis(11);
+  } else {mapcolor <- (rev(RColorBrewer::brewer.pal(11, mapcolor)));
+          maponeway <- rev(RColorBrewer::brewer.pal(9, "Blues")) }
 
   isBigMap=function(emat){
     ncol(emat)>50 || nrow(emat)>100
@@ -49,7 +51,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
 
   getHeatmap=function(`matrix`,name="Z-score",show_row_names.=show_row_names,column_title,
                       cluster_columns=cluster_samples,split=NULL,title_names="",col=mapcolor) {
-    Heatmap(`matrix`=`matrix`, col=col, name=name, top_annotation=ha_column,
+    ComplexHeatmap::Heatmap (`matrix`=`matrix`, col=col, name=name, top_annotation=ha_column,
             show_row_names=if(is.null(show_row_names.)) !isBigMap(`matrix`) else show_row_names.,
             row_labels=substring(rownames(`matrix`),0,50),
             cluster_columns=cluster_columns, use_raster=isBigMap(`matrix`), split=split,
@@ -63,7 +65,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     pdf(output_filename);
     
     # all features, z-score
-    emat_sel <- na.omit(t(scale(t(exprs(eset))))) # Z-score across rows
+    emat_sel <- stats::na.omit(t(scale(t(exprs(eset))))) # Z-score across rows
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2
     ht1 <- getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=cluster_samples,
@@ -75,7 +77,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     
     #Optional k clustering
     if(k_clust !=0){
-      kclus <- kmeans(emat_sel, 3);
+      kclus <- stats::kmeans(emat_sel, 3);
       split <- paste0("Cluster ", kclus$cluster)
       ht1 <-getHeatmap(matrix=emat_sel, cluster_columns=cluster_samples,
                        split=split,#km=k_clust,
@@ -112,7 +114,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     # variation filter, z score
     if ( class(emat_top) !="logical" ){
       emat_sel <- exprs(eset)[emat_top,]
-      emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
+      emat_sel <- stats::na.omit(t(scale(t(emat_sel)))) # Z-score across rows
       emat_sel[emat_sel < -2] <- -2
       emat_sel[emat_sel > 2] <- 2
       print( getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=TRUE,
@@ -122,7 +124,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     }
   
     # all features, log2 intensity
-    emat_sel <- na.omit(exprs(eset))
+    emat_sel <- stats::na.omit(exprs(eset))
     print(getHeatmap(matrix=emat_sel, col=maponeway, name="Value", show_row_names=FALSE,
                      cluster_columns=TRUE, column_title="All features, log2 Value"))
     print(getHeatmap(matrix=emat_sel, col=maponeway, name="Value", show_row_names=FALSE,
@@ -138,7 +140,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
 
     # limma differential expression, z score
     emat_sel <- exprs(eset[rownames(eset) %in% limmaSig,])
-    emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
+    emat_sel <- stats::na.omit(t(scale(t(emat_sel)))) # Z-score across rows
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2 
     print(getHeatmap(matrix=emat_sel, cluster_columns=TRUE,

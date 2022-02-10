@@ -41,36 +41,14 @@ knitr::opts_chunk$set(echo=TRUE)
 # working_dir <- PATH TO DATA FILES
 # setwd(working_dir)
 
-# Databases for enrichR search
-search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_Component_2017b",
-                      "GO_Molecular_Function_2017b", "HMDB_Metabolites", "Reactome_2016",
-                      "MSigDB_Oncogenic_Signatures");
-
-debug_opt <- FALSE
-source(params$param_file)
-
 ```
 
 ```{r, code=readLines(params$param_file) }
 ```
 
 ```{r libraries}
-# Make output subdirectories
-output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
-output_files_subdir <- paste(output_subdir,"1_Files", sep="/")
-output_plots_subdir <- paste(output_subdir,"1_Plots", sep="/")
-output_path <- file.path(working_dir, output_subdir)
-output_files_path <- file.path(working_dir, output_files_subdir)
-output_plots_path <- file.path(working_dir, output_plots_subdir)
-output_contrast_path <- output_plots_path
-if( dir.exists(output_path) == FALSE ) {dir.create(output_path)}
-if( dir.exists(output_files_path) == FALSE ) {dir.create(output_files_path)}
-if( dir.exists(output_plots_path) == FALSE ) {dir.create(output_plots_path)}
 
-# Set library path for BU SCC
-if(inherit_paths==TRUE & exists("libraries_path") ){
-  if(dir.exists(libraries_path) ){ .libPaths(libraries_path) }
-}
+g=g.notebook.setup(param_file=params$param_file)
 
 # Load pipeline libraries
 suppressPackageStartupMessages({
@@ -123,22 +101,7 @@ if(gsea_section){
 })
 
 # Source function file
-sourceDirectory(file.path(gsub("src","R", notebook_dir)))
-
-```
-
-
-```{r }
-remove_group<-"";               # remove a group (like a Pool or Standard) for visualization
-knn_heatmap<-0;                 # Use knn clustering to draw heatmap with clusters
-min_feature_per_sample <- 0.01; # minimum number of features to keep a sample
-norm_batches=F;                 # normalize batches seperately
-norm_post_batch <- F;           # apply normalization post batch correction
-fc_cutoff <- 0;                 # defines fold change cutoff to be used with selecting top hits
-
-if(file.exists(file.path(working_dir,"Options.R")) ){
-  source(file.path(working_dir,"Options.R"))    # import file to oiverwrite default values
-} 
+#sourceDirectory(file.path(gsub("src","R", notebook_dir)))
 
 ```
 
@@ -169,116 +132,27 @@ if(file.exists(file.path(working_dir,"Options.R")) ){
 #
 ############################################
 
-# Make index variables
-metab_data_index <- c();  # index of all Metabolite data
-mz_data_index <- c();     # index of all data with mz
-phos_data_index <- c();   # index of Phospho Site Data (from MQ)
-sites_data_index <- c();  # index of all site data (from MQ)
-data_norm_index <- c();  # index of site data normalized to proteome (if applicable)
-gene_data_index <- c();   # index of all data  with Gene (HGNC Symbols)
-prot_data_index <- c();   # index of all data with Protein (Uniprot IDs)
-prot_groups_index <- c(); # index of all Protein Groups Data (MQ)
-unnorm_gene_index<-c() # index of all data with Genes, including pre-site normalized
-
 # Import annotation file
-if(!file.exists(annotation_filename)){
-  print(paste("Annotation file not found: ",annotation_filename,sep=""))
-  stop()    
-}
-annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
-contrastgroups <- unique(gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3])))) );
-contrast_strings <- c();
-annot<-annot[c(-1,-4),];
-
-# Make omicsList object
-omicsList <- vector("list", (nrow(annot)-2) )
-
-for (i in 1:(nrow(annot)-2) ){
-  omicsList[[i]] <- vector("list", 14);
-  omicsList[[i]][1] <- make.names(annot[i+2,1]);
-  names(omicsList[[i]])[1] <- gsub("\\.","", make.names("dataType"));
-  omicsList[[i]][2] <- make.names(annot[i+2,2]);
-  names(omicsList[[i]])[2] <- "dataFormat";
-  if(grepl("Metabolites", omicsList[[i]][["dataFormat"]]) ){ metab_data_index <- c(metab_data_index, i)  };
-  if(omicsList[[i]][["dataFormat"]]=="Phospho.Sites..MQ."){ phos_data_index <- c(phos_data_index, i)  };
-  if(any(omicsList[[i]][["dataFormat"]] %in% c("Protein.Groups..MQ.", "Peptides..MQ.")) ){ prot_groups_index <- c(prot_groups_index, i) };
-  if(grepl(".Sites..MQ.",omicsList[[i]][["dataFormat"]]) ){ sites_data_index <- c(sites_data_index, i)  };
-  omicsList[[i]][[3]] <- annot[i+2,3];
-  names(omicsList[[i]])[3] <- "filename";
-}
-
-# Format annotation table
-annot[3:nrow(annot),3] <- annot[3:nrow(annot),1];
-annot <- t(annot[,-1:-2]);
-rownames(annot) <- NULL;
-colnames(annot)<-make.unique(annot[1,]);
-annot<-data.frame((annot[-1,]));
-annot[,"Group"]<-gsub("\\.","",make.names(annot[,"Group"]))
-annot[,"SampleName"]<-gsub("\\.","",make.names(make.unique(as.character(annot[,"SampleName"]))))
-
-# Get batch information if there
-try({
-  annot2 <- openxlsx::read.xlsx(annotation_filename, 2, colNames=FALSE, rowNames=TRUE)
-  annot2 <- data.frame(t(annot2))
-  rownames(annot2) <- NULL;
-  annot <- data.frame(cbind(annot, annot2))
-}, silent=TRUE)
-
-# Add file paths to file names (w/chanbge for generating txt report)
-for (i in 1:length(omicsList)){
-  if( (grepl(".MQ.", omicsList[[i]][["dataFormat"]]) & txtFolder==TRUE) ) { 
-    omicsList[[i]][[3]] <- file.path(working_dir, "txt", omicsList[[i]][[3]]) 
-  } else {
-    omicsList[[i]][[3]] <- file.path(working_dir, omicsList[[i]][[3]])
-  }
-}
+g=g.make.omicsList(g)
 
 # Import data and make eset objects
-for (i in 1:length(omicsList)){
-    
-  if( grepl(".csv$", omicsList[[i]][[3]]) ) { file_ext_sep <- ","; } else { file_ext_sep <- "\t"; }
-  
-  if(!file.exists(omicsList[[i]][[3]])){ stop(paste("File not found: ",omicsList[[i]][[3]],sep="")) }
-  
-  omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE,
-                                               sep=file_ext_sep, check.names=FALSE));
-  names(omicsList[[i]])[4] <- "RawData";
-  
-  tryCatch({
-    
-    omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
-                                    log_transform=log_transform,
-                                    data_format=omicsList[[i]][[2]], uniprot_annotation=query_web);
-    }, error=function(e){
-      stop(paste("Problem with input data format:", e));
-    })
-  
-  names(omicsList[[i]])[5] <- "eSet";
-  if(debug_opt == TRUE ) { omicsList[[i]][[14]] <- omicsList[[i]][[5]] }# use for debugging
-    
-  if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { gene_data_index <- c(gene_data_index, i) };
-  if( "Protein" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { prot_data_index <- c(prot_data_index, i) };
-  if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { mz_data_index <- c(mz_data_index, i) };
-}
-
-unnorm_gene_index <- gene_data_index ;
 
 # load libraries if needed
 suppressPackageStartupMessages({suppressWarnings({
-if( length(phos_data_index)>0 ){
+if( length(g$phos_data_index)>0 ){
   library(KSEAapp)
 }
-if( length(metab_data_index)>0 ){
+if( length(g$metab_data_index)>0 ){
   library(MetaboAnalystR)
 }
-if( length(gene_data_index)>1 ){
+if( length(g$gene_data_index)>1 ){
 library(ActivePathways)
 }
 }) })
 ```
 
 ```{r global_options, echo=FALSE}
-knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messages=FALSE, fig.width=8, fig.height=12, knitr.duplicate.label="allow")
+knitr::opts_chunk$set(fig.path=paste(g$output_files_path,"/Images/", sep=""),messages=FALSE, fig.width=8, fig.height=12, knitr.duplicate.label="allow")
 ```
 
 ```{r child=file.path(notebook_dir, 'Notebook_1_Expl.Rmd')}
@@ -286,7 +160,7 @@ knitr::opts_chunk$set(fig.path=paste(output_files_path,"/Images/", sep=""),messa
 
 ```{r}
 # Check if requirements for differential analysis are met
-if( length(contrastgroups)<2 ){
+if( length(g$contrastgroups)<2 ){
   runDifferential <- FALSE;
 }
 
@@ -299,47 +173,13 @@ if( length(contrastgroups)<2 ){
 # Run enrichment based on intensity (most intense/least intense) if there's only one group.
 runEnrichment <- runDifferential
 
-if(length(contrastgroups)<=1){
+if(length(g$contrastgroups)<=1){
   if(gsea_section==TRUE){
     enrichr_section<-FALSE;
-    loop_list <- c(1);
     runEnrichment <- TRUE;
-    output_contrast_subdir <- file.path(output_subdir,"Abundance")
-    output_contast_subdir_files <- file.path(output_contrast_subdir, "files")
-    output_contrast_path <- file.path(working_dir, output_contrast_subdir)
-    output_contrast_path_files <- file.path(output_contrast_path, "files")
-    if( dir.exists(output_contrast_path) == FALSE ) { dir.create(output_contrast_path) }
-    if( dir.exists(output_contrast_path_files) == FALSE ) { dir.create(output_contrast_path_files) }
-    num_contrasts <- 1
-    contrast_strings <- "Abundance"
-    
-    for(i in 1:length(omicsList) ){
-      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) | "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
-      if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
-        top_sum <- data.frame(logFC= rowMeans(exprs(omicsList[[i]][["eSet"]])),
-                             Gene=fData(omicsList[[ gene_data_index[i] ]][["eSet"]])$Gene, 
-                             feature_identifier =fData(omicsList[[ gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
-        ranked <- top_sum[,c("Gene","logFC")]
-      }
-      if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ){
-        top_sum <- data.frame(logFC= rowMeans(exprs(omicsList[[i]][["eSet"]])),
-                             Gene=fData(omicsList[[i]][["eSet"]])$mz, 
-                             feature_identifier =fData(omicsList[[i]][["eSet"]])[,"feature_identifier"] );
-        ranked <- top_sum[,c("Gene","logFC")]
-      
-      }
-      
-      species_backup=species
-      ## XXX should this check be done when there are multiple contrasts too?
-      if(!("Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])))) species="xx";
-      write_gsea_data(ranked, paste(omicsList[[i]][["dataType"]],contrast_strings,sep="_"), NULL)
-      species=species_backup
-    } 
-    }
+    g = g.abundance.gsea(g)
   }
 }
-
-contrast_strings_file <- gsub("-","_",contrast_strings)
 
 ```
 

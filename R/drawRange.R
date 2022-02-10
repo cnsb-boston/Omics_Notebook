@@ -24,9 +24,8 @@ drawRange <- function(matrix, outputpath=output_plots_path, file_name=""){
   plot <- ggplot(data=plot_data, aes(x=Rank, y=Abundance)) + 
         geom_point(size=0.8) + 
         labs(title=paste("Range ",file_name, sep="")) +
-        scale_y_continuous(trans=log10_trans(),
-                           breaks=trans_breaks("log10", function(x) 10^x),
-                           labels=trans_format("log10", math_format(10^.x)) ) +
+        scale_y_continuous(trans="log10",
+                           breaks=scales::breaks_log()) +
         theme_bw() + theme(plot.margin=margin(10,20,10,10), axis.text.x=element_text(angle=45, hjust=1))
   print(plot+theme(legend.position="none"))
   

@@ -1,0 +1,260 @@
+g.check.dep = function(g, deps=c()){
+  deps %in% g$calls
+}
+
+g.run.deps = function(g, deps=c()){
+  for(d in deps){
+    if(!(d %in% g$calls)) g = do.call(d,list(g=g))
+  }
+  g
+}
+
+get.data.filename = function(fconn){
+  attr(fconn,"filename")
+}
+
+get.data.fileconn = function(fname){
+  if(exists("notebook_dir")){
+    f = file.path(sub("src$", "inst", notebook_dir), "extdata", fname)
+  } else {
+    f = system.file("extdata", fname, package="OmicsNotebook")
+  }
+  fconn = if(grepl("bz2$",f)) bzfile(f) else file(f)
+  attr(fconn, "filename") = f; #sub(".bz2$","",f)
+  fconn
+}
+
+merge.lists = function(a,b){
+  ret=b
+  u=setdiff(names(a),names(b))
+  for(i in u){
+    ret[[i]]=a[[i]]
+  }
+  ret
+}
+
+g.notebook.setup = function(global=list(), param_file="Parameters.R"){
+  global$search_databases <- c("KEGG_2016", "GO_Biological_Process_2017b", #"GO_Cellular_Component_2017b",
+                               "GO_Molecular_Function_2017b", "HMDB_Metabolites", "Reactome_2016",
+                               "MSigDB_Oncogenic_Signatures");
+
+  #global$debug_opt <- FALSE
+  source(param_file) # to actual global env/scope
+
+  # Make output subdirectories
+  global$working_dir = working_dir
+  global$output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
+  global$output_files_subdir <- paste(global$output_subdir,"1_Files", sep="/")
+  global$output_plots_subdir <- paste(global$output_subdir,"1_Plots", sep="/")
+  global$output_path <- file.path(working_dir, global$output_subdir)
+  global$output_files_path <- file.path(working_dir, global$output_files_subdir)
+  global$output_plots_path <- file.path(working_dir, global$output_plots_subdir)
+  global$output_contrast_path <- global$output_plots_path
+  if( dir.exists(global$output_path) == FALSE ) {dir.create(global$output_path)}
+  if( dir.exists(global$output_files_path) == FALSE ) {dir.create(global$output_files_path)}
+  if( dir.exists(global$output_plots_path) == FALSE ) {dir.create(global$output_plots_path)}
+
+  if(runDifferential){
+    # Make differential directory
+    global$output_contrast_subdir <- file.path(global$output_subdir,"2_Differential")
+    global$output_contast_subdir_files <- file.path(global$output_contrast_subdir, "files")
+    global$output_contrast_path <- file.path(working_dir, global$output_contrast_subdir)
+    global$output_contrast_path_files <- file.path(global$output_contrast_path, "files")
+    if( dir.exists(global$output_contrast_path) == FALSE ) { dir.create(global$output_contrast_path) }
+    if( dir.exists(global$output_contrast_path_files) == FALSE ) { dir.create(global$output_contrast_path_files) }
+  }
+
+  # Set library path for BU SCC
+  if(inherit_paths==TRUE & exists("libraries_path") ){
+    if(dir.exists(libraries_path) ){ .libPaths(libraries_path) }
+  }
+
+  global$remove_group<-"";               # remove a group (like a Pool or Standard) for visualization
+  global$knn_heatmap<-0;                 # Use knn clustering to draw heatmap with clusters
+  global$min_feature_per_sample <- 0.01; # minimum number of features to keep a sample
+  global$norm_batches=F;                 # normalize batches seperately
+  global$norm_post_batch <- F;           # apply normalization post batch correction
+  global$fc_cutoff <- 0;                 # defines fold change cutoff to be used with selecting top hits
+
+  if(file.exists(file.path(working_dir,"Options.R")) ){
+    ne=new.env()
+    source(file.path(working_dir,"Options.R"),local=ne)    # import file to oiverwrite default values
+    global=merge.lists(global,as.list.environment(ne))
+  }
+
+  # Make index variables
+  global$metab_data_index <- c();  # index of all Metabolite data
+  global$mz_data_index <- c();     # index of all data with mz
+  global$phos_data_index <- c();   # index of Phospho Site Data (from MQ)
+  global$sites_data_index <- c();  # index of all site data (from MQ)
+  global$data_norm_index <- c();   # index of site data normalized to proteome (if applicable)
+  global$gene_data_index <- c();   # index of all data  with Gene (HGNC Symbols)
+  global$prot_data_index <- c();   # index of all data with Protein (Uniprot IDs)
+  global$prot_groups_index <- c(); # index of all Protein Groups Data (MQ)
+  global$unnorm_gene_index <-c()   # index of all data with Genes, including pre-site normalized
+
+  global$subset_genes=FALSE;
+  # If there's a directory called "Subset_Lists" make feature lists based on text files
+  if(length(global$gene_data_index)>1 | length(global$prot_data_index)>1) {
+    if( dir.exists("Subset_Lists") ){ try({
+      filelist <- list.files(path=file.path("Subset_Lists"), pattern="*.txt")
+      subset_genes <- vector("list", length=length(filelist))
+      names(subset_genes) <- gsub("*.txt", "", filelist)
+
+      for( i in 1:length(filelist)){
+        subset_genes[i] <- unique(list(scan(file.path("Subset_Lists", filelist[i]), what="", sep=" " ) ))
+      }
+      subset_genes[[i]] <- subset_genes[[i]][subset_genes[[i]]!=""]
+      global$subset_genes = subset_genes
+    }) }
+  }
+
+  global$calls="g.notebook.setup"
+  global
+}
+
+g.make.omicsList = function(global, deps=T){
+  if(deps) global=g.run.deps(global, "g.notebook.setup")
+
+  if(!file.exists(annotation_filename)){
+    print(paste("Annotation file not found: ",annotation_filename,sep=""))
+    stop()    
+  }
+
+  annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
+  global$contrastgroups <- unique(gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3])))) );
+  global$contrast_strings <- c();
+  annot<-annot[c(-1,-4),];
+
+  # Make omicsList object
+  omicsList <- vector("list", (nrow(annot)-2) )
+
+  for (i in 1:(nrow(annot)-2) ){
+    omicsList[[i]] <- vector("list", 14);
+    omicsList[[i]][1] <- make.names(annot[i+2,1]);
+    names(omicsList[[i]])[1] <- gsub("\\.","", make.names("dataType"));
+    omicsList[[i]][2] <- make.names(annot[i+2,2]);
+    names(omicsList[[i]])[2] <- "dataFormat";
+    if(grepl("Metabolites", omicsList[[i]][["dataFormat"]]) ){ global$metab_data_index <- c(global$metab_data_index, i)  };
+    if(omicsList[[i]][["dataFormat"]]=="Phospho.Sites..MQ."){ global$phos_data_index <- c(global$phos_data_index, i)  };
+    if(any(omicsList[[i]][["dataFormat"]] %in% c("Protein.Groups..MQ.", "Peptides..MQ.")) ){ global$prot_groups_index <- c(global$prot_groups_index, i) };
+    if(grepl(".Sites..MQ.",omicsList[[i]][["dataFormat"]]) ){ global$sites_data_index <- c(global$sites_data_index, i)  };
+    omicsList[[i]][[3]] <- annot[i+2,3];
+    names(omicsList[[i]])[3] <- "filename";
+  }
+
+  # Format annotation table
+  annot[3:nrow(annot),3] <- annot[3:nrow(annot),1];
+  annot <- t(annot[,-1:-2]);
+  rownames(annot) <- NULL;
+  colnames(annot)<-make.unique(annot[1,]);
+  annot<-data.frame((annot[-1,]));
+  annot[,"Group"]<-gsub("\\.","",make.names(annot[,"Group"]))
+  annot[,"SampleName"]<-gsub("\\.","",make.names(make.unique(as.character(annot[,"SampleName"]))))
+
+  # Get batch information if there
+  try({
+    annot2 <- openxlsx::read.xlsx(annotation_filename, 2, colNames=FALSE, rowNames=TRUE)
+    annot2 <- annot2[,annot2[1,]!=""]
+    annot2 <- data.frame(t(annot2))
+    rownames(annot2) <- NULL;
+    annot <- data.frame(cbind(annot, annot2))
+  }, silent=TRUE)
+
+  # Add file paths to file names (w/chanbge for generating txt report)
+  for (i in 1:length(omicsList)){
+    if( (grepl(".MQ.", omicsList[[i]][["dataFormat"]]) & txtFolder==TRUE) ) { 
+      omicsList[[i]][[3]] <- file.path(working_dir, "txt", omicsList[[i]][[3]]) 
+    } else {
+      omicsList[[i]][[3]] <- file.path(working_dir, omicsList[[i]][[3]])
+    }
+  }
+
+  for (i in 1:length(omicsList)){
+    if( grepl(".csv$", omicsList[[i]][[3]]) ) { file_ext_sep <- ","; } else { file_ext_sep <- "\t"; }
+    if(!file.exists(omicsList[[i]][[3]])){ stop(paste("File not found: ",omicsList[[i]][[3]],sep="")) }
+    omicsList[[i]][[4]] <- data.frame(read.delim(omicsList[[i]][[3]], header=TRUE, stringsAsFactors=FALSE,
+                                                 sep=file_ext_sep, check.names=FALSE));
+    names(omicsList[[i]])[4] <- "RawData";
+
+    tryCatch({
+      omicsList[[i]][[5]] <- makeEset(data=omicsList[[i]][[4]], annotate=annot, type=omicsList[[i]][[1]], 
+                                      log_transform=log_transform, outputpath=global$output_plots_path,
+                                      data_format=omicsList[[i]][[2]], uniprot_annotation=query_web);
+    }, error=function(e){
+      stop(paste("Problem with input data format:", e));
+    })
+
+    names(omicsList[[i]])[5] <- "eSet";
+    #if(global$debug_opt == TRUE ) { omicsList[[i]][[14]] <- omicsList[[i]][[5]] }# use for debugging
+
+    if( "Gene" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { global$gene_data_index <- c(global$gene_data_index, i) };
+    if( "Protein" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { global$prot_data_index <- c(global$prot_data_index, i) };
+    if( "mz" %in% colnames(fData(omicsList[[i]][["eSet"]])) ) { global$mz_data_index <- c(global$mz_data_index, i) };
+  }
+
+  global$unnorm_gene_index <- global$gene_data_index;
+
+  global$calls = c(global$calls, "g.make.omicsList")
+  global$annot = annot
+  global$omicsList = omicsList
+  global
+}
+
+g.make.contrasts = function(g, deps=T){
+  if(deps) g=g.run.deps(g, "g.make.omicsList")
+  # Make contrasts between groups
+  # contrastgroups are created from the first row of the annotation file, specifying biological groups of interested for differential analysis.
+  # contrast_strings will hold all of the contrast names for the differential analysis.
+  g$contrast_strings <- c();
+  if(all_comparisons == TRUE & length(g$contrastgroups>1) ){
+    # We generate a list of contrasts based on all groups present. 
+    # We assume the first (left most in annotation file) is control to handle cases where the order and directionality is important.
+    g$contrast_strings <- sapply(combn(rev(g$contrastgroups),2,simplify=F),FUN=function(l)paste(l,collapse="-"))
+  } else if(all_comparisons == FALSE & length(g$contrastgroups>1) ){
+    # If all_comparisons is set to false, we compare all groups to the first (control) group.
+    g$contrast_strings <- paste(g$contrastgroups[2:length(g$contrastgroups)], g$contrastgroups[1], sep='-')
+  } else if( length(g$contrastgroups) ==1 ){
+    # This is a last catch all if there is only one biological group listed.
+    g$contrast_strings <- g$contrastgroups
+  }
+  # To track the number of contrasts.
+  g$num_contrasts <- length(g$contrast_strings);
+  # To track the coefficients from the differential analysis for downstream plots and files.
+  g$loop_list <- 1:g$num_contrasts
+
+  # This case is for TimeSeries experiments, with TimeSeries information on the second page of the annotation sheet.
+  # time_index will track the number of time points in the experiment.
+  g$time_index <- 0;
+  if("TimeSeries" %in% colnames(g$annot)){ 
+    # For the default case, given challenges of very large sample sizes, we assume that there are more timepoints than replicates for a given timepoint.
+    # We will create a time variable shorter than the number of unique TimeSeries, so we have sufficient degrees of freedom for the linear model.
+    # If there are many replicates (>3) for each time point, consider entering them as groups, or edit the following if needed.
+    g$time_index<- length(unique(g$annot[,"TimeSeries"]))-2;
+    # The next two variables track the start and end coefficients for the time variable in the model.
+    g$time_start <- 3+g$time_index
+    g$time_end<- 2+(g$time_index*2)
+    # We adjust the coefficients for downstream plots/files so we are examining the time series.
+    g$loop_list<- g$time_start:g$time_end
+    # We make contrast strings based on the TimeSeries variable.
+    new_strings <- c()
+    for ( k in 1:length(g$contrast_strings)){
+      for( l in 1:g$time_index){
+        new_strings <- c(new_strings, paste(g$contrast_strings[k], "_Time_", l, sep=""))
+      }
+    }
+    # We add these strings together.
+    g$contrast_strings <- c(new_strings, g$contrast_strings)
+  }
+
+  # If we have multiple contrasts/coefficients, we will want to analyze the data using the F-statistic to analyze features that change the most over all the groups.
+  if(g$num_contrasts>1 | g$time_index>0){ 
+    g$statistic_index <- "F";
+  } else { 
+    g$statistic_index <- "t"; 
+  }
+
+  g$calls = c(g$calls, "g.make.contrasts")
+  g$contrast_strings_file <- gsub("-","_",g$contrast_strings)
+  g
+}

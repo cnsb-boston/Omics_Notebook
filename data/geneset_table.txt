@@ -1,7 +1,0 @@
-Species	GeneSet
-C. elegans (6239)	Caenorhabditis_elegans_GSEA_GO_sets_all_symbols_April_2015.gmt
-Zebrafish (7955)	Danio_rerio_GSEA_GO_sets_all_symbols_April_2015.gmt
-Fruit Fly (7227)	Drosophila_melanogaster_GSEA_GO_sets_all_symbols_April_2015.gmt
-E. coli (511145)	escherichia_coli_k12_intestinalbacteria_gmt2.gmt
-Rat (10116)	Rattus_norvegicus_GSEA_GO_sets_all_symbols_April_2015.gmt
-Yeast (559292)	Saccharomyces_cerevisiae_S288c_GSEA_GO_sets_all_symbols_April_2015.gmt

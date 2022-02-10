@@ -52,10 +52,10 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
     index <- unique(pData(eset)$Batch2)[i]
     
   if(norm=='quantile'){
-    eset_matrix_norm[,grep(index,pData(eset)$Batch2)] <- as.matrix(normalize.quantiles(eset_matrix[,grep(index,pData(eset)$Batch2)]))
+    eset_matrix_norm[,grep(index,pData(eset)$Batch2)] <- as.matrix(preprocessCore::normalize.quantiles(eset_matrix[,grep(index,pData(eset)$Batch2)]))
     dimnames(eset_matrix_norm) <- dimnames(eset_matrix)
   } else if (norm=='loess'){
-    eset_matrix_norm[,grep(index,pData(eset)$Batch2)] <- as.matrix(normalizeCyclicLoess(eset_matrix[,grep(index,pData(eset)$Batch2)], method='pairs'))
+    eset_matrix_norm[,grep(index,pData(eset)$Batch2)] <- as.matrix(limma::normalizeCyclicLoess(eset_matrix[,grep(index,pData(eset)$Batch2)], method='pairs'))
   } else if (norm=='median'){
     eset_matrix[eset_matrix==0] <- NA
     colMedians <- matrixStats::colMedians(eset_matrix, na.rm=T)
@@ -101,12 +101,12 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   dev.off();
   
   if(!grepl("none", norm)) { 
-    grid.arrange(plot1+labs(title="Raw Data"), plot3+labs(title="Normalized"),
+    gridExtra::grid.arrange(plot1+labs(title="Raw Data"), plot3+labs(title="Normalized"),
                  plot2+theme(legend.position="none")+labs(title="Raw Data"), 
                  plot4+theme(legend.position="none")+labs(title="Normalized"),
                  top=paste(type, ":", sep=""), ncol=4);
   } else {
-    grid.arrange(plot1+labs(title="Intensity"),
+    gridExtra::grid.arrange(plot1+labs(title="Intensity"),
                  plot2+theme(legend.position="none")+labs(title="Intensity"), 
                  top=paste(type, ":", sep=""), ncol=4);
     
@@ -129,7 +129,7 @@ intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,
   output_filename <- file.path(outputpath, paste("RLE_",type,".pdf", sep=''));
   pdf(output_filename, width=11, height=8.5);
   par(mar=c(10,4,4,2)+0.1)
-  boxplot(rle, main="RLE (Relative Log Expression)\nShould be centered on 0 (blue line)",
+  graphics::boxplot(rle, main="RLE (Relative Log Expression)\nShould be centered on 0 (blue line)",
           names=colnames(eset_matrix_norm), las=2)
   lines(x=c(0,ncol(eset_matrix_norm)+1), y=rep(0,2), col="blue", lty=2)
   lines(x=c(0,ncol(eset_matrix_norm)+1), y=rep(0.1,2), col="red", lty=2)

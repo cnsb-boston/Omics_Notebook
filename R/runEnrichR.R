@@ -23,22 +23,22 @@ runEnrichR <- function (genes, type, search_dat=search_databases,
     genes_down <- genes[genes[,"logFC"]<0,"Gene"]
     
     if(length(genes_up)>0){
-      invisible(capture.output({ enriched_up <- enrichr(unique(as.character(genes_up)), databases = search_dat); }))
-      enriched_up <- bind_rows(enriched_up, .id="databases")
+      invisible(capture.output({ enriched_up <- enrichR::enrichr(unique(as.character(genes_up)), databases = search_dat); }))
+      enriched_up <- dplyr::bind_rows(enriched_up, .id="databases")
       enriched_up[,"Phenotype"] <- "+1"
       enriched <- rbind(enriched, enriched_up)
     }
     if(length(genes_down)>0){
-      invisible(capture.output({ enriched_down <- enrichr(unique(as.character(genes_down)), databases = search_dat); }))
-      enriched_down <- bind_rows(enriched_down, .id="databases")
+      invisible(capture.output({ enriched_down <- enrichR::enrichr(unique(as.character(genes_down)), databases = search_dat); }))
+      enriched_down <- dplyr::bind_rows(enriched_down, .id="databases")
       enriched_down[,"Phenotype"] <- "-1"
       enriched <- rbind(enriched, enriched_down)
     }
     enriched<- enriched[-1,]
     
   } else {
-    invisible(capture.output({ enriched <- enrichr(unique(as.character(genes_down)), databases = search_dat); }))
-    enriched <- bind_rows(enriched_down, .id="databases")
+    invisible(capture.output({ enriched <- enrichR::enrichr(unique(as.character(genes_down)), databases = search_dat); }))
+    enriched <- dplyr::bind_rows(enriched_down, .id="databases")
     enriched[,"Phenotype"] <- "+1"
   }
   })
@@ -48,9 +48,9 @@ runEnrichR <- function (genes, type, search_dat=search_databases,
   colnames(formatted) <- c("Term","Description")
   formatted[,c("p.Val","FDR")] <- format(enriched[,c("P.value", "Adjusted.P.value")], scientific=FALSE);
   formatted[,"Phenotype"] <- enriched[,"Phenotype"]
-  enriched <- enriched %>% mutate(Genes=str_replace_all(Genes, ";", ","))
+  enriched <- dplyr::mutate(enriched, Genes=stringr::str_replace_all(Genes, ";", ","))
   formatted[,"Genes"] <- enriched[,"Genes"]
-  formatted[,c("Gene_Hits", "Gene_Total")] <- str_split_fixed(enriched[,"Overlap"], "/",2)
+  formatted[,c("Gene_Hits", "Gene_Total")] <- stringr::str_split_fixed(enriched[,"Overlap"], "/",2)
   formatted[,"Gene_Ratio"] <- as.numeric(formatted[,"Gene_Hits"])/as.numeric(formatted[,"Gene_Total"])
   formatted[,c("Combined.Score")] <- format(enriched[,c("Combined.Score")], scientific=FALSE);
   formatted[,"Database"] <- enriched[,"databases"]

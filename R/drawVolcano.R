@@ -12,7 +12,7 @@ getLabelVars <- function(dat){
   list(textsize=textsize,labname=labname)
 }
 
-drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby){
+drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby, subset_rows){
   lv <- getLabelVars(dat)
   
     plot1 <- ggplot(data=data.frame(dat)) + 
@@ -20,7 +20,7 @@ drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby){
       scale_colour_manual(values=c(NS="Grey", Up="Red", Down="Blue"))   +
       labs(title=title) + theme_bw() + 
       theme(legend.title=element_blank())
-    plot2 <- plot1 + geom_text_repel(data=data.frame(dat[label_names,]),size=lv$textsize[1],
+    plot2 <- plot1 + ggrepel::geom_text_repel(data=data.frame(dat[label_names,]),size=lv$textsize[1],
                                      aes_string(x=xvar, y=yvar, label=lv$labname[1])) +
                      geom_point(data=data.frame(dat[label_names,]) ,size=0.7, pch=21,
                                 aes_string(x=xvar, y=yvar))
@@ -33,7 +33,7 @@ drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby){
         if(length(subset_rows[[j]])>0){
           label_names2 <- subset_rows[[j]]
           plot(plot1 +
-                 geom_label_repel(data=data.frame(dat[label_names,]),size=lv$textsize[2], 
+                 ggrepel::geom_label_repel(data=data.frame(dat[label_names,]),size=lv$textsize[2], 
                                   aes_string(x=xvar, y=yvar, label=lv$labname[2]),
                                   label.size=NA, label.padding = .1, na.rm=T, fill=alpha(c("white"),0.5) )+
                  theme(legend.position="none") +
@@ -61,6 +61,7 @@ drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby){
 #' @examples
 #'  
 #' 
+#' @import ggplot2
 #' @export
 drawVolcano <- function(dat, type, subset_rows=F,
                         top_values=0.05, top_fc=0,
@@ -86,10 +87,10 @@ drawVolcano <- function(dat, type, subset_rows=F,
   output_filename <- file.path(outputpath, paste0(type,"_volcano",".pdf"));
   pdf(output_filename, width=3.5, height=3.5);
   for(v in c("P.Value","adj.P.Val")){
-    plot1 <- drawVPlots(dat, xvar="logFC", yvar=paste0("-log10(",v,")"), title=paste(type,"Volcano Plot",sep="\n"), label_names=label_names, colorby=paste0(v,".sig"))
+    plot1 <- drawVPlots(dat, xvar="logFC", yvar=paste0("-log10(",v,")"), title=paste(type,"Volcano Plot",sep="\n"), label_names=label_names, colorby=paste0(v,".sig"), subset_rows=subset_rows)
   }
 
-  grid.arrange(g_legend(plot1))
+  gridExtra::grid.arrange(g_legend(plot1))
   tmp<-dev.off();
 }
 
@@ -107,8 +108,8 @@ drawMDPlot <- function(dat, type, subset_rows=FALSE, outputpath=output_contrast_
   # Plot
   output_filename <- file.path(outputpath, paste0(type,"_MDplot",".pdf"));
   pdf(output_filename, width=3.5, height=3.5);
-  plot1 <- drawVPlots(dat, xvar="Mean", yvar="logFC", title=paste(type,"MD Plot", sep="\n"), label_names=label_names, colorby="Significance")
-  grid.arrange(g_legend(plot1))
+  plot1 <- drawVPlots(dat, xvar="Mean", yvar="logFC", title=paste(type,"MD Plot", sep="\n"), label_names=label_names, colorby="Significance", subset_rows=subset_rows)
+  gridExtra::grid.arrange(g_legend(plot1))
   tmp<-dev.off();
 }
 

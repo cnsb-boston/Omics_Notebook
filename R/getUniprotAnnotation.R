@@ -33,7 +33,7 @@ getUniprotAnnotation <- function(IDs){
     ret <- NULL
     info_url<-paste0("https://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
                     "&query=accession%3A",paste(q_ids, collapse="+OR+accession%3A"))
-    if(url.exists(info_url)==TRUE){
+    if(RCurl::url.exists(info_url)==TRUE){
       invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE, quote=""))) )
       if (class(info_annot) != 'try-error' &&
           dim(info_annot)[2]==length(uniprot_columns)+1 &&

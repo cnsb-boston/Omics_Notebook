@@ -22,9 +22,9 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   
   # Make colors for sample names
   annotLab <- data.frame(Group = factor(pData(eset)$Group));
-  annotCol <- list(Group = rainbow(length(levels(factor(pData(eset)$Group)))) )
+  annotCol <- list(Group = grDevices::rainbow(length(levels(factor(pData(eset)$Group)))) )
   sampleCols <- annotCol$Group[1:length(levels(factor(pData(eset)$Group)))][factor(pData(eset)$Group)];
-  mapcolor <- rev(brewer.pal(7, "RdYlBu"))
+  mapcolor <- rev(RColorBrewer::brewer.pal(7, "RdYlBu"))
   
   if (class(limmaFit)!="NULL"){
     # Create table for each coefficient
@@ -36,16 +36,16 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
     }
     if(class(coef_index)!="NULL" & class(time_index)!="NULL"){
       if(time_index>0){
-        DiffList_T <- topTable(limmaFit, adjust.method="BH", n=Inf, coef=coef_index)
+        DiffList_T <- limma::topTable(limmaFit, adjust.method="BH", n=Inf, coef=coef_index)
       } else {
         DiffList_T <- NULL
       }
     }
     if(length(DiffList)>1){
-      DiffList_F <- topTable(limmaFit, adjust.method="BH", n=Inf)
+      DiffList_F <- limma::topTable(limmaFit, adjust.method="BH", n=Inf)
     }
     for(i in 1:length(coef_index) ) {
-      DiffList[[i]] = topTable(limmaFit, adjust.method="BH", n=Inf, sort.by='p', coef=coef_index[i])[,c("P.Value","adj.P.Val","logFC")]
+      DiffList[[i]] = limma::topTable(limmaFit, adjust.method="BH", n=Inf, sort.by='p', coef=coef_index[i])[,c("P.Value","adj.P.Val","logFC")]
     }
     # Match the row order to the first contrast
     eset <- eset[match(rownames(DiffList[[1]]),rownames(eset)),]
@@ -53,7 +53,7 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   
   # Create new sheet to add to the workbook
   stName <- as.character(type)
-  addWorksheet(wb=wb, sheetName=stName)
+  openxlsx::addWorksheet(wb=wb, sheetName=stName)
   
   # Format Uniprot hyperlinks
   if ("Link" %in% colnames(fData(eset)) ){
@@ -178,35 +178,35 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   #write(paste("dim",paste0(dim(formatted_table),collapse=" "),"names",length(names),"width",length(col_widths)),stderr())
   
   # Write data table to sheet
-  writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
-  if ("Link" %in% colnames(fData(eset)) ){ writeData(wb=wb, sheet=stName, x=links, xy=c( 1+(ncol(eset)+3 ) ,3)) }
+  openxlsx::writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
+  if ("Link" %in% colnames(fData(eset)) ){ writeData(wb=wb, sheet=stName, x=links, xy=c( which(names=="Uniprot") ,3)) }
   
   # Add heatmap color
-  conditionalFormatting(wb=wb, sheet=stName, type="colourScale", cols=2:(1+ncol(eset)), rows=3:(2+nrow(eset)), style=mapcolor[c(1,4,7)])
+  openxlsx::conditionalFormatting(wb=wb, sheet=stName, type="colourScale", cols=2:(1+ncol(eset)), rows=3:(2+nrow(eset)), style=mapcolor[c(1,4,7)])
 
   # Add color bars for fold change
   if(length(DiffList)>0) { i<-1; #for(i in 1:length(DiffList)){
-    conditionalFormatting(wb=wb, sheet=stName, cols= ( 3+col_index+(3*(i-1))) , rows=3:(3+nrow(limmaFit)), type="databar", style=c("blue", "red"), showvalue=FALSE)
+    openxlsx::conditionalFormatting(wb=wb, sheet=stName, cols= ( 3+col_index+(3*(i-1))) , rows=3:(3+nrow(limmaFit)), type="databar", style=c("blue", "red"), showvalue=FALSE)
   } #}
   
   # Rotate text for sample names
   for (ci in 1:ncol(eset)){
     fgfill=if(is.na(sampleCols[ci])) NULL else sampleCols[ci]
     for(c_offset in c(1, (length(names) - ncol(eset)))){
-      addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=fgfill, textRotation=90, halign="center", valign="top"),
+      openxlsx::addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(fgFill=fgfill, textRotation=90, halign="center", valign="top"),
              rows=2, cols=ci+c_offset)
     }
   }
 
   # Merge cells and add Intensity title
-  mergeCells(wb=wb, sheet=stName, rows=1, cols=2:(1+ncol(eset)) )
-  writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity, Row Z Score", xy=c(2,1))
-  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=2, stack=TRUE)
+  openxlsx::mergeCells(wb=wb, sheet=stName, rows=1, cols=2:(1+ncol(eset)) )
+  openxlsx::writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity, Row Z Score", xy=c(2,1))
+  openxlsx::addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=2, stack=TRUE)
   
   # Add final intensity title
-  mergeCells(wb=wb, sheet=stName, rows=1, cols=( length(names) : ( length(names) - ncol(eset) + 1 )) )
-  writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c(( length(names) - ncol(eset) + 1 ),1))
-  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=( length(names) - ncol(eset) + 1 ), stack=TRUE)
+  openxlsx::mergeCells(wb=wb, sheet=stName, rows=1, cols=( length(names) : ( length(names) - ncol(eset) + 1 )) )
+  openxlsx::writeData(wb=wb, sheet=stName, x="Normalized Log2 Intensity", xy=c(( length(names) - ncol(eset) + 1 ),1))
+  openxlsx::addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=( length(names) - ncol(eset) + 1 ), stack=TRUE)
   
   # Add contrast titles
   if(class(contrast_strings)=="NULL"){
@@ -214,21 +214,21 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   }
   if(length(DiffList)>0) { for(i in 1:length(DiffList)){
     startCol<- col_index + 1 + (3*(i-1))
-    mergeCells(wb=wb, sheet=stName, rows=1, cols=startCol:(startCol+2) )
-    writeData(wb=wb, sheet=stName, x=contrast_strings[i], xy=c(startCol,1))
-    addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=startCol, stack=TRUE)
+    openxlsx::mergeCells(wb=wb, sheet=stName, rows=1, cols=startCol:(startCol+2) )
+    openxlsx::writeData(wb=wb, sheet=stName, x=contrast_strings[i], xy=c(startCol,1))
+    openxlsx::addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", halign="center"), rows=1, cols=startCol, stack=TRUE)
   } }
   
   # Freeze columns/rows and bold column titles
-  freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
-  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", fontColour='black'),
+  openxlsx::freezePane(wb=wb, sheet=stName, firstActiveRow=3, firstActiveCol=2)
+  openxlsx::addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(textDecoration="bold", fontColour='black'),
            rows=1:2, cols=1:length(names),gridExpand=TRUE, stack=TRUE)   
   
   # Don't treat gene names as dates
-  addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(numFmt="TEXT"), rows=3:(2+nrow(eset)), cols=1, gridExpand=TRUE )
+  openxlsx::addStyle(wb=wb, sheet=stName, style=openxlsx::createStyle(numFmt="TEXT"), rows=3:(2+nrow(eset)), cols=1, gridExpand=TRUE )
   
   # Set row heights and column widths
-  setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)
-  setColWidths(wb=wb, sheet=stName, cols=1:ncol(formatted_table), widths= col_widths )
+  openxlsx::setRowHeights(wb=wb, sheet=stName, rows=2, heights=100)
+  openxlsx::setColWidths(wb=wb, sheet=stName, cols=1:ncol(formatted_table), widths= col_widths )
 }
 

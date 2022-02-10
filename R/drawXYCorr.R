@@ -10,6 +10,7 @@
 #' 
 #' @examples
 #' 
+#' @import ggplot2
 #' @export
 drawXYCorr <- function(item_list, item_name, outputpath=output_plots_path, file_name="", subset_genes=FALSE){
   
@@ -27,18 +28,18 @@ drawXYCorr <- function(item_list, item_name, outputpath=output_plots_path, file_
         }
         if(nrow(plot_data)==0){ next; }
         # density colors
-        x<-densCols(plot_data[,2], plot_data[,3],colramp=colorRampPalette(c("black","white")))
-        plot_data$Density <- col2rgb(x)[1,] + 1L
+        x<-grDevices::densCols(plot_data[,2], plot_data[,3],colramp=grDevices::colorRampPalette(c("black","white")))
+        plot_data$Density <- grDevices::col2rgb(x)[1,] + 1L
         # make plot
         corr_coef <- cor(plot_data[,2], plot_data[,3], method="pearson");
         label<-paste("italic(r) == ",round(corr_coef, digits=2), sep="");
         plot <- ggplot(data=plot_data, aes(x=plot_data[,2], y=plot_data[,3], color=Density)) + 
-          geom_point() + scale_color_viridis(direction=-1) + labs(x=names(item_list)[j], y=names(item_list)[k]) +
+          geom_point() + viridis::scale_color_viridis(direction=-1) + labs(x=names(item_list)[j], y=names(item_list)[k]) +
           labs(title=title) +
           theme_bw() + annotate("text",x=-Inf, y=Inf, label=label, color="black", vjust=1.5, hjust=-0.4 , parse=TRUE) +
-          geom_smooth(method=lm, se=FALSE, color="red")
+          geom_smooth(method=lm, se=FALSE, color="red", formula=y~x)
         print(plot+theme(legend.position="none"))
-        grid.arrange(g_legend(plot))
+        gridExtra::grid.arrange(g_legend(plot))
       }
     }
   }
