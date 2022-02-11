@@ -14,10 +14,10 @@
 getUniprotAnnotation <- function(IDs){
   
   # Uniprot entries to fetch (and col names)
-  uniprot_columns <- c("comment(FUNCTION)", "comment(SUBCELLULAR LOCATION)", "comment(DISEASE)",
+  uniprot_columns <- c("id","comment(FUNCTION)", "comment(SUBCELLULAR LOCATION)", "comment(DISEASE)",
                      "go(biological process)", "go(molecular function)", "go(cellular component)", "go-id", "database(Reactome)", "database(KEGG)",
                      "database(BioCyc)", "database(Ensembl)", "database(ChEMBL)", "database(IntAct)","database(STRING)")
-  uniprot_col_names <- c("Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
+  uniprot_col_names <- c("ENTRY","Uniprot_Function", "Uniprot_Cellular_Location", "Uniprot_Disease",
                        "GO_biological_process", "GO_molecular_function", "GO_cellular_component", "GO_ID", "ReactomeID", "KEGG_ID",
                        "BioCyc_ID", "Ensembl_ID", "ChEMBL_ID", "IntAct_ID","STRING_ID")
 
@@ -26,34 +26,30 @@ getUniprotAnnotation <- function(IDs){
   # List of uniprot IDs (remove duplicates for speed)
   IDs_unique <- IDs[!duplicated(IDs)] #get unique IDs
 
-  id_groups=split(IDs_unique,factor((1:length(IDs_unique)) %/% 100))
+  id_groups=split(IDs_unique,factor((1:length(IDs_unique)) %/% 5000))
   
-  # Query uniprot server 100 entries at a time
+  # Query uniprot server in batches
   annotUniprot <- do.call("rbind",lapply(id_groups,FUN=function(q_ids){ try({
     ret <- NULL
-    info_url<-paste0("https://www.uniprot.org/uniprot/?format=tab&columns=id,",gsub(" ","%20", paste(uniprot_columns, collapse=",")),
-                    "&query=accession%3A",paste(q_ids, collapse="+OR+accession%3A"))
-    if(RCurl::url.exists(info_url)==TRUE){
-      invisible(info_annot <- try(data.frame(read.delim(url(info_url),header=TRUE, stringsAsFactors=FALSE, quote=""))) )
-      if (class(info_annot) != 'try-error' &&
-          dim(info_annot)[2]==length(uniprot_columns)+1 &&
-          colnames(info_annot)[2]=="Function..CC."){
-        colnames(info_annot) <- colnames_annotUniprot
-        ret <- info_annot
-      }
+    res = httr::POST("https://www.uniprot.org/uploadlists/",
+                     body=list(query=paste(q_ids,collapse=","), format="tab", from="ACC", to="ACC",
+                               columns=paste0(uniprot_columns,collapse=",")))
+    info_annot <- try(data.frame(read.delim(textConnection(httr::content(res)),
+                                            header=TRUE, stringsAsFactors=FALSE, quote="")))
+    if (class(info_annot) != 'try-error' &&
+        ncol(info_annot)==length(uniprot_columns)+1 &&
+        colnames(info_annot)[2]=="Function..CC."){
+      info_annot=info_annot[,-ncol(info_annot)] # yourlist...
+      colnames(info_annot) <- uniprot_col_names
+      ret <- info_annot
     }
     Sys.sleep(2)
     ret
   }) 
   }))
  
-  # make data frame corresponding to original ID list
-  annotatedUniprot <- data.frame(matrix(ncol=length(uniprot_col_names)+1, nrow=length(IDs)))
-  colnames(annotatedUniprot) <- colnames_annotUniprot
-  annotatedUniprot[,"ENTRY"] <- IDs
-  for (r in 1:nrow(annotatedUniprot)){ if(sum(annotUniprot[,"ENTRY"]==annotatedUniprot[r,"ENTRY"])!=0) {
-    annotatedUniprot[r,uniprot_col_names] <-annotUniprot[which(annotUniprot[,"ENTRY"]==annotatedUniprot[r,"ENTRY"])[1],uniprot_col_names]
-  } }
+  annotatedUniprot <- data.frame(ENTRY=IDs)
+  annotatedUniprot <- merge(annotatedUniprot, annotUniprot, by="ENTRY", all.x=T)
 
   return (annotatedUniprot)
 }
