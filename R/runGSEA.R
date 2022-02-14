@@ -119,10 +119,9 @@ fetchGMT <- function(dest_path,.species="Other"){
   if(grepl("Mouse|Human", .species)){  suppressWarnings({ suppressMessages({
     # Only if you need a new GMT file
     gmt_url = sub("(Mouse|Human).*","http://download.baderlab.org/EM_Genesets/current_release/\\1/symbol/",.species)
-    filenames = RCurl::getURL(gmt_url)   #list all the files on the server
-    tc = textConnection(filenames)
-    contents = readLines(tc)
-    close(tc)
+    filenames = url(gmt_url)   #list all the files on the server
+    contents = readLines(filenames)
+    close(filenames)
     #get the gmt that has all the pathways and does not include terms inferred from electronic annotations(IEA), start with gmt file that has pathways only
     rx = gregexpr("(?<=<a href=\")(.*.GOBP_AllPathways_no_GO_iea.*.)(.gmt)(?=\">)",contents, perl = TRUE)
     gmt_file = unlist(regmatches(contents, rx))
