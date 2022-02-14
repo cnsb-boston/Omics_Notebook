@@ -300,7 +300,7 @@ g.interactive.volcano = function(g, deps=T){
       top_sum <- limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
       type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[c], sep="_");
 
-      interactiveVolcano(eset=g$omicsList[[i]][["eSet"]], fit=g$omicsList[[i]][["fit"]], dt=decideTests(g$omicsList[[i]][["fit"]]),
+      interactiveVolcano(eset=g$omicsList[[i]][["eSet"]], fit=g$omicsList[[i]][["fit"]], dt=limma::decideTests(g$omicsList[[i]][["fit"]]),
                         limmaSig=top_sum, type=type_name, col=g$loop_list[c], outputcontrastpath=g$output_contrast_path);
 
       add_link <- paste("[ ",type_name, " ](", g$output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",type_name,".html)", sep="");

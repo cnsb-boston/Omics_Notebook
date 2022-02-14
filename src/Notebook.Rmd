@@ -48,57 +48,12 @@ knitr::opts_chunk$set(echo=TRUE)
 
 ```{r libraries}
 
-g=g.notebook.setup(param_file=params$param_file)
-
-# Load pipeline libraries
-suppressPackageStartupMessages({
-library(R.utils)
-library(matrixStats)
-library(Biobase)
-library(limma)
-library(splines)
-library(knitr)
+library(OmicsNotebook)
 library(ggplot2)
-library(cowplot)
-library(uwot)
-library(ggrepel)
-library(calibrate)
-library(preprocessCore)
-library(RColorBrewer)
-library(viridis)
-library(reshape2)
-library(tidyr)
-library(tidyselect)
-library(dplyr)
-library(stringr)
-library(grid)
-library(gridExtra)
-library(lattice)
-library(VennDiagram)
-library(UpSetR)
-library(corrplot)
-library(heatmaply)
-library(scales)
-library(edgeR)
-library(Glimma)
-library(openxlsx)
-library(ComplexHeatmap)
-library(RCurl)
-library(fgsea)
-library(BiocParallel)
-register(MulticoreParam(workers=as.integer(Sys.getenv("NSLOTS",1))))
-library(httr)
-library(RJSONIO)
+library(Biobase)
+BiocParallel::register(BiocParallel::MulticoreParam(workers=as.integer(Sys.getenv("NSLOTS",1))))
 
-if(enrichr_section){ library(enrichR) }
-
-if(gsea_section){
-  library(RCy3)
-}
-
-# library(sva) # combat/batch correction
-
-})
+g=g.notebook.setup(param_file=params$param_file)
 
 # Source function file
 #sourceDirectory(file.path(gsub("src","R", notebook_dir)))

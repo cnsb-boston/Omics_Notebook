@@ -328,7 +328,7 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
   } 
 
   g$calls = c(g$calls, "g.enrichr")
-  g$enrichr_working_dir = enrichr_working_dir
+  g$enrichr_working_dir = working_dir
   g
 }
 

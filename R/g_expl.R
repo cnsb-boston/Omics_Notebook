@@ -131,7 +131,7 @@ drawcorplot <- function(g, item_name,data_index,dataname=NULL){ try({
       gene_values[[i]] <- data.frame( exprs(g$omicsList[[ data_index[i] ]][[ dataname[i] ]])[,group_columns] ); # Make a data frame of values and genes
       gene_values[[i]][,item_name] <- fData(g$omicsList[[ data_index[i] ]][[ dataname[i] ]])[,item_name] ;                                                                         
       gene_values[[i]] <- tidyr::gather(gene_values[[i]], sample, value, -tidyselect::all_of(item_name)); # Gather values and get average by gene
-      gene_values[[i]] <- dplyr::group_by(gene_values[[i]], .dots=tidyselect::all_of(item_name)) ;
+      gene_values[[i]] <- dplyr::group_by_at(gene_values[[i]], tidyselect::all_of(item_name)) ;
       gene_values[[i]] <- dplyr::summarize(gene_values[[i]], mean=mean(value));
       gene_values[[i]] <- gene_values[[i]][gene_values[[i]][,item_name]!="",]
       names(gene_values)[i] <- paste0(g$omicsList[[ data_index[i] ]][["dataType"]],"_",outname[j])
@@ -170,7 +170,7 @@ g.cor.across.groups = function(g, deps=T){
 
       item_list <- vector("list", ncol(gene_values)-1)
       for( j in 1:(ncol(gene_values)-1) ){
-        item_list[[j]] <- as_tibble(cbind(gene_values[,"Groups"], gene_values[,j] ), .name_repair="minimal")
+        item_list[[j]] <- tibble::as_tibble(cbind(gene_values[,"Groups"], gene_values[,j] ), .name_repair="minimal")
         names(item_list[[j]]) <-  c("Groups", colnames(gene_values)[j])
         item_list[[j]][,2] <- as.double(unlist(item_list[[j]][,2]))
       }
@@ -178,14 +178,12 @@ g.cor.across.groups = function(g, deps=T){
       file_name <- g$omicsList[[i]][["dataType"]]
       item_name <- "Groups"
       drawXYCorr(item_list=item_list, item_name=item_name, file_name=file_name, outputpath=g$output_plots_path);
-      add_link <- paste("[ ",file_name," ](",g$output_plots_subdir,"/Correlation_Plots_",item_name,"_",file_name,".pdf)", sep="");
-      output_links <- paste(output_links, add_link, sep=" | " )
-      output_links
+      paste("[ ",file_name," ](",g$output_plots_subdir,"/Correlation_Plots_",item_name,"_",file_name,".pdf)", sep="");
     }
   }  ) })
 
   g$calls = c(g$calls, "g.cor.across.groups")
-  g$output_links = output_links
+  g$output_links = paste0(output_links, collapse=" | " )
   g
 }
 
@@ -478,7 +476,7 @@ g.save.data.qc = function(g, deps=T){
 
   # Save excel file summary for collaborators
   if(saveXlsx==TRUE){    
-    wbOut <- createWorkbook()
+    wbOut <- openxlsx::createWorkbook()
 
     for(i in 1:length(g$omicsList)){
       if(g$omicsList[[i]][["dataType"]]!="met_combined"){
@@ -488,7 +486,7 @@ g.save.data.qc = function(g, deps=T){
     } 
 
     output_filename=file.path(g$output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary", ".xlsx", sep=""))
-    saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
+    openxlsx::saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
   }
 
   g$calls = c(g$calls, "g.save.data.qc")

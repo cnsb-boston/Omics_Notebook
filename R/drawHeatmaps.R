@@ -38,7 +38,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     names(annotCol$Group2) <- levels(factor(annotLab$Group2))
   }
   
-  ComplexHeatmap::ht_opt("message", FALSE)
+  ComplexHeatmap::ht_opt("message" = FALSE)
   ha_column <- ComplexHeatmap::HeatmapAnnotation(df=annotLab, col=annotCol)
   
   if(mapcolor=="viridis"){mapcolor <- viridisLite::viridis(11); maponeway <- viridisLite::viridis(11);
@@ -55,7 +55,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
             show_row_names=if(is.null(show_row_names.)) !isBigMap(`matrix`) else show_row_names.,
             row_labels=substring(rownames(`matrix`),0,50),
             cluster_columns=cluster_columns, use_raster=isBigMap(`matrix`), split=split,
-            row_names_gp=gpar(fontsize=4),
+            row_names_gp=grid::gpar(fontsize=4),
             column_title=paste(type, ": ", title_names, "\n", column_title, sep='') )
   }
   
@@ -101,11 +101,11 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
                          column_title="Subset, row z score", title_names=names(subset)[k]))
         # print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
         #               cluster_columns=TRUE,show_row_names=show_row_names,cluster_rows=F,
-        #               row_names_gp=gpar(fontsize=4),
+        #               row_names_gp=grid::gpar(fontsize=4),
         #               column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
         # print(Heatmap(matrix=emat_sel, col=mapcolor, name="Z-score", top_annotation=ha_column,
         #               cluster_columns=FALSE,show_row_names=show_row_names,cluster_rows=F,
-        #               row_names_gp=gpar(fontsize=4),
+        #               row_names_gp=grid::gpar(fontsize=4),
         #               column_title=paste(type, ": ",names(subset)[k],"\n Subset, row z score", sep='') ) )
         
       }, silent=TRUE) }) }

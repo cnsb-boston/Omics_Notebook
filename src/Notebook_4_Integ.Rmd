@@ -16,7 +16,7 @@ g = g.mumm2omicsList(g)
 
 # Save excel file summary for collaborators
 if(saveXlsx==TRUE){    
-  wbOut <- createWorkbook()
+  wbOut <- openxlsx::createWorkbook()
   
   for(i in 1:length(g$metab_data_index)){ try({
     writeDataToSheets(wb=wbOut, eset=g$omicsList[[ g$mz_data_index[i] ]][["eSet"]], limmaFit=g$omicsList[[ g$mz_data_index[i] ]][["fit"]], 
@@ -24,7 +24,7 @@ if(saveXlsx==TRUE){
   }) }  
   
   output_filename=file.path(g$output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary_AllMetIDs", ".xlsx", sep=""))
-  saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
+  openxlsx::saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
 }
 ```
 

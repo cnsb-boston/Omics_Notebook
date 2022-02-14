@@ -179,7 +179,7 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   
   # Write data table to sheet
   openxlsx::writeDataTable(wb=wb, sheet=stName, x=formatted_table, xy=c("A",2), keepNA=FALSE, tableStyle="TableStyleLight1")
-  if ("Link" %in% colnames(fData(eset)) ){ writeData(wb=wb, sheet=stName, x=links, xy=c( which(names=="Uniprot") ,3)) }
+  if ("Link" %in% colnames(fData(eset)) ){ openxlsx::writeData(wb=wb, sheet=stName, x=links, xy=c( which(names=="Uniprot") ,3)) }
   
   # Add heatmap color
   openxlsx::conditionalFormatting(wb=wb, sheet=stName, type="colourScale", cols=2:(1+ncol(eset)), rows=3:(2+nrow(eset)), style=mapcolor[c(1,4,7)])

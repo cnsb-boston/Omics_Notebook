@@ -24,7 +24,6 @@ notebook_dir <- file.path(args[1], "src");
 analysis_dir <- file.path(args[2]);
 param_file=file.path(analysis_dir,if(length(args)>2)args[3] else "Parameters.R")
 
-library(OmicsNotebook)
 # source run variables
 setwd(analysis_dir);
 source(param_file);
