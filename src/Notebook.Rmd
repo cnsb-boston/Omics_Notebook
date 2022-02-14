@@ -87,23 +87,9 @@ g=g.notebook.setup(param_file=params$param_file)
 #
 ############################################
 
-# Import annotation file
+# Import annotation file, data, and make eset objects
 g=g.make.omicsList(g)
 
-# Import data and make eset objects
-
-# load libraries if needed
-suppressPackageStartupMessages({suppressWarnings({
-if( length(g$phos_data_index)>0 ){
-  library(KSEAapp)
-}
-if( length(g$metab_data_index)>0 ){
-  library(MetaboAnalystR)
-}
-if( length(g$gene_data_index)>1 ){
-library(ActivePathways)
-}
-}) })
 ```
 
 ```{r global_options, echo=FALSE}
