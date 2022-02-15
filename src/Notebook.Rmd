@@ -48,9 +48,11 @@ knitr::opts_chunk$set(echo=TRUE)
 
 ```{r libraries}
 
+suppressPackageStartupMessages({
 library(OmicsNotebook)
 library(ggplot2)
 library(Biobase)
+})
 BiocParallel::register(BiocParallel::MulticoreParam(workers=as.integer(Sys.getenv("NSLOTS",1))))
 
 g=g.notebook.setup(param_file=params$param_file)

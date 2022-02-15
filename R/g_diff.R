@@ -239,10 +239,10 @@ g.de.static.heatmap = function(g, deps=T){
   for(i in 1:length(g$omicsList)){
     sig_cutoff <- round(sig_percent*nrow(g$omicsList[[i]][["eSet"]]), digits=0)
     if(class(g$omicsList[[i]][["fit"]])=='MArrayLM' ){ try({
-      top_sum <- rownames( limma::topTableF(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F', p.value=adjpcutoff) );
+      top_sum <- rownames( limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='B', p.value=adjpcutoff) );
       title_add <- paste("FDR<", adjpcutoff, sep="")
       if (length(top_sum)<sig_cutoff){ 
-        top_sum <- rownames( limma::topTableF(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='F' ) )[1:sig_cutoff];
+        top_sum <- rownames( limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='B' ) )[1:sig_cutoff];
         title_add <- paste("Top ", (sig_percent*100), "%", sep="")
       }
       type_name <- paste(g$omicsList[[i]][["dataType"]], "_","F-statistic", sep="");
@@ -333,13 +333,13 @@ ttable=function(ol,coef){
 }
 
 fttable=function(ol,coef){
-  top_sum <- limma::topTableF(ol, adjust="BH", n=Inf, sort.by='F'); 
+  top_sum <- limma::topTable(ol, adjust="BH", n=Inf, sort.by='B'); 
   top_sum[,"logFC"] <- top_sum[,"F"]
   top_sum
 }
 
 timetable=function(ol,coef){
-  top_sum <- limma::topTable(ol, adjust="BH", n=Inf, sort.by='F', coef=coef); 
+  top_sum <- limma::topTable(ol, adjust="BH", n=Inf, sort.by='B', coef=coef); 
   top_sum[,"logFC"] <- top_sum[,"F"]
   top_sum
 }

@@ -14,7 +14,7 @@ getLabelVars <- function(dat){
 
 drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby, subset_rows){
   lv <- getLabelVars(dat)
-  
+  suppressWarnings({
     plot1 <- ggplot(data=data.frame(dat)) + 
       geom_point(aes_string(x=xvar, y=yvar, colour=colorby),size=0.7, pch=19) +
       scale_colour_manual(values=c(NS="Grey", Up="Red", Down="Blue"))   +
@@ -42,6 +42,7 @@ drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby, subset_rows
         }
       }) }
     }
+  })
   plot1
 }
 

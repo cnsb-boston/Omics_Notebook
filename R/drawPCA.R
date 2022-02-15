@@ -71,25 +71,28 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
                  rownames(PC_data$rotation[order(PC_data$rotation[,y_axis], decreasing=F)[1:12],]) )
   sig_data <- data.frame(PC_data$rotation[sig_hits,])
   
-  pca_loading_graph <- ggplot(data=as.data.frame(PC_data$rotation), aes(x=(PC_data$rotation[,x_axis]), y=PC_data$rotation[,y_axis])) +
-    geom_point(colour="grey", size=0.7) +
-    ggrepel::geom_text_repel(data=sig_data, aes(x=sig_data[,x_axis], y=sig_data[,y_axis]),label=rownames(sig_data), colour="black", size=2) +
-    theme_bw() + theme(legend.title=element_blank()) +
-    labs(x=paste(x_axis, sep=""), y=paste(y_axis, sep=""),
-         title=paste("PC Factor Loadings \n",type, sep=""))
+  suppressWarnings({
+    pca_loading_graph <- ggplot(data=as.data.frame(PC_data$rotation), aes(x=(PC_data$rotation[,x_axis]), y=PC_data$rotation[,y_axis])) +
+      geom_point(colour="grey", size=0.7) +
+      ggrepel::geom_text_repel(data=sig_data, aes(x=sig_data[,x_axis], y=sig_data[,y_axis]),label=rownames(sig_data), colour="black", size=2) +
+      theme_bw() + theme(legend.title=element_blank()) +
+      labs(x=paste(x_axis, sep=""), y=paste(y_axis, sep=""),
+          title=paste("PC Factor Loadings \n",type, sep=""))
 
-  # Graph output
-  output_filename <- file.path(outputpath, paste("PCAplots_",type,".pdf",sep=""))
-  pdf(output_filename, width=3.5, height=3.5)
-  print(pca_graph+theme(legend.position="none") )
-  print(pca_graph+theme(legend.position="none")+ggrepel::geom_text_repel(aes(x=PC_data$x[,x_axis], y=PC_data$x[,y_axis], label=rownames(PC_data$x)), colour="black", size=3) )
-  gridExtra::grid.arrange(g_legend(pca_graph) )
-  try({
-    print(pca_graph2+theme(legend.position="none") )
-    print(pca_graph2+theme(legend.position="none")+ggrepel::geom_text_repel(aes(x=PC_data$x[,"PC2"], y=PC_data$x[,"PC3"], label=rownames(PC_data$x)), colour="black", size=3) )
+    # Graph output
+    output_filename <- file.path(outputpath, paste("PCAplots_",type,".pdf",sep=""))
+    pdf(output_filename, width=3.5, height=3.5)
+    print(pca_graph+theme(legend.position="none") )
+
+    print(pca_graph+theme(legend.position="none")+ggrepel::geom_text_repel(aes(x=PC_data$x[,x_axis], y=PC_data$x[,y_axis], label=rownames(PC_data$x)), colour="black", size=3) )
+    gridExtra::grid.arrange(g_legend(pca_graph) )
+    try({
+      print(pca_graph2+theme(legend.position="none") )
+      print(pca_graph2+theme(legend.position="none")+ggrepel::geom_text_repel(aes(x=PC_data$x[,"PC2"], y=PC_data$x[,"PC3"], label=rownames(PC_data$x)), colour="black", size=3) )
+    })
+    print(pca_loading_graph)
+    plot(PC_data, type = 'l', main=paste("PCs vs. Variance",sep=""))
   })
-  print(pca_loading_graph)
-  plot(PC_data, type = 'l', main=paste("PCs vs. Variance",sep=""))
   
   piece1 <- gg_dist_1 + theme(axis.title.x=element_blank(), plot.margin=unit(c(0.5, -0.3, 0, 0.6), "cm") )
   piece2 <- gg_dist_2 + theme(axis.title.y=element_blank(), plot.margin=unit(c(-0.3, 0.2, 0.35, 0), "cm") ) + coord_flip() 

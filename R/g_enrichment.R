@@ -2,7 +2,7 @@ gsea_ranked_data=function(g, contrast_name, coef, rcols){
   do.call("rbind", lapply(1:length(g$gene_data_index),FUN=function(i){
     top_sum <- FALSE;
     try({ 
-      top_sum <- limma::topTable(g$omicsList[[ g$gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by='p', coef=coef);
+      top_sum <- limma::topTable(g$omicsList[[ g$gene_data_index[i] ]][["fit"]], adjust.method="BH", n=Inf, sort.by=if(is.null(coef)) 'B' else 'p', coef=coef);
       ranked <- cbind(top_sum[,"Gene"], rcols(top_sum)) 
     })
     if( class(top_sum)=="logical" ){ try({
@@ -299,8 +299,8 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
 
       gene_table = do.call("rbind",lapply(1:length(g$gene_data_index),FUN=function(i){
         sig_cutoff <- round(sig_percent*nrow(g$omicsList[[ g$gene_data_index[1] ]][["eSet"]]), digits=0)
-        gene_table <- limma::topTableF(g$omicsList[[ g$gene_data_index[1] ]][["fit"]], adjust="BH", n=Inf, sort.by='F', p.value=adjpcutoff)
-        if (nrow(gene_table)<sig_cutoff){ gene_table<-limma::topTableF(g$omicsList[[ g$gene_data_index[1] ]][["fit"]], adjust="BH", n=sig_cutoff, sort.by='F') }
+        gene_table <- limma::topTable(g$omicsList[[ g$gene_data_index[1] ]][["fit"]], adjust="BH", n=Inf, sort.by='B', p.value=adjpcutoff)
+        if (nrow(gene_table)<sig_cutoff){ gene_table<-limma::topTable(g$omicsList[[ g$gene_data_index[1] ]][["fit"]], adjust="BH", n=sig_cutoff, sort.by='B') }
         gene_table[, c("Gene", "F") ];
       }))
           
@@ -317,8 +317,8 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
       top_sum<- FALSE;
       contrast_name <- "F-statistic"
       sig_cutoff <- round(sig_percent*nrow(g$omicsList[[ g$gene_data_index[1] ]][["eSet"]]), digits=0)
-      top_sum <- limma::topTableF(g$omicsList[[ g$gene_data_index[i] ]][["fit"]], adjust="BH", n=Inf, sort.by='F', p.value=adjpcutoff);
-      if (nrow(top_sum)<sig_cutoff){ top_sum <- limma::topTableF(g$omicsList[[ g$gene_data_index[i] ]][["fit"]], adjust="BH", n=sig_cutoff, sort.by='F'); }
+      top_sum <- limma::topTable(g$omicsList[[ g$gene_data_index[i] ]][["fit"]], adjust="BH", n=Inf, sort.by='B', p.value=adjpcutoff);
+      if (nrow(top_sum)<sig_cutoff){ top_sum <- limma::topTable(g$omicsList[[ g$gene_data_index[i] ]][["fit"]], adjust="BH", n=sig_cutoff, sort.by='B'); }
       top_sum[,"logFC"] <- top_sum[,'F']
       type_name <- paste(g$omicsList[[ g$gene_data_index[i] ]][["dataType"]], 'F-statistic', sep="_");
       
@@ -373,7 +373,7 @@ g.ksea = function(g, working_dir="3_KSEA", deps=T){
       if( dir.exists(dir_path2) == FALSE ) {dir.create(dir_path2)}
       
       try({
-        KSEAapp::KSEA.Complete(KSData, PX2, NetworKIN=TRUE, NetworKIN.cutoff=5, m.cutoff=3, p.cutoff=0.05, output_dir=dir_path2)
+        KSEAapp::KSEA.Complete(KSEAapp::KSData, PX2, NetworKIN=TRUE, NetworKIN.cutoff=5, m.cutoff=3, p.cutoff=0.05, output_dir=dir_path2)
       
       output_links <- paste0(output_links,paste("[ ",dir_name," ](",g$output_subdir,"/3_KSEA/",dir_name,"/KSEA Bar Plot.png)  |  ",sep=""))
       })
