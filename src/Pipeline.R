@@ -38,7 +38,7 @@ if(analysis_dir != working_dir){
 
 # Set local file paths, if not needed, set BUSCC to false
 if(inherit_paths==TRUE) {
-  .libPaths(libraries_path);
+  #.libPaths(libraries_path);
    #Sys.setenv(RSTUDIO_PANDOC=pandoc_path);
 }
 
