@@ -13,6 +13,7 @@ Edit Config.R configuration variables to match your installation paths.
 ##### i. Install specified versions of R and the OmicsNotebook package and its dependencies
 It's recommended to use something like [remotes](https://cran.r-project.org/web/packages/remotes/) to install this package.
 If this code was downloaded into the "Omics_Notebook" directory:
+
 `R -e "remotes::install_local('Omics_Notebook')"`
 
 ##### ii. Run Notebook.R script, which will automate entire pipeline.
@@ -27,8 +28,11 @@ Given complexity with R package dependencies, it may be easiest to run with the 
 ##### ii. From Omics Notebook Directory, run:
 *Docker:*
 `docker pull cnsbboston/omicsnotebook:latest`
+
 Or build from Dockerfile.
+
 `docker build -t omicsnotebook-base -f Dockerfile-base .` base OS with required system dependencies (libraries, R, etc)
+
 `docker build -t cnsbboston/omicsnotebook -f Dockerfile .` full image with R packages, built on top of the base image
 
 *Singularity:*
@@ -39,6 +43,7 @@ The base image can be used if it's preferable to keep R packages outside the con
 ##### iii. Run Notebook.R with a container argument.
 *Docker:*
 `Rscript Notebook.R Docker`
+
 `-c` can also be passed here (like Singularity below) to specify a different docker image tag to run
 
 *Singularity:*
