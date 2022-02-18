@@ -6,39 +6,49 @@ https://github.com/cnsb-boston/Omics_Notebook_Docs
 #### 1. Install git. Clone github repository:
 `git clone https://github.com/cnsb-boston/Omics_Notebook.git`
 
+Edit Config.R configuration variables to match your installation paths.
 
 #### 2 A. Run Natively.
 
-##### i. Install specified versions of R and Python and all packages in install.R file (see below).
+##### i. Install specified versions of R and the OmicsNotebook package and its dependencies
+It's recommended to use something like [remotes](https://cran.r-project.org/web/packages/remotes/) to install this package.
+If this code was downloaded into the "Omics_Notebook" directory:
+`R -e "remotes::install_local('Omics_Notebook')"`
 
-##### ii. Run Notebook.py script, which will automate entire pipeline.
-`python3 Notebook.py`
+##### ii. Run Notebook.R script, which will automate entire pipeline.
+`Rscript Notebook.R`
 
 
-#### 2 B. Run with Docker.
-Given complexity with R package dependencies, it may be easiest to run with the assistance of docker on local computers or cloud resources. 
+#### 2 B. Run in a container.
+Given complexity with R package dependencies, it may be easiest to run with the assistance of a container on local computers or cloud resources. 
 
-##### i. Install Python (3.6), tkinter, and Docker. 
+##### i. Install R and the container system (Docker or Singularity). 
 
 ##### ii. From Omics Notebook Directory, run:
-`docker pull bblum/omics_notebook:latest`
+*Docker:*
+`docker pull cnsbboston/omicsnotebook:latest`
 Or build from Dockerfile.
+`docker build -t omicsnotebook-base -f Dockerfile-base .` base OS with required system dependencies (libraries, R, etc)
+`docker build -t cnsbboston/omicsnotebook -f Dockerfile .` full image with R packages, built on top of the base image
 
-##### iii. Run Notebook.py with "Docker" argument.
-`python3 Notebook.py Docker`
+*Singularity:*
+`singularity build "ON.simg" "docker://cnsbboston/omicsnotebook:latest"`
 
+The base image can be used if it's preferable to keep R packages outside the container. In this case the R library directory can be mapped onto the container with -v (Docker) or -B (Singularity), or using the libdir variable in Config.R.
+
+##### iii. Run Notebook.R with a container argument.
+*Docker:*
+`Rscript Notebook.R Docker`
+`-c` can also be passed here (like Singularity below) to specify a different docker image tag to run
+
+*Singularity:*
+`Rscript Notebook.R Singularity -c '/Path/to/SingularityImage.simg'`
 
 Or run each component on its own, which may be easier for integrating into other workflows.
 
-##### i. Install Python (3.6), tkinter, and Docker. 
-
-##### ii. From Omics Notebook Directory, run:
-`docker pull bblum/omics_notebook:latest`
-Or build from Dockerfile.
-
 ##### iii. Generate Parameters.R file.
-The GUI component automates the creation of the Parameters.R file and should be run natively with Python3 and tkinter. While there are solutions for GUI in docker (e.g. VNC or configuring X11 socket), they may be difficult to configure on all systems.
-`python3 Omics_Notebook/src/Pipeline.py` Adjust path for file location.
+The GUI component automates the creation of the Parameters.R file and should be run natively with R. While there are solutions for GUI in docker (e.g. VNC or configuring X11 socket), they may be difficult to configure on all systems.
+`Rscript Notebook.R GUI` Adjust path for file location.
 
 ##### iv. Run R analysis using docker:
 ```
@@ -46,7 +56,7 @@ docker run -it --rm \
   -u docker \
   -v /PATH/TO/OMICS NOTEBOOK:/home:rw \
   -v /PATH/TO/DATA ANALYSIS DIR:/data:rw \
-  bblum/omics_notebook Rscript /home/src/Pipeline.R "/home" "/data"
+  cnsbboston/omicsnotebook Rscript /home/src/Pipeline.R "/home" "/data"
 ```
 The Analysis Directory is the directory where the Parameters.R, Annotation, and Data files are and where the output will be saved. Remember, files are relative to the docker container. The third and fourth -v lines mount the local Omics_Notebook directory to the home directory in the container, and mount the Analysis Directory to the data directory.
 
@@ -56,34 +66,10 @@ docker run -it --rm \
   -u docker \
   -v ~/Omics_Notebook:/home:rw \
   -v ~/Omics_Notebook/example:/data:rw \
-  bblum/omics_notebook Rscript "/home/src/Pipeline.R" "/home" "/data"
+  cnsbboston/omicsnotebook Rscript "/home/src/Pipeline.R" "/home" "/data"
 ```
 
-
-#### 2 C. Run with Singularity.
-For use with shared HPC linux environments.
-
-##### i. Install Python (3.6), tkinter, and Singularity. 
-
-##### ii. Create singularity image from Docker.
-`singularity build "ON.simg" "docker://bblum/omics_notebook:latest"`
-
-##### iii. Run Notebook.py with "Docker" argument.
-`python3 Notebook.py Singularity '/Path/to/SingularityImage.simg'`
-
-
-Or run each component on its own, which may be easier for integrating into other workflows.
-
-##### i. Install Python (3.6), tkinter, and Singularity. 
-
-##### ii. Create singularity image from Docker.
-`singularity build "ON.simg" "docker://bblum/omics_notebook:latest"`
-
-##### iii. Generate Parameters.R file.
-The GUI component automates the creation of the Parameters.R file and should be run natively with Python3 and tkinter. While there are solutions for GUI in docker (e.g. VNC or configuring X11 socket), they may be difficult to configure on all systems.
-`python3 Omics_Notebook/src/Pipeline.py` Adjust path for file location.
-
-##### iv. Run R analysis using docker:
+##### iv. Run R analysis using Singularity:
 ```
 singularity run \
   --bind /PATH/TO/OMICS NOTEBOOK:/home:rw \
@@ -147,9 +133,9 @@ The complete pipeline should run on a normal desktop computer in a few hours, po
 
 ## Structure
 
-"Notebook.py" is a python script that will call two scripts. The first is "src/Pipeline.py", which will generate a Parameters.R file in the directory with the data (Analysis Directory). This can be helpful to assure correct variable formatting. The second is "src/Pipeline.R", which will knit the R markdown files.
+"Notebook.R" is an R script that will call two scripts. The first is "NotebookGUI.R", which will generate a Parameters.R file in the directory with the data (Analysis Directory). This can be helpful to assure correct variable formatting. The second is "src/Pipeline.R", which will knit the R markdown files.
 
-For cutsome analysis, it may be easier to use "Pipeline.py" to generate a "Parameters.R". Place the "Parameters.R" in the directory with the data and annotation files, and then use R studio to walk through the .Rmd files. This can be done with the umbrella "Notebook.Rmd", exploratory "Notebook_1_Expl.Rmd", differential "Notebook_2_Diff.Rmd", enrichment "Notebook_3_Enrch.Rmd", integrative "Notebook_4_Integ.Rmd", and functions in the "R" directory.
+For custom analysis, it may be easier to call `Rscript Notebook.R GUI` to generate a "Parameters.R". Place the "Parameters.R" in the directory with the data and annotation files, and then use R studio to walk through the .Rmd files. This can be done with the umbrella "Notebook.Rmd", exploratory "Notebook_1_Expl.Rmd", differential "Notebook_2_Diff.Rmd", enrichment "Notebook_3_Enrch.Rmd", integrative "Notebook_4_Integ.Rmd", and functions in the "R" directory.
 
 In this way, the r markdown reports can be generated automatically with wrapper scripts or manually with R studio. 
 
@@ -165,7 +151,7 @@ Read /docs/SupplementaryInformation.pdf for screen shots and instructions.
 
 In general, this software is designed to make use of containerization for managing the many R package installation requirements and dependencies. It also permits use of this software on local computers or shared (e.g., HPC or cloud) computing resources with Docker or Singularity. However, the following will be updated as needed.
 
-* R 3.6,  Python 3.6, Tkinter.
+* R 4.1
 
 * Install Rstudio.
 
