@@ -26,8 +26,7 @@ LocationOfThisScript = function() {
 current.dir = LocationOfThisScript()
 
 notebook_path=if(is.null(current.dir)) "/project/cnsbomic/Omics_Notebook" else current.dir
-source(paste0(notebook_path,"Config.R"))
-source(paste0(notebook_path,"NotebookGUI.R"))
+source(paste0(notebook_path,"/Config.R"))
 
 native.cmd = function(notebook="/home", analysis="/data", parameters="Parameters.R"){
   c("Rscript", paste0(notebook,"/src/Pipeline.R"), notebook, analysis, parameters)
@@ -37,6 +36,7 @@ run.native = function(args){
   cmdargs=list(notebook=args[1],analysis=args[2])
   if(length(args)>2) cmdargs$parameters=args[3]
   command = do.call("native.cmd",cmdargs)
+  #write(paste0(command,collapse=" "),stderr())
   system2(command[1], command[-1], env=character(R_LIBS="/usr/local/R/local-library"))
 }
 
@@ -47,15 +47,18 @@ run.generic.container = function(cmd, image, bindopt, extras=list(pre="",post=""
               bindopt, paste0(libdir, ":/usr/local/lib/R/local-library"), extras$post,
               image, native.cmd(parameters=parameters))
   command=command[command!=""]
+  #write(paste0(command,collapse=" "),stderr())
   system2(command[1], command[-1])
 }
 
-run.docker = function(parameters,image){
-  run.generic.container(cmd=c("docker","run","-it","--rm","-u","docker"), image="cnsbboston/omicsnotebook", bindopt="-v", parameters=parameters)
+run.docker = function(param,container,...){
+  if(length(container)!=1 || nchar(container)<1) container=docker_img
+  run.generic.container(cmd=c("docker","run","-it","--rm","-u","docker"), image=container, bindopt="-v", parameters=param)
 }
 
-run.singularity = function(parameters,image){
-  run.generic.container(cmd=c("singularity","run"), image=image, bindopt="--bind", parameters=parameters)
+run.singularity = function(param,container,...){
+  if(length(container)!=1 || nchar(container)<1) container=singularity_img
+  run.generic.container(cmd=c("singularity","run"), image=container, bindopt="--bind", parameters=param)
 }
 
 getopt = function(args, choices){
@@ -89,7 +92,7 @@ getopt = function(args, choices){
 
 choices=matrix(c(
   'param', 'p', 'Parameters.R', 'character',
-  'container', 'c', singularity_img, 'character',
+  'container', 'c', "", 'character',
   'nogui', 'g', F, 'logical',
   'help', 'h', F, 'logical'
   ), byrow=T, ncol=4)
@@ -105,12 +108,12 @@ if(opts$help){
 if(opts$nogui){
   analysis_dir = getwd()
 } else {
+  source(paste0(notebook_path,"/NotebookGUI.R"))
   analysis_dir = make.gui(startdir=startdir)
 }
 
-parameters = if(length(args)>1) args[length(args)] else "Parameters.R"
 switch(args[1],
-       "Docker"=run.docker(opts$param,opts$container),
-       "Singularity"=run.singularity(opts$param,opts$container),
+       "Docker"=do.call(run.docker, opts),
+       "Singularity"=do.call(run.singularity, opts),
        "GUI"=write(analysis_dir,stdout()),
        run.native(args))
