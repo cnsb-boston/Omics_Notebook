@@ -117,5 +117,6 @@ make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets
   tkgrid(tkbutton(tt, text="Enter", command=function(){write.params(v); tkdestroy(tt)}), column=1, row=30)
 
   tkwait.window(tt)
+  Sys.sleep(3) # sometimes the window hangs if we don't wait?
   tclvalue(v$working_dir)
 }
