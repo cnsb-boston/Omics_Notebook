@@ -35,10 +35,15 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
   # Get and format Sample Names from annotation
   annotate[,"SampleName"] <- make.names(annotate[,"SampleName"] ); #format sample names
   annotate[,type] <- make.names(annotate[,type] ); # data column headers
-  
+  samp_cols = annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type]
+  missing_cols = setdiff(samp_cols, colnames(data))
+  if(!grepl("Sites..MQ.", data_format) && length(missing_cols)>0){
+    stop(paste0("Annotation file requests columns not present in data file (",type,", / ",data_format,"): ", paste0(missing_cols, collapse=", ")))
+  }
+
   if (data_format=='Protein.Groups..MQ.'){
     # pull out sample intensity values based on annotation
-    data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
+    data.matrix <- as.matrix(data[, samp_cols]);
     # parse out protein namea
     data[,"Protein"] <- apply(data, 1, function(x) {
       if(grepl(';', x["Majority.protein.IDs"])){ substr(x["Majority.protein.IDs"], 0, 
@@ -47,7 +52,7 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
   }
   if (data_format=='Peptides..MQ.'){
     # pull out sample intensity values based on annotation
-    data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
+    data.matrix <- as.matrix(data[, samp_cols]);
     # parse out protein namea
     data[,"Protein"] <- apply(data, 1, function(x) {
       if(grepl(';', x["Proteins"])){ substr(x["Proteins"], 0, 
@@ -60,33 +65,30 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     data <- data[ data[,"Localization.prob"]>=0.70 ,]; #filter low probability features
     
     # pull out sample intensity values based on annotation and collapse multiple sites
-    data1 <- data[, -grep(paste(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type],
-                                collapse='|'), colnames(data)) ]; 
+    data1 <- data[, !(colnames(data) %in% samp_cols)];
     data1 <- data1[rep(rownames(data1), 3),];
-    for (i in 1:length(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type])){
-      cols.keep <- colnames(data)[grep(annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type][i],
-                                       colnames(data) )];  
-      data1 <- cbind(data1, reshape2::melt(data[, cols.keep], measure.vars=cols.keep,
-                                 variable.name=paste("Phospho.Site.", i-1, sep=''),
-                                 value.name=annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type][i] ));
-    }
-    data <- data1;
-    data.matrix <- as.matrix(data[,annotate[ (annotate[,type]!="NA."& annotate[,"SampleName"]!="NA."),type]]);
+    data2 = do.call("cbind",lapply(1:length(samp_cols), FUN=function(i){
+      cols.keep <- grep(samp_cols[i], colnames(data), value=T);  
+      reshape2::melt(data[, cols.keep], measure.vars=cols.keep,
+                     variable.name=paste("Phospho.Site.", i-1, sep=''),
+                     value.name=samp_cols[i]);
+    }))
+    data <- cbind(data1, data2)
+    data.matrix <- as.matrix(data[, samp_cols]);
     # parse out protein namea
     data[,"Protein"] <- apply(data, 1, function(x) {
       if(grepl(';', x["Protein"])){ substr(x["Protein"], 0, 
                                            unlist(gregexpr(';', x["Protein"]))[1]-1)}
       else {x["Protein"]} } );
   }
-  
-  sample_column_names <- colnames(data[, which(colnames(data) %in% annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ) ])
+ 
+  sample_column_names <- colnames(data[, which(colnames(data) %in% samp_cols) ])
   if( data_format=="Generic" ){
     data.matrix <- as.matrix(data[, sample_column_names ]);
-
   }
   
   if( grepl("Metabolites", data_format) ){ # Either OpenMS output or XCMS Online output
-    data.matrix <- as.matrix(data[, annotate[ (annotate[,type]!="NA." & annotate[,"SampleName"]!="NA."),type] ]);
+    data.matrix <- as.matrix(data[, samp_cols]);
     
     if( "mzmed" %in% colnames(data) ){ data[,"mz"] <- data[,"mzmed"] } # if xmcs output, make mz column
     if( "mz_cf" %in% colnames(data) ){ data[,"mz"] <- data[,"mz_cf"] } # if openms output, make mz column
