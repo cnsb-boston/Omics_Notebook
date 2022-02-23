@@ -101,8 +101,8 @@ make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets
   tkgrid(tklabel(tt, text="Normalization Method"), column=2, row=14)
   tkgrid(ttkcombobox(tt, textvariable=v$norm_method, values=norm_methods), column=3, row=14)
 
-  #tkgrid(tklabel(tt, text="Zero Value Filter:"), column=2, row=15)
-  #tkgrid(ttkspinbox(tt, textvariable=v$zero_cutoff, from=0, to=1, increment=.01), column=3, row=15)
+  tkgrid(tklabel(tt, text="Zero Value Filter:"), column=2, row=15)
+  tkgrid(ttkspinbox(tt, textvariable=v$zero_percent, from=0, to=1, increment=.01), column=3, row=15)
 
   species = c('Human (9606)', 'Mouse (10090)','Other', 'Yeast (559292)', 'E. coli (511145)','Zebrafish (7955)', 'C. elegans (6239)', 'Fruit Fly (7227)','Rat (10116)')
   tkgrid(tklabel(tt, text="Species"), column=0, row=16)
