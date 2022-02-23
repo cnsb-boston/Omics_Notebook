@@ -379,9 +379,9 @@ g.heatmap.static = function(g, deps=T){
     },silent=T) }
     # Draw the heatmaps and sace the Complex Heatmap object
     map_out <- drawHeatmaps(eset=g$omicsList[[i]][["eSet"]], emat_top=g$omicsList[[i]][["topVariable"]],
-                            type=g$omicsList[[i]][["dataType"]], subset=subset_rows, k_clust=knn_heatmap,
+                            type=g$omicsList[[i]][["dataType"]], subset=subset_rows, k_clust=g$knn_heatmap,
                             outputpath=g$output_plots_path, outputcontrastpath=g$output_contrast_path);
-    saveRDS(map_out, file=file.path(output_files_path, paste("Heatmap_",g$omicsList[[i]][["dataType"]],".RDS",sep="")) )
+    saveRDS(map_out, file=file.path(g$output_files_path, paste("Heatmap_",g$omicsList[[i]][["dataType"]],".RDS",sep="")) )
 
   }) })
 
