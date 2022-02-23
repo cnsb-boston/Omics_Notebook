@@ -26,7 +26,7 @@ make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets
          query_web=tclBool(TRUE),
          map_color=tclStr('viridis'),
          zero_percent=tclNum(0.010),
-         norm_method = tclStr('quantile'),
+         norm_method = tclStr('loess'),
          log_transform = tclBool(TRUE),
          shinyNorm = tclBool(FALSE),
          saveXlsx = tclBool(TRUE),
