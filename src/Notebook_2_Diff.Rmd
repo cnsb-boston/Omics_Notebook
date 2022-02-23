@@ -68,7 +68,7 @@ if(saveXlsx==TRUE){
                       coef_index=g$loop_list, time_index=g$time_index, contrast_strings=g$contrast_strings); 
   }) }  
   
-  output_filename=file.path(g$output_path, paste(gsub("\\.","",make.names(g$project_name)), "_Summary", ".xlsx", sep=""))
+  output_filename=file.path(g$output_path, paste(gsub("\\.","",make.names(project_name)), "_Summary", ".xlsx", sep=""))
   openxlsx::saveWorkbook(wbOut, file=output_filename, overwrite=TRUE)
 }
 ```
