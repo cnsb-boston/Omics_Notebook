@@ -51,12 +51,24 @@ make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets
   tkgrid(tklabel(tt, text="Project Name:"), column=0, row=1, sticky="E") 
   tkgrid(tkentry(tt, textvariable=v$project_name), column=1, row=1, sticky="W")
 
-  fileDir_clicked=function()tclvalue(v$working_dir)=tkchooseDirectory(initialdir=startdir, title="Choose directory")
-  tkgrid(tklabel(tt, text="Files Directory:"), column=0, row=2, sticky="E")
-  tkgrid(tkentry(tt, textvariable=v$working_dir, width=60, state="disabled"), column=1, row=2, columnspan=3, sticky="W")
-  tkgrid(tkbutton(tt, text="Choose Directory", command=fileDir_clicked), column=4, row=2, sticky="W")
+  annotation_validate=tclStr("")
+  tkgrid(tklabel(tt, textvariable=annotation_validate), column=1, row=2, columnspan=3, sticky="E")
 
-  anno_clicked=function()tclvalue(v$annotation_filename)=tkgetOpenFile(initialdir=tclvalue(v$working_dir), title="Choose Annotation file")
+  fileDir_clicked=function()tclvalue(v$working_dir)=tkchooseDirectory(initialdir=startdir, title="Choose directory")
+  tkgrid(tklabel(tt, text="Files Directory:"), column=0, row=3, sticky="E")
+  tkgrid(tkentry(tt, textvariable=v$working_dir, width=60, state="disabled"), column=1, row=3, columnspan=3, sticky="W")
+  tkgrid(tkbutton(tt, text="Choose Directory", command=fileDir_clicked), column=4, row=3, sticky="W")
+
+  anno_clicked=function(){
+    fname=tkgetOpenFile(initialdir=tclvalue(v$working_dir), title="Choose Annotation file", filetypes="{ {Excel Files} {.xlsx} } { {All Files} * }")
+    fi=file.path(tclvalue(v$working_dir),basename(tclvalue(fname)))
+    if(file.exists(fi)){
+      tclvalue(v$annotation_filename)=fi
+      tclvalue(annotation_validate)=""
+    } else {
+      tclvalue(annotation_validate)="Annotation file must be in the project directory."
+    }
+  }
   tkgrid(tklabel(tt, text="Annotation File:"), column=0, row=5, sticky="E")
   tkgrid(tkentry(tt, textvariable=v$annotation_filename, width=60, state="disabled"), column=1, row=5, columnspan=3, sticky="W")
   tkgrid(tkbutton(tt, text="Choose Annotation File", command=anno_clicked), column=4, row=5, sticky="W")
