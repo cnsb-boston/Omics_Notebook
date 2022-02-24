@@ -99,6 +99,8 @@ choices=matrix(c(
 opts=getopt(args,choices)
 
 if(opts$help){
+  print("[GUI | [[R] [Docker | Singularity]]] {options ...}")
+  print("options:")
   for(i in 1:nrow(choices)){
     print(paste0("--",choices[i,1]," -",choices[i,2]," (default: ",choices[i,3],")"))
   }
@@ -112,8 +114,13 @@ if(opts$nogui){
   analysis_dir = make.gui(startdir=startdir)
 }
 
+#short circuits
+switch(args[1],
+       "GUI"={write(analysis_dir,stdout()); quit("no");},
+       "R"={args=args[-1]; native.cmd=function(...)c("R","--quiet");})
+
+#normal analysis
 switch(args[1],
        "Docker"=do.call(run.docker, opts),
        "Singularity"=do.call(run.singularity, opts),
-       "GUI"=write(analysis_dir,stdout()),
        run.native(args))
