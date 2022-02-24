@@ -356,11 +356,11 @@ genfile=function(g,oListi,contrast_name,coef,tsum,fd){
     if( "mz" %in% colnames(fData(oListi[["eSet"]])) ){ top_sum$mz <- fData(oListi[["eSet"]])$mz }
   })}
 
-  saveFiles(data=oListi, limmaRes=top_sum, type=oListi[["dataType"]], contrast_name=contrast_name, outputpath=g$output_plots_path, outputcontrastpath=g$output_contrast_path_files)
+  saveFiles(data=oListi, limmaRes=top_sum, type=oListi[["dataType"]], contrast_name=contrast_name, outputpath=g$output_files_path, outputcontrastpath=g$output_contrast_path_files, saveRDS=F)
   
   if( !( grepl("Human", species) ) & "Gene" %in% colnames(fData(oListi[["eSet"]]))   ){ 
     top_sum$Gene <- toupper(top_sum$Gene)
-    saveFiles(oListi, limmaRes=top_sum, type=paste(oListi[["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F, outputpath=g$output_plots_path, outputcontrastpath=g$output_contrast_path_files)
+    saveFiles(oListi, limmaRes=top_sum, type=paste(oListi[["dataType"]], "_Uppercase", sep=""), contrast_name=contrast_name, saveRDS=F, outputpath=g$output_files_path, outputcontrastpath=g$output_contrast_path_files)
   }
 }
 
@@ -391,6 +391,8 @@ g.savedata = function(g, deps=T){
       genfile(g,g$omicsList[[i]],"Timecourse_Overall",g$time_start:g$time_end,timetable,NULL);
     }
   })})}
+
+  saveRDS(g, file=file.path(g$output_files_path,"Data_g_state.RDS"));
 
   g$calls = c(g$calls, "g.savedata")
   g

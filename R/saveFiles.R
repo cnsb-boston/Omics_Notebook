@@ -18,7 +18,7 @@ saveFiles <- function(data, type, outputpath=output_files_path, subset=FALSE, sa
                       limmaRes=FALSE, contrast_name=FALSE, outputcontrastpath=output_contrast_path_files){
   # Save eSet RDS  
   if( saveRDS ){
-    output_filename <- file.path(outputpath, paste("Data_",type,".RDS", sep=""));             
+    output_filename <- file.path(outputpath, paste("Data_",type,".RDS", sep=""));
     saveRDS(data, file=output_filename); 
   }
   

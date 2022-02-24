@@ -359,7 +359,7 @@ g.combine.met = function(g, deps=T){
 }
 
 
-g.heatmap.static = function(g, deps=T){
+g.heatmap.static = function(g, deps=T, saveRDS=F){
   if(deps) g=g.run.deps(g, c("g.varplot","g.combine.met"))
   output_links<-"";
   # Heatmaps
@@ -381,7 +381,7 @@ g.heatmap.static = function(g, deps=T){
     map_out <- drawHeatmaps(eset=g$omicsList[[i]][["eSet"]], emat_top=g$omicsList[[i]][["topVariable"]],
                             type=g$omicsList[[i]][["dataType"]], subset=subset_rows, k_clust=g$knn_heatmap,
                             outputpath=g$output_plots_path, outputcontrastpath=g$output_contrast_path);
-    saveRDS(map_out, file=file.path(g$output_files_path, paste("Heatmap_",g$omicsList[[i]][["dataType"]],".RDS",sep="")) )
+    if(saveRDS) saveRDS(map_out, file=file.path(g$output_files_path, paste("Heatmap_",g$omicsList[[i]][["dataType"]],".RDS",sep="")) )
 
   }) })
 
@@ -470,8 +470,9 @@ g.save.data.qc = function(g, deps=T){
         }
       }
     }, silent=TRUE) }
-    saveFiles(data=g$omicsList[[i]], type=g$omicsList[[i]][["dataType"]], subset=subset_rows,
+    saveFiles(data=g$omicsList[[i]], type=g$omicsList[[i]][["dataType"]], subset=subset_rows, saveRDS=FALSE,
               outputpath=g$output_files_path, outputcontrastpath=g$output_contrast_path_files);
+    saveRDS(g, file=file.path(g$output_files_path,"Data_g_state.RDS"));
   }  
 
   # Save excel file summary for collaborators
