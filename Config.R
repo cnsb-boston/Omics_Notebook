@@ -3,3 +3,4 @@ libdir="/project/cnsbomic/RTools/ON4.1" # extra libraries to map into the contai
 singularity_img=paste0(notebook_path,"/ON4.simg") # ignored if singularity is not used or image is provided on the command line
 docker_img="cnsbboston/omicsnotebook" # ignored if docker is not used or image is provided on the command line
 startdir="/projectnb/cnsbomic" # default starting directory for the GUI file selection
+env_vars=c("R_LIBS=/usr/local/lib/R/local-library") # environment variables to use during the analysis

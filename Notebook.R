@@ -23,9 +23,9 @@ LocationOfThisScript = function() {
   # Both are not the case. Maybe we are in an R GUI?
   return(NULL)
 }
-current.dir = LocationOfThisScript()
+script.dir = LocationOfThisScript()
 
-notebook_path=if(is.null(current.dir)) "/project/cnsbomic/Omics_Notebook" else current.dir
+notebook_path=if(is.null(script.dir)) "/project/cnsbomic/Omics_Notebook" else script.dir
 source(paste0(notebook_path,"/Config.R"))
 
 native.cmd = function(notebook="/home", analysis="/data", parameters="Parameters.R"){
@@ -37,28 +37,31 @@ run.native = function(args){
   if(length(args)>2) cmdargs$parameters=args[3]
   command = do.call("native.cmd",cmdargs)
   #write(paste0(command,collapse=" "),stderr())
-  system2(command[1], command[-1], env=character(R_LIBS="/usr/local/R/local-library"))
+  system2(command[1], command[-1], env=paste0(env_vars,collapse=";"))
 }
 
-run.generic.container = function(cmd, image, bindopt, extras=list(pre="",post=""), parameters){
-  command = c(cmd, extras$pre,
-              bindopt, paste0(notebook_path, ":/home:rw"),
-              bindopt, paste0(analysis_dir, ":/data:rw"),
-              bindopt, paste0(libdir, ":/usr/local/lib/R/local-library"), extras$post,
+run.generic.container = function(cmd, image, bindopt, extras=list(pre="",post=""), parameters, libdir){
+  command = c(cmd, extras$pre, paste0("--env=",env_vars),
+              bindopt, paste0("'", notebook_path, ":/home:rw'"),
+              bindopt, paste0("'", analysis_dir, ":/data:rw'"),
+              bindopt, paste0("'", libdir, ":/usr/local/lib/R/local-library'"),
+              extras$post,
               image, native.cmd(parameters=parameters))
   command=command[command!=""]
   #write(paste0(command,collapse=" "),stderr())
   system2(command[1], command[-1])
 }
 
-run.docker = function(param,container,...){
+run.docker = function(param,container,libdir,...){
   if(length(container)!=1 || nchar(container)<1) container=docker_img
-  run.generic.container(cmd=c("docker","run","-it","--rm","-u","docker"), image=container, bindopt="-v", parameters=param)
+  run.generic.container(cmd=c("docker","run","-it","--rm","-u","docker"), image=container, bindopt="-v",
+                        extras=list(pre="--workdir=/data",post=""),parameters=param, libdir=libdir)
 }
 
-run.singularity = function(param,container,...){
+run.singularity = function(param,container,libdir,...){
   if(length(container)!=1 || nchar(container)<1) container=singularity_img
-  run.generic.container(cmd=c("singularity","run"), image=container, bindopt="--bind", parameters=param)
+  run.generic.container(cmd=c("singularity","run"), image=container, bindopt="--bind",
+                        extras=list(pre="--pwd=/data",post=""), parameters=param, libdir=libdir)
 }
 
 getopt = function(args, choices){
@@ -92,6 +95,7 @@ getopt = function(args, choices){
 
 choices=matrix(c(
   'param', 'p', 'Parameters.R', 'character',
+  'libdir', 'l', libdir, 'character',
   'container', 'c', "", 'character',
   'nogui', 'g', F, 'logical',
   'help', 'h', F, 'logical'
