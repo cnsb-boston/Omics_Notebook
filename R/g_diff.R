@@ -1,4 +1,14 @@
 
+#' Limma
+#'
+#' Run limma::lmFit for differential analysis by sample groups
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.limma = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.make.contrasts", "g.combine.met"))
   ##########################################################
@@ -61,10 +71,19 @@ g.limma = function(g, deps=T){
   g
 }
 
+#' Fold Change
+#'
+#' Calculate log fold change by an internal method, in case limma fails
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.fc = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.make.contrasts", "g.combine.met"))
   ##########################################################
-  # Calculate log fold change in case limma fails
   # For the case where the differential analysis fails (e.g., due to too few samples per group), we calculate an average value for each group,
   # and then calculate a simple difference between all groups.
   logfc_index <- c();
@@ -97,6 +116,16 @@ g.fc = function(g, deps=T){
   g
 }
 
+#' Volcano
+#'
+#' Generate volcano plots for each contrast pair
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.volcano = function(g, deps=T){
   if(deps) g=g.run.deps(g, "g.limma")
   output_links = ""
@@ -139,6 +168,16 @@ g.volcano = function(g, deps=T){
   g
 }
 
+#' Mirrored Density (MD) Plots
+#'
+#' Generate MD plots for each contrast pair
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.md = function(g, deps=T){
   if(deps) g=g.run.deps(g, "g.fc")
   output_links = g$volcano_output_links
@@ -186,6 +225,16 @@ g.md = function(g, deps=T){
   g
 }
 
+#' Differential Static Heatmaps
+#'
+#' Generate static heatmaps for each contrast pair, rather than the global analysis of g.static.heatmap()
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.de.static.heatmap = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.fc", "g.limma"))
   output_links = ""
@@ -291,6 +340,16 @@ g.de.static.heatmap = function(g, deps=T){
   g
 }
 
+#' Interactive Volcano
+#'
+#' Generate interactive volcano plots for each contrast pair
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.interactive.volcano = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.fc", "g.limma"))
   output_links<-"";
@@ -364,6 +423,16 @@ genfile=function(g,oListi,contrast_name,coef,tsum,fd){
   }
 }
 
+#' Save Data
+#'
+#' Write various files at the end of differential analysis: expression matrices, ranked lists for GSEA, files for network analysis, RDS of the notebook state 'g'
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.savedata = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.fc", "g.limma"))
 

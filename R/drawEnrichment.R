@@ -3,7 +3,7 @@
 #'
 #' This function draws plots for enrichment results
 #' 
-#' @param enrichment_results
+#' @param enrichment_results data
 #' @param type Type of data to be processed, or name for the Omics set
 #' @param outputpath output file path for plots
 #'

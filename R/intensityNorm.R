@@ -12,7 +12,7 @@
 #' @return an expression set object, with normalized data
 #' 
 #' @examples
-#'   eset <- intensityNorm(eset, norm=norm_method)}
+#'   eset <- intensityNorm(eset, norm=norm_method)
 #' 
 #' @export
 intensityNorm <- function(eset, norm, type, outputpath=output_plots_path,

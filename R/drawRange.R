@@ -3,7 +3,7 @@
 #'
 #' This function generates venn diagrams
 #' 
-#' @param matrix
+#' @param matrix data
 #' @param outputpath output file path for plots
 #' 
 #' @examples

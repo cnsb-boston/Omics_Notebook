@@ -6,13 +6,13 @@
 #' @param eset an ExpressionSet object with omics data
 #' @param type Type of data to be processed, or a name for the Omics set.
 #' @param outputpath output file path for plots
-#' @mapcolor specifies color scale to use for heatmap: "viridis" "RdBu" "RdYlBu"
+#' @param mapcolor specifies color scale to use for heatmap: "viridis" "RdBu" "RdYlBu"
 #'
 #' @return
 #' 
 #' @examples
 #' 
-#' @Biobase
+#' @import Biobase
 #' @export
 interactiveHeatmap <- function(eset, type, outputpath=output_plots_path,mapcolor=map_color ){
   

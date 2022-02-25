@@ -50,7 +50,17 @@ contrast_secondary=function(g, ranked, contrast_name){
     write.table(x=ranked_pval,file=output_filename, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE);
 }
  
-g.gsea.combined.contrast = function(g, deps=T){ # Save combined ranked lists for GSEA, for each contrast
+#' GSEA Combined Contrast
+#'
+#' Save combined ranked lists for GSEA, for each contrast
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
+g.gsea.combined.contrast = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.fc", "g.limma"))
 
   cnames=gsub("-","_",g$contrast_strings)
@@ -64,6 +74,16 @@ g.gsea.combined.contrast = function(g, deps=T){ # Save combined ranked lists for
   g
 }
 
+#' Abundance GSEA
+#'
+#' Generate ranked lists for GSEA based on absolute abundance instead of differential analysis
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.abundance.gsea = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.fc", "g.limma"))
 
@@ -106,6 +126,16 @@ g.abundance.gsea = function(g, deps=T){
   g
 }
 
+#' GSEA Data by Paramters
+#'
+#' Convenience function to generate the GSEA data appropriate for the current analysis parameters
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.param.gsea.data = function(g, deps=T){
   if(deps){
     g=g.run.deps(g, "g.make.contrasts")
@@ -123,6 +153,16 @@ g.param.gsea.data = function(g, deps=T){
   g
 }
 
+#' GSEA Prep
+#'
+#' Preprocessing the data in preparation for GSEA
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.gsea.prep = function(g, deps=T){
   if(deps) g=g.run.deps(g, "g.param.gsea.data")
 
@@ -163,6 +203,20 @@ g.gsea.prep = function(g, deps=T){
   g
 }
 
+
+#' GSEA
+#'
+#' Run GSEA
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param gmt path to GMT files to 
+#' @param gmt_name concise names for the GMT files, for labeling results
+#' @param working_dir the name of the directory to write outputs to
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.gsea = function(g, gmt=NULL, gmt_name=NULL, working_dir="3_GSEA", deps=T){
   if(deps) g=g.run.deps(g, "g.gsea.prep")
 
@@ -193,6 +247,18 @@ g.gsea = function(g, gmt=NULL, gmt_name=NULL, working_dir="3_GSEA", deps=T){
   g
 }
 
+#' Custom GSEA
+#'
+#' Run GSEA with custom gene sets from the Gene_Sets directory
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param working_dir the name of the directory to write outputs to
+#' @param run.GSEA actually run GSEA (T) or just adjust 'g' with the custom parameters (F)?
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.gsea.custom = function(g, working_dir="3_GSEA_Custom", run.GSEA=F, deps=T){
   if(run.GSEA && deps) g=g.run.deps(g, "g.gsea.prep")
 
@@ -210,6 +276,17 @@ g.gsea.custom = function(g, working_dir="3_GSEA_Custom", run.GSEA=F, deps=T){
   g
 }
 
+#' GSEA MOMENTA
+#'
+#' MOMENTA analysis
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param working_dir the name of the directory to write outputs to
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.gsea.momenta = function(g, working_dir="3_GSEA_MOMENTA", deps=T){
   if(deps) g=g.run.deps(g, "g.gsea.prep")
 
@@ -227,6 +304,17 @@ g.gsea.momenta = function(g, working_dir="3_GSEA_MOMENTA", deps=T){
   g
 }
 
+#' EnrichR
+#'
+#' Run EnrichR
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param working_dir the name of the directory to write outputs to
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
   if(deps) g=g.run.deps(g, c("g.limma"))
 
@@ -332,12 +420,33 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
   g
 }
 
+#' EnrichmentMap
+#'
+#' Run EnrichmentMap (currently unused)
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.enrichmentmap = function(g, deps=T){
   #unused??
   g$calls = c(g$calls, "g.enrichmentmap")
   g
 }
 
+#' Kinase-Substrate Enrichment Analysis (KSEA)
+#'
+#' Run KSEA for phosphoproteomics
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param working_dir the name of the directory to write outputs to
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.ksea = function(g, working_dir="3_KSEA", deps=T){
   if(deps) g=g.run.deps(g, c("g.limma"))
   output_links <- "";
@@ -386,6 +495,17 @@ g.ksea = function(g, working_dir="3_KSEA", deps=T){
   g
 }
 
+#' Metabolomics Enrichment
+#'
+#' Run MetaboanalystR's Peak Set Enrichment Analysis (PSEA) with mummichog identification
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param working_dir the name of the directory to write outputs to
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.metabo.enrich = function(g, working_dir="3_Metabo_Enrichment", deps=T){
   if(deps) g=g.run.deps(g, c("g.make.contrasts","g.limma"))
 

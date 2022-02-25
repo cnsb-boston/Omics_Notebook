@@ -53,7 +53,7 @@ drawVPlots <- function(dat, xvar, yvar, title, label_names, colorby, subset_rows
 #' 
 #' @param dat is the result of topTable()
 #' @param type Type of data to be processed, or a name for the Omics analysis
-#' @param subset_rows
+#' @param subset_rows plot a subset of dat by passing a vector of row numbers, or FALSE to plot the full data
 #' @param outputpath output file path for plots
 #' 
 #'

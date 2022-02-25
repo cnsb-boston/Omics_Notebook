@@ -1,3 +1,14 @@
+#' Active Pathways
+#'
+#' Run Active Pathways multiomics pathway enrichment analysis
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param working_dir the name of the directory to write outputs to
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.activepath = function(g, working_dir="4_ActivePathways", deps=T){
   if(deps) g=g.run.deps(g, c("g.gsea.custom","g.limma","g.gsea.momenta"))
 
@@ -60,7 +71,17 @@ g.activepath = function(g, working_dir="4_ActivePathways", deps=T){
   g
 }
 
-g.mumm2omicsList = function(g, deps=T){ # add mumm ID columns to eset and write *_IDs.txt file
+#' Mummichog to omicsList
+#'
+#' Add mummichog ID columns to the state variable 'g', and write them to _ID.txt files
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
+g.mumm2omicsList = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.metabo.enrich"))
 
   iters=do.call("rbind",
@@ -103,6 +124,16 @@ g.mumm2omicsList = function(g, deps=T){ # add mumm ID columns to eset and write 
   g
 }
 
+#' Combine Rank
+#'
+#' Combine the rank files for gene and metabolite based GSEA analyses, for later integrative analysis.
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.combine.rnk = function(g, deps=T){
   if(deps) g=g.run.deps(g, c("g.metabo.enrich", "g.param.gsea.data"))
 
@@ -189,6 +220,16 @@ g.combine.rnk = function(g, deps=T){
   g
 }
 
+#' MOMENTA
+#'
+#' Run MOMENTA multi-omic metabolic enrichment and network analysis
+#' 
+#' @param g omics notebook state, created by g.notebook.setup()
+#' @param deps automatically run dependencies?
+#'
+#' @return updated omics notebook state
+#' 
+#' @export
 g.momenta = function(g, working_dir="4_MOMENTA_Integrated", deps=T){
   if(deps) g=g.run.deps(g, c("g.combine.rnk"))
   gsea_working_path <- file.path(g$output_path, working_dir)
