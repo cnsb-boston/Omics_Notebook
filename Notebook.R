@@ -40,28 +40,34 @@ run.native = function(args){
   system2(command[1], command[-1], env=paste0(env_vars,collapse=";"))
 }
 
-run.generic.container = function(cmd, image, bindopt, extras=list(pre="",post=""), parameters, libdir){
+run.generic.container = function(cmd, image, bindopt, extras=list(pre="",post=""), parameters, libdir, outputlog=F){
+  native=native.cmd(parameters=parameters)
+  if(outputlog){
+    logfile=paste0("/data/",format(Sys.time(), "%Y-%m-%d.%H:%M:%S"),".log.txt")
+    native= paste0(c(native, "2>&1", "|", "tee", logfile), collapse=" ")
+    native=c("sh","-c",paste0("'",native,"'"))
+  }
   command = c(cmd, extras$pre, paste0("--env=",env_vars),
               bindopt, paste0("'", notebook_path, ":/home:rw'"),
               bindopt, paste0("'", analysis_dir, ":/data:rw'"),
               bindopt, paste0("'", libdir, ":/usr/local/lib/R/local-library'"),
               extras$post,
-              image, native.cmd(parameters=parameters))
+              image, native)
   command=command[command!=""]
   #write(paste0(command,collapse=" "),stderr())
   system2(command[1], command[-1])
 }
 
-run.docker = function(param,container,libdir,...){
+run.docker = function(param,container,libdir,outputlog,...){
   if(length(container)!=1 || nchar(container)<1) container=docker_img
   run.generic.container(cmd=c("docker","run","-it","--rm","-u","docker"), image=container, bindopt="-v",
-                        extras=list(pre="--workdir=/data",post=""),parameters=param, libdir=libdir)
+                        extras=list(pre="--workdir=/data",post=""),parameters=param, libdir=libdir, outputlog=outputlog)
 }
 
-run.singularity = function(param,container,libdir,...){
+run.singularity = function(param,container,libdir,outputlog,...){
   if(length(container)!=1 || nchar(container)<1) container=singularity_img
   run.generic.container(cmd=c("singularity","run"), image=container, bindopt="--bind",
-                        extras=list(pre="--pwd=/data",post=""), parameters=param, libdir=libdir)
+                        extras=list(pre="--pwd=/data",post=""), parameters=param, libdir=libdir, outputlog=outputlog)
 }
 
 getopt = function(args, choices){
@@ -98,6 +104,7 @@ choices=matrix(c(
   'libdir', 'l', libdir, 'character',
   'container', 'c', "", 'character',
   'nogui', 'g', F, 'logical',
+  'outputlog', 'o', F, 'logical',
   'help', 'h', F, 'logical'
   ), byrow=T, ncol=4)
 opts=getopt(args,choices)
