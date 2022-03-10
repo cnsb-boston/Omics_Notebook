@@ -47,10 +47,12 @@ run.generic.container = function(cmd, image, bindopt, extras=list(pre="",post=""
     native= paste0(c(native, "2>&1", "|", "tee", logfile), collapse=" ")
     native=c("sh","-c",paste0("'",native,"'"))
   }
+  tmpdir = Sys.getenv("TMPDIR")
   command = c(cmd, extras$pre, paste0("--env=",env_vars),
               bindopt, paste0("'", notebook_path, ":/home:rw'"),
               bindopt, paste0("'", analysis_dir, ":/data:rw'"),
               bindopt, paste0("'", libdir, ":/usr/local/lib/R/local-library'"),
+              if(tmpdir!=""){ c(bindopt, paste0("'", tmpdir, "'")) } else NULL,
               extras$post,
               image, native)
   command=command[command!=""]
