@@ -25,7 +25,7 @@ make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets
          annotation_filename=tclStr(""),
          query_web=tclBool(TRUE),
          map_color=tclStr('viridis'),
-         zero_percent=tclNum(0.010),
+         zero_percent=tclNum(0.70),
          norm_method = tclStr('loess'),
          log_transform = tclBool(TRUE),
          shinyNorm = tclBool(FALSE),
@@ -117,7 +117,7 @@ make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets
   tkgrid(tklabel(tt, text="FDR:"), column=0, row=19)
   tkgrid(ttkspinbox(tt, textvariable=v$adjpcutoff, from=0.01, to=0.5, increment=.01), column=1, row=19)
   tkgrid(tklabel(tt, text="Top %:"), column=0, row=20)
-  tkgrid(ttkspinbox(tt, textvariable=v$zero_percent, from=0.001, to=0.5, increment=.001), column=1, row=20)
+  tkgrid(ttkspinbox(tt, textvariable=v$sig_percent, from=0.001, to=0.5, increment=.001), column=1, row=20)
 
   gencheck(0, 25, "txt Folder report", "txtFolder")
   tkgrid(tklabel(tt, text="Copy mqpar file into txt folder for complete results."), column=0, row=24, columnspan=2)
