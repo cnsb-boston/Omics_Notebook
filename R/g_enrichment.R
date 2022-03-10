@@ -318,6 +318,7 @@ g.gsea.momenta = function(g, working_dir="3_GSEA_MOMENTA", deps=T){
 g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
   if(deps) g=g.run.deps(g, c("g.limma"))
 
+  enrichR:::.onAttach() # load webservice
   run_enrichr_seperate <- TRUE;
 
   enrichr_working_path <- file.path(g$output_path, working_dir)
@@ -339,13 +340,13 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
                               feature_identifier =fData(g$omicsList[[ g$gene_data_index[i] ]][["eSet"]])[,"feature_identifier"] );
         top_sum <- top_sum[top_sum[,"Gene"]!="", ]
         top_sum <- top_sum[order(abs(as.numeric(top_sum[,"logFC"])), decreasing=TRUE),]
-        if( nrow(top_sum)>sig_cutoff ){  top_sum <- top_sum[1:sigcutoff,] }
+        if( nrow(top_sum)>sig_cutoff ){  top_sum <- top_sum[1:sig_cutoff,] }
         contrast_name <- gsub("logfc_","",g$logfc_index[j])
       }
       type_name <- paste(g$omicsList[[ g$gene_data_index[i] ]][["dataType"]], contrast_name, sep="_");
       
       runEnrichR(genes=top_sum[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate,
-                 search_dat=g$search_databases) 
+                 search_dat=g$search_databases, outputpath=enrichr_working_path) 
 
     }) } 
     
@@ -359,7 +360,7 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
       type_name <- paste(g$omicsList[[ g$gene_data_index[i] ]][["dataType"]], "TimeCourse_Overall", sep="_");
       
       runEnrichR(genes=top_sum[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate,
-                 search_dat=g$search_databases) 
+                 search_dat=g$search_databases, outputpath=enrichr_working_path) 
 
     }) } 
   } 
@@ -379,7 +380,7 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
       }))
           
       runEnrichR(gene_table[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate,
-                 search_dat=g$search_databases )
+                 search_dat=g$search_databases, outputpath=enrichr_working_path )
     } 
 
     if(g$statistic_index=='F'){ 
@@ -394,7 +395,7 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
           
       gene_table[,"logFC" ] <- gene_table[,"F" ] 
       runEnrichR(gene_table[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate,
-                 search_dat=g$search_databases )
+                 search_dat=g$search_databases, outputpath=enrichr_working_path )
     }
   }
   })
@@ -411,7 +412,7 @@ g.enrichr = function(g, working_dir="3_EnrichR", deps=T){
       type_name <- paste(g$omicsList[[ g$gene_data_index[i] ]][["dataType"]], 'F-statistic', sep="_");
       
       runEnrichR(genes=top_sum[, c("Gene", "logFC") ], type=type_name, run_seperate=run_enrichr_seperate,
-                 search_dat=g$search_databases) 
+                 search_dat=g$search_databases, outputpath=enrichr_working_path) 
     }) }
   } 
 
