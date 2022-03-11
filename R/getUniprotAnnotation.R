@@ -51,7 +51,7 @@ getUniprotAnnotation <- function(IDs){
   annotatedUniprot <- data.frame(matrix(ncol=length(uniprot_col_names), nrow=length(IDs)))
   colnames(annotatedUniprot) <- uniprot_col_names 
   annotatedUniprot[,"ENTRY"] <- IDs
-  xi=match(IDs, annotUniprot$Entry)
+  xi=match(IDs, annotUniprot$ENTRY)
   annotatedUniprot[,-1] = annotUniprot[xi,-1]
   annotatedUniprot[is.na(annotatedUniprot)] = ""
 
