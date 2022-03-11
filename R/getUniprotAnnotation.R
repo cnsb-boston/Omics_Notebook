@@ -48,8 +48,12 @@ getUniprotAnnotation <- function(IDs){
   }) 
   }))
  
-  annotatedUniprot <- data.frame(rnum=1:length(IDs), ENTRY=IDs)
-  annotatedUniprot <- merge(annotatedUniprot, annotUniprot, by="ENTRY", all.x=T)
+  annotatedUniprot <- data.frame(matrix(ncol=length(uniprot_col_names), nrow=length(IDs)))
+  colnames(annotatedUniprot) <- uniprot_col_names 
+  annotatedUniprot[,"ENTRY"] <- IDs
+  xi=match(IDs, annotUniprot$Entry)
+  annotatedUniprot[,-1] = annotUniprot[xi,-1]
+  annotatedUniprot[is.na(annotatedUniprot)] = ""
 
   return (annotatedUniprot)
 }
