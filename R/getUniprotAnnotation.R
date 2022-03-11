@@ -48,7 +48,7 @@ getUniprotAnnotation <- function(IDs){
   }) 
   }))
  
-  annotatedUniprot <- data.frame(ENTRY=IDs)
+  annotatedUniprot <- data.frame(rnum=1:length(IDs), ENTRY=IDs)
   annotatedUniprot <- merge(annotatedUniprot, annotUniprot, by="ENTRY", all.x=T)
 
   return (annotatedUniprot)
