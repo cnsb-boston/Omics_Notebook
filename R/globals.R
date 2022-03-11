@@ -33,6 +33,34 @@ merge.lists = function(a,b){
   ret
 }
 
+setup_analysis_dir = function(global, basedir){
+  assign("working_dir", basedir, env=.GlobalEnv)
+  global$working_dir = working_dir
+  global$output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
+  global$output_files_subdir <- file.path(global$output_subdir,"1_Files")
+  global$output_plots_subdir <- file.path(global$output_subdir,"1_Plots")
+  global$output_path <- file.path(working_dir, global$output_subdir)
+  global$output_files_path <- file.path(working_dir, global$output_files_subdir)
+  global$output_plots_path <- file.path(working_dir, global$output_plots_subdir)
+  global$output_contrast_path <- global$output_plots_path
+  if( dir.exists(global$output_path) == FALSE ) {dir.create(global$output_path)}
+  if( dir.exists(global$output_files_path) == FALSE ) {dir.create(global$output_files_path)}
+  if( dir.exists(global$output_plots_path) == FALSE ) {dir.create(global$output_plots_path)}
+
+  if(runDifferential){
+    # Make differential directory
+    global$output_contrast_subdir <- file.path(global$output_subdir,"2_Differential")
+    global$output_contast_subdir_files <- file.path(global$output_contrast_subdir, "files")
+    global$output_contrast_path <- file.path(working_dir, global$output_contrast_subdir)
+    global$output_contrast_path_files <- file.path(global$output_contrast_path, "files")
+    if( dir.exists(global$output_contrast_path) == FALSE ) { dir.create(global$output_contrast_path) }
+    if( dir.exists(global$output_contrast_path_files) == FALSE ) { dir.create(global$output_contrast_path_files) }
+  }
+
+  global
+}
+
+
 #' Notebook Setup
 #'
 #' Creates the global state used for the rest of the notebook's analysis and populates it with configuration information
@@ -52,27 +80,8 @@ g.notebook.setup = function(global=list(), param_file="Parameters.R"){
   source(param_file) # to actual global env/scope
 
   # Make output subdirectories
-  global$working_dir = working_dir
-  global$output_subdir <- paste( gsub("\\.","", make.names(project_name)), gsub("-","",Sys.Date()), sep="_")
-  global$output_files_subdir <- paste(global$output_subdir,"1_Files", sep="/")
-  global$output_plots_subdir <- paste(global$output_subdir,"1_Plots", sep="/")
-  global$output_path <- file.path(working_dir, global$output_subdir)
-  global$output_files_path <- file.path(working_dir, global$output_files_subdir)
-  global$output_plots_path <- file.path(working_dir, global$output_plots_subdir)
-  global$output_contrast_path <- global$output_plots_path
-  if( dir.exists(global$output_path) == FALSE ) {dir.create(global$output_path)}
-  if( dir.exists(global$output_files_path) == FALSE ) {dir.create(global$output_files_path)}
-  if( dir.exists(global$output_plots_path) == FALSE ) {dir.create(global$output_plots_path)}
-
-  if(runDifferential){
-    # Make differential directory
-    global$output_contrast_subdir <- file.path(global$output_subdir,"2_Differential")
-    global$output_contast_subdir_files <- file.path(global$output_contrast_subdir, "files")
-    global$output_contrast_path <- file.path(working_dir, global$output_contrast_subdir)
-    global$output_contrast_path_files <- file.path(global$output_contrast_path, "files")
-    if( dir.exists(global$output_contrast_path) == FALSE ) { dir.create(global$output_contrast_path) }
-    if( dir.exists(global$output_contrast_path_files) == FALSE ) { dir.create(global$output_contrast_path_files) }
-  }
+  global=setup_analysis_dir(global, working_dir)
+  file.copy(param_file, file.path(global$output_subdir,"Parameters.R")) # archive for reproducibility
 
   # Set library path for BU SCC
   if(inherit_paths==TRUE & exists("libraries_path") ){
