@@ -568,20 +568,17 @@ g.boxplots = function(g, deps=T){
 #' @export
 g.interactive.heatmap = function(g, deps=T){
   if(deps) g=g.run.deps(g, "g.param.norm")
-  output_links<-"";
+
+  outdir=file.path(g$output_plots_path,"InteractiveHeatmaps")
+  if( dir.exists(outdir) == FALSE ) { dir.create(outdir) }
 
   for(i in 1:length(g$omicsList)){
     # Make the interactive heatmap
-    interactiveHeatmap(eset=g$omicsList[[i]][["eSet"]], type=g$omicsList[[i]][["dataType"]], outputpath=g$output_plots_path);
-    
-    # Make output hyperlinks for markdown
-    add_link <- paste("[ ",g$omicsList[[i]][["dataType"]], "-All ](", g$output_plots_subdir,"/heatmap_all_",
-                      g$omicsList[[i]][["dataType"]],".html)", sep="");
-    output_links <- paste(output_links, add_link, sep=" | " );
+    outfile = interactiveHeatmap(eset=g$omicsList[[i]][["eSet"]], type=g$omicsList[[i]][["dataType"]], outputpath=outdir);
   }
 
   g$calls = c(g$calls, "g.interactive.heatmap")
-  g$output_links = output_links
+  g$output_links = file.path(g$output_plots_subdir,"InteractiveHeatmaps")
   g
 }
 

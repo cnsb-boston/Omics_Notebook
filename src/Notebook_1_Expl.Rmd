@@ -127,7 +127,7 @@ g = g.boxplots(g)
 g = g.interactive.heatmap(g)
 
 ```
-`r if(int_heatmap_section){"Click to view interactive heatmaps:"}`  `r if(int_heatmap_section){ g$output_links }`  
+`r if(int_heatmap_section){ paste("Upload files to [Morpheus](https://software.broadinstitute.org/morpheus/) for viewing. Files are located at: ", g$output_links) }`  
 
 ---
 
