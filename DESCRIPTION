@@ -9,7 +9,7 @@ Imports: KSEAapp, MetaboAnalystR, ActivePathways, matrixStats, Biobase,
     preprocessCore, RColorBrewer, viridis, reshape2, tidyr, tidyselect, dplyr,
     stringr, grid, gridExtra, VennDiagram, UpSetR, corrplot,
     heatmaply, scales, Glimma, openxlsx, ComplexHeatmap, fgsea,
-    BiocParallel, enrichR, RCy3, PTXQC, data.table, rmarkdown
+    BiocParallel, enrichR, RCy3, PTXQC, data.table, rmarkdown, sva
 BiocViews:
 Remotes: cnsb-boston/KSEAapp, cnsb-boston/MetaboAnalystR@a53e9b2, cnsb-boston/preprocessCore, reimandlab/ActivePathways
 Maintainer: Christian Heckendorf <heckend@bu.edu>

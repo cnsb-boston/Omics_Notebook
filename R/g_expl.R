@@ -37,7 +37,7 @@ g.norm = function(g, deps=T){
         batch = pheno$Batch
 
         modcombat = model.matrix(~1, data=pheno)
-        combat_edata = ComBat(dat=edata, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=FALSE)
+        combat_edata = sva::ComBat(dat=edata, batch=batch, mod=modcombat, par.prior=TRUE, prior.plots=FALSE)
         combat_eset = ExpressionSet(assayData=combat_edata)
         pData(combat_eset) = pData(g$omicsList[[i]][["eSet"]])
         fData(combat_eset) = fData(g$omicsList[[i]][["eSet"]])
