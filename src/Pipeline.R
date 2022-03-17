@@ -18,7 +18,7 @@
 ############################################
 
 # Get Notebook directory - if running pipeline
-args <- commandArgs(trailingOnly=TRUE)
+if(length(commandArgs(trailingOnly=TRUE))>0) args <- commandArgs(trailingOnly=TRUE)
 
 notebook_dir <- file.path(args[1], "src");
 analysis_dir <- file.path(args[2]);
