@@ -114,19 +114,17 @@ g.notebook.setup = function(global=list(), param_file="Parameters.R"){
 
   global$subset_genes=FALSE;
   # If there's a directory called "Subset_Lists" make feature lists based on text files
-  if(length(global$gene_data_index)>1 | length(global$prot_data_index)>1) {
-    if( dir.exists("Subset_Lists") ){ try({
-      filelist <- list.files(path=file.path("Subset_Lists"), pattern="*.txt")
-      subset_genes <- vector("list", length=length(filelist))
-      names(subset_genes) <- gsub("*.txt", "", filelist)
+  if( dir.exists("Subset_Lists") ){ try({
+    filelist <- list.files(path=file.path("Subset_Lists"), pattern="*.txt")
+    subset_genes <- vector("list", length=length(filelist))
+    names(subset_genes) <- gsub("*.txt", "", filelist)
 
-      for( i in 1:length(filelist)){
-        subset_genes[i] <- unique(list(scan(file.path("Subset_Lists", filelist[i]), what="", sep=" " ) ))
-      }
-      subset_genes[[i]] <- subset_genes[[i]][subset_genes[[i]]!=""]
-      global$subset_genes = subset_genes
-    }) }
-  }
+    for( i in 1:length(filelist)){
+      subset_genes[i] <- unique(list(scan(file.path("Subset_Lists", filelist[i]), what="", sep=" " ) ))
+    }
+    subset_genes[[i]] <- subset_genes[[i]][subset_genes[[i]]!=""]
+    global$subset_genes = subset_genes
+  }) }
 
   global$calls="g.notebook.setup"
   global
