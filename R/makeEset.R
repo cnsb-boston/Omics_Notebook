@@ -41,23 +41,27 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     stop(paste0("Annotation file requests columns not present in data file (",type,", / ",data_format,"): ", paste0(missing_cols, collapse=", ")))
   }
 
+  split_semi = function(data, dest, src){
+    if(src %in% colnames(data)){
+      data[,dest] = sub(';.*', '', data[,src])
+    } else if(!(dest %in% colnames(data))) {
+      stop(paste0(data_format, "input file requires one of the following columns:", dest, src))
+    }
+
+    data
+  }
+
   if (data_format=='Protein.Groups..MQ.'){
     # pull out sample intensity values based on annotation
     data.matrix <- as.matrix(data[, samp_cols]);
-    # parse out protein namea
-    data[,"Protein"] <- apply(data, 1, function(x) {
-      if(grepl(';', x["Majority.protein.IDs"])){ substr(x["Majority.protein.IDs"], 0, 
-                                                        unlist(gregexpr(';', x["Majority.protein.IDs"]))[1]-1)
-      } else {x["Majority.protein.IDs"]} } );
+    # parse out protein names
+    data = split_semi(data, "Protein", "Majority.protein.IDs")
   }
   if (data_format=='Peptides..MQ.'){
     # pull out sample intensity values based on annotation
     data.matrix <- as.matrix(data[, samp_cols]);
-    # parse out protein namea
-    data[,"Protein"] <- apply(data, 1, function(x) {
-      if(grepl(';', x["Proteins"])){ substr(x["Proteins"], 0, 
-                                                        unlist(gregexpr(';', x["Proteins"]))[1]-1)
-      } else {x["Proteins"]} } );
+    # parse out protein names
+    data = split_semi(data, "Protein", "Proteins")
   }
   # Get data for MaxQuant Sites format
   if( grepl("Sites..MQ.", data_format) ){
@@ -75,11 +79,8 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     }))
     data <- cbind(data1, data2)
     data.matrix <- as.matrix(data[, samp_cols]);
-    # parse out protein namea
-    data[,"Protein"] <- apply(data, 1, function(x) {
-      if(grepl(';', x["Protein"])){ substr(x["Protein"], 0, 
-                                           unlist(gregexpr(';', x["Protein"]))[1]-1)}
-      else {x["Protein"]} } );
+    # parse out protein names
+    data = split_semi(data, "Protein", "Protein")
   }
  
   sample_column_names <- colnames(data[, which(colnames(data) %in% samp_cols) ])
@@ -122,9 +123,7 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
   }
   # Parse maxquant to get gene names
   if ( "Gene.names" %in% colnames(data) ){ 
-    data[,"Gene"] <- apply(data, 1, function(x) {
-      if(grepl(';', x["Gene.names"])){ substr(x["Gene.names"], 0, unlist(gregexpr(';', x["Gene.names"]))[1]-1)
-      } else {x["Gene.names"]} } );
+    data = split_semi(data, "Gene", "Gene.names")
   } else if("Fasta.headers" %in% colnames(data)){ # For species that have Uniprot but not MQ gene annotations
     uni=grepl("^(sp|tr)\\|",data[,"Fasta.headers"])
     if(any(uni)){
