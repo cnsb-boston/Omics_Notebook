@@ -297,7 +297,7 @@ g.gsea.momenta = function(g, working_dir="3_GSEA_MOMENTA", deps=T){
   g$gmt_files = lapply(file.path("matched",g$gmt_files),FUN=get.data.fileconn)
 
   for(i in 1:length(g$gmt_files)){
-    g = g.gsea(g, gmt=g$gmt_files[[i]], gmt_name=g$gmt_names[i])
+    g = g.gsea(g, gmt=g$gmt_files[[i]], gmt_name=g$gmt_names[i], working_dir=working_dir)
   }
 
   g$calls = c(g$calls, "g.gsea.momenta")
