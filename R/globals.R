@@ -127,6 +127,7 @@ g.notebook.setup = function(global=list(), param_file="Parameters.R"){
   }) }
 
   global$calls="g.notebook.setup"
+  class(global)="ON"
   global
 }
 
