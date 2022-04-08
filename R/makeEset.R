@@ -119,7 +119,7 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
     data[,"Uniprot"] <- paste("<a href='https://www.uniprot.org/uniprot/",data[,"Protein"],"'>",
                               data[,"Protein"],"</a>", sep="")
     # Add uniprot annotation
-    if(uniprot_annotation == TRUE) { try({data <- cbind(data, getUniprotAnnotation(IDs=data[,"Protein"])) }, silent=TRUE) }
+    if(uniprot_annotation == TRUE) { try({data <- cbind(data, getUniprotAnnotation(IDs=data[,"Protein"], genes=!("Gene.names" %in% colnames(data)))) }, silent=TRUE) }
   }
   # Parse maxquant to get gene names
   if ( "Gene.names" %in% colnames(data) ){ 
