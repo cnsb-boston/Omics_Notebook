@@ -226,8 +226,8 @@ g.gsea = function(g, gmt=NULL, gmt_name=NULL, working_dir="3_GSEA", deps=T){
 
     if(!is.null(gmt)){
       dest_gmt_file <- gmt
-    } else if( species!="Other" ) { 
-      g$species_gmt <- fetchGMT(gsea_working_path, species)
+    } else if( species!="Other" ) {
+      g$species_gmt <- fetchGMT(g$gmt_path, species)
       dest_gmt_file <- g$species_gmt
     } else {
       return(g)

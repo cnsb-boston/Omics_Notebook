@@ -15,7 +15,7 @@ g.activepath = function(g, working_dir="4_ActivePathways", deps=T){
   gsea_working_path <- file.path(g$output_path, working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
 
-  if(is.null(g$species_gmt) && species!="Other"){ g$species_gmt <- fetchGMT(gsea_working_path, species) }
+  if(is.null(g$species_gmt) && species!="Other"){ g$species_gmt <- fetchGMT(g$gmt_path, species) }
   a_pathways_gmt <- g$species_gmt # large generic gene set
   if( length(g$gmt_files_cust) > 0 ){ a_pathways_gmt <- c(a_pathways_gmt, gmt_files_cust) } # Add Custom gene sets if there
   a_paths_gmt_names <- gsub("(.*/\\s*(.*$))","\\2", gsub(".gmt|.GMT","",a_pathways_gmt) )

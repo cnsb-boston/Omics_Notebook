@@ -43,6 +43,7 @@ setup_analysis_dir = function(global, basedir){
   global$output_files_path <- file.path(working_dir, global$output_files_subdir)
   global$output_plots_path <- file.path(working_dir, global$output_plots_subdir)
   global$output_contrast_path <- global$output_plots_path
+  global$gmt_path = global$output_files_path
   if( dir.exists(global$output_path) == FALSE ) {dir.create(global$output_path)}
   if( dir.exists(global$output_files_path) == FALSE ) {dir.create(global$output_files_path)}
   if( dir.exists(global$output_plots_path) == FALSE ) {dir.create(global$output_plots_path)}

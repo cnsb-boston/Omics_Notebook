@@ -123,7 +123,7 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
     gsea_working_dir <- "PCA_Loading_GSEA"
     gsea_working_path <- file.path(outputfile, gsea_working_dir)
     if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
-    dest_gmt_file <- fetchGMT(gsea_working_path, .species)
+    dest_gmt_file <- fetchGMT(outputfile, .species)
   
     analysis_names <- c(paste(type, "PC1", sep="_"), paste(type, "PC2", sep="_"), paste(type, "PC3", sep="_") )
 
