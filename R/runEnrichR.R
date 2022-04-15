@@ -16,30 +16,36 @@
 #' @export
 runEnrichR <- function (genes, type, search_dat=search_databases, 
                         outputpath=enrichr_working_path, run_seperate=FALSE) {
+
+  mergerows = function(enrich_list, id=NULL){
+    dplyr::bind_rows(enrich_list[sapply(enrich_list,nrow)>0], .id=id)
+  }
+
+  mergedb = function(enrich_list, pheno){
+    ret = mergerows(enrich_list, id="databases")
+    ret$Phenotype = pheno
+    ret
+  }
+
   suppressMessages({
   if(run_seperate){
-    enriched<- data.frame();
+    elist <- list()
     genes_up <- genes[genes[,"logFC"]>0,"Gene"]
     genes_down <- genes[genes[,"logFC"]<0,"Gene"]
     
     if(length(genes_up)>0){
       invisible(capture.output({ enriched_up <- enrichR::enrichr(unique(as.character(genes_up)), databases = search_dat); }))
-      enriched_up <- dplyr::bind_rows(enriched_up, .id="databases")
-      enriched_up[,"Phenotype"] <- "+1"
-      enriched <- rbind(enriched, enriched_up)
+      elist <- c(elist, list(mergedb(enriched_up, "+1")))
     }
     if(length(genes_down)>0){
       invisible(capture.output({ enriched_down <- enrichR::enrichr(unique(as.character(genes_down)), databases = search_dat); }))
-      enriched_down <- dplyr::bind_rows(enriched_down, .id="databases")
-      enriched_down[,"Phenotype"] <- "-1"
-      enriched <- rbind(enriched, enriched_down)
+      elist <- c(elist, list(mergedb(enriched_down, "-1")))
     }
-    enriched<- enriched[-1,]
+    enriched<- mergerows(elist)
     
   } else {
     invisible(capture.output({ enriched <- enrichR::enrichr(unique(as.character(genes_down)), databases = search_dat); }))
-    enriched <- dplyr::bind_rows(enriched_down, .id="databases")
-    enriched[,"Phenotype"] <- "+1"
+    enriched <- mergedb(enriched, "+1")
   }
   })
   enriched <- enriched[order(enriched[,"Adjusted.P.value"]),]
