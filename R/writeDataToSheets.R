@@ -159,7 +159,8 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
   # Add phospho site probabilities and data
   try({ 
     if(grepl("Sites", data_format)) { 
-      fData(eset)[,"AAPos"]=paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep="")
+      if(all(c("Amino.acid","Position") %in% colnames(fData(eset))))
+        fData(eset)[,"AAPos"]=paste(fData(eset)[,"Amino.acid"],fData(eset)[,"Position"], sep="")
       d <- fillOutputTable(d, c(
         "Localization.prob", "Localization Probability", 16,
         "Probabilities","Site Probabilities", 16,
