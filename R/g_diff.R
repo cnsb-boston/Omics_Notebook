@@ -146,10 +146,10 @@ g.volcano = function(g, deps=T){
         }
       }, silent=TRUE) }
       
-      for(c in 1:length(g$loop_list)){
+      for(ci in 1:length(g$loop_list)){
         # For the data set and coefficient, make the summary table and name
-        top_sum <- limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=g$loop_list[c]);
-        type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[c], sep="_");
+        top_sum <- limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=g$loop_list[ci]);
+        type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[ci], sep="_");
       
         # run Volcan function
         drawVolcano(dat=top_sum, type=type_name, subset_rows=subset_rows, top_values=adjpcutoff,top_fc=g$fc_cutoff,
@@ -198,15 +198,15 @@ g.md = function(g, deps=T){
         }
     }, silent=TRUE) }
     
-    for(c in 1:length(g$logfc_index) ){ try({
+    for(ci in 1:length(g$logfc_index) ){ try({
       # For the data set and coefficient, make the summary table and name
-      top_sum <- data.frame(logFC= fData(g$omicsList[[i]][["eSet"]])[,g$logfc_index[c]],
+      top_sum <- data.frame(logFC= fData(g$omicsList[[i]][["eSet"]])[,g$logfc_index[ci]],
                             Mean=rowMeans(exprs(g$omicsList[[i]][["eSet"]])), 
                             feature_identifier =fData(g$omicsList[[i]][["eSet"]])[,"feature_identifier"] );
       if( "Gene" %in% colnames(fData(g$omicsList[[i]][["eSet"]])) ){ top_sum$Gene <- fData(g$omicsList[[i]][["eSet"]])$Gene }
       else if( "mz" %in% colnames(fData(g$omicsList[[i]][["eSet"]])) ){ top_sum$mz <- fData(g$omicsList[[i]][["eSet"]])$mz }
       
-      type_name <- paste(g$omicsList[[i]][["dataType"]],g$logfc_index[c], sep="_");
+      type_name <- paste(g$omicsList[[i]][["dataType"]],g$logfc_index[ci], sep="_");
       
       # run Volcano function
       if(g$fc_cutoff==0){ tmp <- 1 } else { tmp <- g$fc_cutoff }
@@ -241,22 +241,22 @@ g.de.static.heatmap = function(g, deps=T){
   for(i in 1:length(g$omicsList)){
     sig_cutoff <- round(sig_percent*nrow(g$omicsList[[i]][["eSet"]]), digits=0)
     if(class(g$omicsList[[i]][["fit"]])=='MArrayLM'){
-    for(c in 1:length(g$loop_list)){ try({
+    for(ci in 1:length(g$loop_list)){ try({
       # For the data set and coefficient, make the summary table and name
-      top_sum <- rownames( limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=g$loop_list[c], p.value=adjpcutoff) );
+      top_sum <- rownames( limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=g$loop_list[ci], p.value=adjpcutoff) );
       title_add <- paste("FDR<", adjpcutoff, sep="")
       if (length(top_sum)< sig_cutoff ){ 
-        top_sum <- rownames( limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=g$loop_list[c]))[1:sig_cutoff];
+        top_sum <- rownames( limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=g$loop_list[ci]))[1:sig_cutoff];
         title_add <- paste("Top ", (sig_percent*100), "%", sep="")
       }
-      type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[c], sep="_");
+      type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[ci], sep="_");
       
       # run heatmap function
       drawHeatmaps(eset=g$omicsList[[i]][["eSet"]], limmaSig=top_sum, type=type_name, title_add=title_add,
                     outputpath=g$output_plots_path, outputcontrastpath=g$output_contrast_path);
       
       if(g$num_contrasts>1) {
-          drawHeatmaps(eset=g$omicsList[[i]][["eSet"]][,pData(g$omicsList[[i]][["eSet"]])$Group %in% unlist(strsplit(g$contrast_strings[c], "-")) ], outputpath=g$output_plots_path, outputcontrastpath=g$output_contrast_path,
+          drawHeatmaps(eset=g$omicsList[[i]][["eSet"]][,pData(g$omicsList[[i]][["eSet"]])$Group %in% unlist(strsplit(g$contrast_strings[ci], "-")) ], outputpath=g$output_plots_path, outputcontrastpath=g$output_contrast_path,
                       limmaSig=top_sum,type=paste(type_name, "_subgroup", sep="") );
       }
       
@@ -267,9 +267,9 @@ g.de.static.heatmap = function(g, deps=T){
       output_links <- paste(output_links, add_link, sep=" | " ); 
       
     }) } } else {
-    for(c in 1:length(g$logfc_index) ){ try({  
-      top_sum <- rownames( exprs(g$omicsList[[i]][["eSet"]])[order( abs(fData(g$omicsList[[i]][["eSet"]])[,g$logfc_index[c]]), decreasing=TRUE),] )[1:sig_cutoff]
-      type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[c], "logFC", sep="_");
+    for(ci in 1:length(g$logfc_index) ){ try({
+      top_sum <- rownames( exprs(g$omicsList[[i]][["eSet"]])[order( abs(fData(g$omicsList[[i]][["eSet"]])[,g$logfc_index[ci]]), decreasing=TRUE),] )[1:sig_cutoff]
+      type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[ci], "logFC", sep="_");
       title_add <- paste("Top ", (sig_percent*100), "%", sep="")
       
       # run heatmap function
@@ -355,26 +355,26 @@ g.interactive.volcano = function(g, deps=T){
   output_links<-"";
   for(i in 1:length(g$omicsList)){
     if(class(g$omicsList[[i]][["fit"]])=='MArrayLM' & g$time_index==0){
-    for(c in 1:length(g$loop_list) ){ try({
-      top_sum <- limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=c);
-      type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[c], sep="_");
+    for(ci in 1:length(g$loop_list) ){ try({
+      top_sum <- limma::topTable(g$omicsList[[i]][["fit"]], adjust="BH", n=Inf, sort.by='p', coef=ci);
+      type_name <- paste(g$omicsList[[i]][["dataType"]],g$contrast_strings[ci], sep="_");
 
       interactiveVolcano(eset=g$omicsList[[i]][["eSet"]], fit=g$omicsList[[i]][["fit"]], dt=limma::decideTests(g$omicsList[[i]][["fit"]]),
-                        limmaSig=top_sum, type=type_name, col=g$loop_list[c], outputcontrastpath=g$output_contrast_path);
+                        limmaSig=top_sum, type=type_name, col=g$loop_list[ci], outputcontrastpath=g$output_contrast_path);
 
       add_link <- paste("[ ",type_name, " ](", g$output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",type_name,".html)", sep="");
       output_links <- paste(output_links, add_link, sep=" | " ); 
     }) }
     } else {
-    for(c in 1:length(g$logfc_index) ){ try({
-      type_name <- paste(g$omicsList[[i]][["dataType"]],g$logfc_index[c], sep="_");
-      top_sum <- data.frame(logFC= fData(g$omicsList[[i]][["eSet"]])[,g$logfc_index[c]],
+    for(ci in 1:length(g$logfc_index) ){ try({
+      type_name <- paste(g$omicsList[[i]][["dataType"]],g$logfc_index[ci], sep="_");
+      top_sum <- data.frame(logFC= fData(g$omicsList[[i]][["eSet"]])[,g$logfc_index[ci]],
                             Mean=rowMeans(exprs(g$omicsList[[i]][["eSet"]])), 
                             feature_identifier =fData(g$omicsList[[i]][["eSet"]])[,"feature_identifier"] );
       if( "Gene" %in% colnames(fData(g$omicsList[[i]][["eSet"]])) ){ top_sum$Gene <- fData(g$omicsList[[i]][["eSet"]])$Gene }
       if( "mz" %in% colnames(fData(g$omicsList[[i]][["eSet"]])) ){ top_sum$mz <- fData(g$omicsList[[i]][["eSet"]])$mz }
       
-      interactiveVolcano(eset=g$omicsList[[i]][["eSet"]],limmaSig=top_sum, type=type_name, col=c, outputcontrastpath=g$output_contrast_path);
+      interactiveVolcano(eset=g$omicsList[[i]][["eSet"]],limmaSig=top_sum, type=type_name, col=ci, outputcontrastpath=g$output_contrast_path);
       add_link <- paste("[ ",type_name, " ](", g$output_contrast_subdir,"/InteractivePlots/Volcano-Plot_",type_name,".html)", sep="");
       output_links <- paste(output_links, add_link, sep=" | " ); 
     }) }
