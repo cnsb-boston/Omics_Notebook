@@ -3,11 +3,11 @@
 #'
 #' This runs enrichment analysis with fgsea
 #' 
-#' @param genes, list of genes
-#' @param type Type of data to be processed, or name for the Omics set
-#' @param search_data list of enrichr databases to search
-#' @param outputpath output file path for plots
-#' @param run_seperate Whether or not to run up and down genes seperately
+#' @param rnk file containing a rank ordered gene list (RNK file)
+#' @param gmt GMT gene set file path
+#' @param analysis_name prefix for output file names
+#' @param pathway_plots generate plots?
+#' @param out_path output file path for plots and tables
 #'
 #' @return 
 #' 
