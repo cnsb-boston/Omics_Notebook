@@ -23,7 +23,7 @@ g.norm = function(g, deps=T){
                                         norm=norm_method, zero_cutoff=zero_percent,
                                         min_feature=g$min_feature_per_sample,
                                         annotate=g$annot, outputpath=g$output_plots_path,
-                                        norm_by_batch=g$norm_batches)
+                                        norm_by_batches=g$norm_batches)
 
     # Batch correction
     if("Batch" %in% colnames(pData(g$omicsList[[i]][["eSet"]])) & !("Met" %in% g$omicsList[[i]][["dataFormat"]])) { try({
@@ -51,7 +51,7 @@ g.norm = function(g, deps=T){
                                     data_format=g$omicsList[[i]][["dataFormat"]],
                                     norm=g$norm_post_batch, zero_cutoff=zero_percent,
                                     annotate=g$annot, outputpath=g$output_plots_path,
-                                    min_feature=g$min_feature_per_sample, norm_by_batch=F) )
+                                    min_feature=g$min_feature_per_sample, norm_by_batches=F) )
 
     }) }
   }
