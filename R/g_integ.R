@@ -235,32 +235,23 @@ g.momenta = function(g, working_dir="4_MOMENTA_Integrated", deps=T){
   gsea_working_path <- file.path(g$output_path, working_dir)
   if( dir.exists(gsea_working_path) == FALSE ) { dir.create(gsea_working_path) }
 
-  geneset_lookup <-  read.delim(get.data.fileconn(file.path("feature","MatchedFeatureSets.txt")))
+  geneset_lookup <-  read.delim(OmicsNotebook:::get.data.fileconn(file.path("feature","MatchedFeatureSets.txt")))
 
   gmt_files <- as.vector(geneset_lookup[which(geneset_lookup[,"Species"]==species),"GeneSet"])
   gmt_names <- as.vector(geneset_lookup[which(geneset_lookup[,"Species"]==species),"Name"])
+  gmt_shortnames = sub("[a-zA-Z]*_(.*)_[a-zA-Z]*","\\1",gmt_names)
 
+  all_rnk_files = unlist(g$combine_rnk_files)
   for(gmt_i in 1:length(gmt_files)){
+    rnk_files = all_rnk_files[grep(gmt_shortnames[gmt_i], names(all_rnk_files))]
+    rnk_files = rnk_files[file.exists(rnk_files)]
+    if(length(rnk_files)==0) next;
 
-    dest_gmt_file2 <- get.data.fileconn(file.path("feature",gmt_files[gmt_i]))
+    dest_gmt_file2 <- OmicsNotebook:::get.data.fileconn(file.path("feature",gmt_files[gmt_i]))
 
-    analysis_names <- vector("list", length(g$loop_list))
-    for (i in 1:length(g$loop_list)) {
-      analysis_names[[i]] <- paste0("Combined_",gmt_names[gmt_i],"_",g$contrast_strings_file[i])
-    }
-
-    rnk_files_select <-vector("list", length(g$loop_list))
-    for (i in 1:length(g$loop_list)){ 
-      rnk_files_select[[i]] <- g$combine_rnk_files[[i]][stringr::str_detect(gmt_names[gmt_i], names(g$combine_rnk_files[[i]]))]
-    }
-
-    for (i in 1:length(analysis_names)){
-      for(j in 1:length(rnk_files_select[[i]])){
-        analysis_name <- paste(gsub(".*/","", gsub(".rnk", "", rnk_files_select[[i]][[j]])), "_", gmt_names[gmt_i], sep="" ) #analysis_names[[i]]
-        rnk_file <- rnk_files_select[[i]][[j]]
-
-        runGSEA(rnk=rnk_file, gmt=dest_gmt_file2, analysisName=analysis_name, out_path=gsea_working_path )
-      }
+    for(rf in rnk_files){
+      analysis_name <- paste(basename(gsub(".rnk", "", rf)), "_", gmt_names[gmt_i], sep="" )
+      runGSEA(rnk=rf, gmt=dest_gmt_file2, analysisName=analysis_name, out_path=gsea_working_path )
     }
     close(dest_gmt_file2)
   }
