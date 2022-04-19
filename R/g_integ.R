@@ -101,10 +101,11 @@ g.mumm2omicsList = function(g, deps=T){
         
         output_mummichog_reldir_tmp <- file.path(g$mumm_working_dir, paste0(analysis_name, "_",g$contrast_strings_file[1]))
         output_mummichog_absdir_tmp <- file.path(working_dir, output_mummichog_reldir_tmp)
-        met_ids <- read.delim(file.path(output_mummichog_absdir_tmp, "mummichog_matched_compound_all.csv"),
-                              header=TRUE, stringsAsFactors = F, sep=",")
+        infile <- file.path(output_mummichog_absdir_tmp, "mummichog_matched_compound_all.csv")
+        if(!file.exists(infile)) return(NULL);
+        met_ids <- read.delim(infile, header=TRUE, stringsAsFactors = F, sep=",")
         
-        id_column_name <- paste("mummichogID_", mumm_libs[mumm_lib_i], sep="")
+        id_column_name <- paste("mummichogID_", g$mumm_libs[mumm_lib_i], sep="")
         fData(g$omicsList[[ g$metab_data_index[i] ]][["eSet"]])[,id_column_name] <- ""
         
         for(n in 1:nrow(fData(g$omicsList[[ g$metab_data_index[i] ]][["eSet"]])) ){
@@ -113,7 +114,7 @@ g.mumm2omicsList = function(g, deps=T){
           fData(g$omicsList[[ g$metab_data_index[i] ]][["eSet"]])[n,id_column_name] <- met_id_list
         }
         
-        output_filename <- file.path(output_files_path, paste(analysis_name,"_IDs.txt",sep="") )
+        output_filename <- file.path(g$output_files_path, paste(analysis_name,"_IDs.txt",sep="") )
         write.table(fData(g$omicsList[[ g$metab_data_index[i] ]][["eSet"]])[,c("feature_identifier", "mz", id_column_name)],
                     file=output_filename, quote=F, sep="\t", row.names=F)
       
