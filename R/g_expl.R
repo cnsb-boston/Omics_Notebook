@@ -150,6 +150,7 @@ g.venn = function(g, deps=T){
 
 drawcorplot <- function(g, item_name,data_index,dataname=NULL){ try({
   output_links <-"";
+  if(length(data_index)==0) return("")
   if(is.null(dataname)) dataname <- rep("eSet",length(data_index))
   fprefix=paste0(dataname[length(data_index)],"_")
   outname <- paste0(sub("eSet_","",fprefix),g$contrastgroups)
@@ -258,13 +259,20 @@ g.norm.to.first = function(g, deps=T){
       dataname=c("eSet",rep("siteNorm",length(g$prot_data_index)-1))
       item_name="Protein"
       data_index=g$prot_data_index
-    } else {
+    } else if(length(g$gene_data_index)>1) {
       dataname=c("eSet",rep("siteNorm",length(g$gene_data_index)-1))
       item_name="Gene"
       data_index=g$gene_data_index
+    } else {
+      g$calls = c(g$calls, "g.norm.to.first")
+      return(g)
     }
 
-    gene_values <- g$omicsList[[ data_index[1] ]][["eSet"]]; 
+    g$data_norm_index = c()
+    gene_values <-
+      g$omicsList[[ data_index[1] ]][[10]] <- 
+        g$omicsList[[ data_index[1] ]][["eSet"]]; 
+    names( g$omicsList[[ data_index[1] ]] )[10] <- "siteNorm";
     for(i in 2:length(data_index)){
       if( identical(gene_values$SampleName, g$omicsList[[ data_index[i] ]][["eSet"]]$SampleName) ) {
 
@@ -275,6 +283,10 @@ g.norm.to.first = function(g, deps=T){
         gv = fData(gene_values)[,item_name]
         gi = gv %in% nv
         gv = gv[gi]
+        if(length(gv)==0){
+          cat (paste0("Warning (normalize to first): No genes in ", g$omicsList[[ data_index[i] ]][["dataType"]] ," match the reference dataset. Reverting to standard normalization.\n"))
+          next
+        }
         ag = aggregate(exprs(gene_values)[gi,],by=list(gv),FUN="mean")
         nm = merge(data.frame(Group.1=nv,ind=1:length(nv)),ag,by="Group.1")
         nm = nm[order(nm$ind),-2]
@@ -292,9 +304,9 @@ g.norm.to.first = function(g, deps=T){
 
     output_links = drawcorplot(g,item_name=item_name,data_index=data_index,dataname=dataname)
 
-    for(i in 1:length(g$data_norm_index)){
-      type_name <- paste0(g$omicsList[[ g$data_norm_index[i] ]][["dataType"]], "_NormTo",g$omicsList[[ data_index[1] ]][["dataType"]])
-      tmp<-drawPCA(eset=g$omicsList[[ g$data_norm_index[i] ]][["siteNorm"]], type=type_name, show_sample_names=TRUE, outputpath=g$output_plots_path, outputfile=g$output_files_path)
+    for(i in g$data_norm_index){
+      type_name <- paste0(g$omicsList[[ i ]][["dataType"]], "_NormTo",g$omicsList[[ data_index[1] ]][["dataType"]])
+      tmp<-drawPCA(eset=g$omicsList[[ i ]][["siteNorm"]], type=type_name, show_sample_names=TRUE, outputpath=g$output_plots_path, outputfile=g$output_files_path)
 
       add_link <- paste0("[ PCA:",type_name, " ](", g$output_plots_subdir,"/PCAplots_",type_name,".pdf)" )
       output_links <- paste(output_links, add_link, sep=" | " )
@@ -323,9 +335,9 @@ g.use.site.norm = function(g, deps=T){
   g$gene_data_index <- g$data_index[1]
   #Note: g$prot_data_index becomes unused by this point, so we don't need to update it
 
-  for(i in 1:length(g$data_norm_index)){try({
+  for(i in g$data_norm_index){try({
     start_length <- length(g$omicsList) + 1
-    g$omicsList[[start_length]] <- g$omicsList[[ g$data_norm_index[i] ]]
+    g$omicsList[[start_length]] <- g$omicsList[[ i ]]
     g$omicsList[[start_length]][["eSet"]] <- g$omicsList[[start_length]][["siteNorm"]] 
     g$omicsList[[start_length]][["dataType"]] <- paste(g$omicsList[[start_length]][["dataType"]],
                                                      "_NormTo",g$omicsList[[ g$data_index[1] ]][["dataType"]],sep="")
