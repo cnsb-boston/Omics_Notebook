@@ -31,7 +31,14 @@ for(i in 1:length(g$omicsList)){
 cat(print_report)
 writeLines(print_report, con=file.path(g$output_files_path, "Feature_Numbers.txt"))
 
-try({ gridExtra::grid.arrange(grobs=g$pca_output, ncol=2) })
+nulls=sapply(g$pca_output,is.null)
+if(all(nulls)){
+  cat("Warning: no PCA plots could be created for this data.")
+} else {
+  if(any(nulls))
+    cat("Warning: some PCA plots could not be created for this data.")
+  try({ gridExtra::grid.arrange(grobs=g$pca_output[!nulls], ncol=2) })
+}
 
 ```
 Click to view full size images:  

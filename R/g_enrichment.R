@@ -582,7 +582,7 @@ g.metabo.enrich = function(g, working_dir="3_Metabo_Enrichment", deps=T){
           out_table[,"Gene_Ratio"] <- out_table[,"Gene_Hits"]/out_table[,"Gene_Total"]
           out_table[,"Ionization"] <- ion_mode
           write.table(out_table,file="emap_mummi_pathway_enrichment.txt", sep="\t", quote=FALSE, row.names=FALSE)
-        
+
           #if(nrow(out_table)>15){ out_table <- out_table[1:15,] }
           #drawEnrichment(out_table,type=analysis_name,label="mummichog", outputpath=output_mummichog_path_tmp)
           #mset<-PlotIntegPaths(mSet, "png", 400, width=10)

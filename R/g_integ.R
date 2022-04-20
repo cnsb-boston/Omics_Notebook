@@ -42,6 +42,7 @@ g.activepath = function(g, working_dir="4_ActivePathways", deps=T){
     # run active pathways for each gmt_file
     for( gmt_i in 1:length(a_pathways_gmt) ){
       out_table <- ActivePathways::ActivePathways(scores, a_pathways_gmt[[gmt_i]],geneset.filter = c(10, 500))
+      if(is.null(out_table) || length(out_table)==0 || nrow(out_table)==0) next;
       out_table <- out_table[ order(out_table$adjusted.p.val, decreasing = F),]
       out_table$overlap <- apply(out_table, 1, function(x) paste(as.character(unlist(x["overlap"])), collapse=","))
       out_table$evidence <- apply(out_table, 1, function(x) paste(as.character(unlist(x["evidence"])), collapse=","))
@@ -150,8 +151,9 @@ g.combine.rnk = function(g, deps=T){
         
         output_mummichog_reldir_tmp <- file.path(g$mumm_working_dir, analysis_name)
         output_mummichog_absdir_tmp <- file.path(working_dir, output_mummichog_reldir_tmp)
-        met_ids <- read.delim(file.path(output_mummichog_absdir_tmp, "mummichog_matched_compound_all.csv"),
-                              header=TRUE, stringsAsFactors = F, sep=",")
+        infile <- file.path(output_mummichog_absdir_tmp, "mummichog_matched_compound_all.csv")
+        if(!file.exists(infile)) return(NULL);
+        met_ids <- read.delim(infile, header=TRUE, stringsAsFactors = F, sep=",")
     
         met_ranked <- stats::na.omit(limma::topTable(g$omicsList[[ g$metab_data_index[i] ]][["fit"]], adjust="BH", n=Inf,
                                       sort.by='p', coef=g$loop_list[ci])[,c("mz", "P.Value", "logFC")] );
@@ -166,10 +168,13 @@ g.combine.rnk = function(g, deps=T){
         met_ids
       }))
 
-      output_filename <- paste0("Met_Ranked_", g$mumm_libs[mumm_lib_i],"_", g$contrast_strings_file[ci], "_Combined.rnk")
+      if(length(met_ids_out)==0) next;
+
+      output_filename <- paste0("Met_Ranked_Combined_", g$mumm_libs[mumm_lib_i],"_", g$contrast_strings_file[ci], ".rnk")
  
-      write.table(met_ids_out, file=file.path(g$output_mummichog_absdir, output_filename), sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
-      rnk_files[[ci]] <- c(rnk_files[[ci]], file.path(output_mummichog_path, output_filename) )
+      out_path = file.path(g$mumm_working_dir, output_filename)
+      write.table(met_ids_out, file=out_path, sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
+      rnk_files[[ci]] <- c(rnk_files[[ci]], out_path)
       names(rnk_files[[ci]])[length(rnk_files[[ci]])] <- g$mumm_libs[mumm_lib_i]
 
       if(length(g$gene_data_index)==0){
@@ -196,7 +201,7 @@ g.combine.rnk = function(g, deps=T){
                   sep='\t',row.names=FALSE, col.names=TRUE, quote=FALSE)
       
       rnk_files[[ci]] <- c(rnk_files[[ci]], out_path)
-      names(rnk_files[[c]])[length(rnk_files[[ci]])] <- g$mumm_libs[mumm_lib_i]
+      names(rnk_files[[ci]])[length(rnk_files[[ci]])] <- g$mumm_libs[mumm_lib_i]
       
       # # Randomize for Control
       # met_ids_out["GeneName"] <- met_ids_out[sample(nrow(met_ids_out)),"GeneName"]

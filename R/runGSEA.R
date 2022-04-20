@@ -26,6 +26,7 @@ runGSEA <- function (rnk, gmt,
     if( dir.exists(gsea_absval_path) == FALSE ) { dir.create(gsea_absval_path) }
     
   ranked_features <- read.delim(rnk)
+  ranked_features = subset(ranked_features,rank!=0.)
   file.copy(from=rnk, to=file.path(out_path,basename(rnk)) )
   ranked_vector <- ranked_features[,"rank"]
   names(ranked_vector) <- toupper(ranked_features[,"GeneName"])
@@ -40,6 +41,11 @@ runGSEA <- function (rnk, gmt,
                            nperm=10000)
   })
   
+  if(nrow(fgsea_results)==0){
+    print(paste0("Warning: GSEA returned no results for ", analysisName))
+    return(NULL)
+  }
+
   fgsea_out <- fgsea_results[,c(1,1,2,3)]
   colnames(fgsea_out) <- c("Term", "Description", "p.Val", "FDR")
   fgsea_out[,"Phenotype"] <- sign(fgsea_results[,"ES"])

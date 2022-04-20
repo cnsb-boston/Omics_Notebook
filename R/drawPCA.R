@@ -19,7 +19,10 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
                     outputfile=output_files_path, show_sample_names=TRUE, .species=species) {
   
   # perform PC analysis
-  PC_data <- stats::prcomp(t(exprs(eset)))
+  data=t(exprs(eset))
+  if(any(dim(data)==0))
+    return(NULL)
+  PC_data <- stats::prcomp(data)
   percent_variance <- summary(PC_data)$importance["Proportion of Variance",]*100
   
   # Make colors for groups
@@ -65,10 +68,11 @@ drawPCA <- function(eset, x_axis="PC1", y_axis="PC2", type, outputpath=output_pl
   })
   
   # Identify most variable hits for loadings graph
-  sig_hits <- c( rownames(PC_data$rotation[order(PC_data$rotation[,x_axis], decreasing=T)[1:12],]),
-                 rownames(PC_data$rotation[order(PC_data$rotation[,x_axis], decreasing=F)[1:12],]),
-                 rownames(PC_data$rotation[order(PC_data$rotation[,y_axis], decreasing=T)[1:12],]),
-                 rownames(PC_data$rotation[order(PC_data$rotation[,y_axis], decreasing=F)[1:12],]) )
+  num_hits = min(12,nrow(PC_data$rotation))
+  sig_hits <- c( rownames(PC_data$rotation[order(PC_data$rotation[,x_axis], decreasing=T)[1:num_hits],]),
+                 rownames(PC_data$rotation[order(PC_data$rotation[,x_axis], decreasing=F)[1:num_hits],]),
+                 rownames(PC_data$rotation[order(PC_data$rotation[,y_axis], decreasing=T)[1:num_hits],]),
+                 rownames(PC_data$rotation[order(PC_data$rotation[,y_axis], decreasing=F)[1:num_hits],]) )
   sig_data <- data.frame(PC_data$rotation[sig_hits,])
   
   suppressWarnings({
