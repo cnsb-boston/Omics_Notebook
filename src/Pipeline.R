@@ -28,13 +28,11 @@ param_file=file.path(analysis_dir,if(length(args)>2)args[3] else "Parameters.R")
 setwd(analysis_dir);
 source(param_file);
 
+override=list()
 if(analysis_dir != working_dir){
-  write(paste("annotation_filename <- '",file.path(analysis_dir,basename(annotation_filename)), "';", sep=""),
-        file = param_file, append = T)
-  write(paste("working_dir <- '", analysis_dir, "';", sep=""),
-        file = param_file, append = T)
+  override$annotation_filename <- file.path(analysis_dir,basename(annotation_filename))
+  override$working_dir <- analysis_dir
 }
-
 
 # Set local file paths, if not needed, set BUSCC to false
 if(inherit_paths==TRUE) {
@@ -56,7 +54,7 @@ rmarkdown::render(file.path(notebook_dir,'Notebook.Rmd'),
                   envir=new.env(),
                   knit_root_dir=analysis_dir,
                   intermediates_dir=analysis_dir,
-                  params=list(param_file=param_file),
+                  params=list(param_file=param_file, override=override),
                   output_file=paste(gsub("\\.","",make.names(project_name)),"_",gsub("-","",Sys.Date()),".html", sep=""),
                   output_dir=analysis_dir);
 

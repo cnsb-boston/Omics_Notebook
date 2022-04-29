@@ -4,6 +4,7 @@ author: "CNSB"
 date: "`r Sys.Date()`"
 params:
   param_file: "Parameters.R"
+  override: "`r list()`"
 output:
   html_document:
     theme: united
@@ -55,7 +56,7 @@ library(Biobase)
 })
 BiocParallel::register(BiocParallel::MulticoreParam(workers=as.integer(Sys.getenv("NSLOTS",1))))
 
-g=g.notebook.setup(param_file=params$param_file)
+g=g.notebook.setup(param_file=params$param_file, override=params$override)
 
 # Source function file
 #sourceDirectory(file.path(gsub("src","R", notebook_dir)))
