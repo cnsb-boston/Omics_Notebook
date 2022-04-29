@@ -8,7 +8,7 @@ tclBool=function(default=T) tcltype(default,tclbool)
 tclStr=function(default="") tcltype(default,tclstring)
 tclNum=function(default=0) tcltype(default,tclnum)
 
-make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets=NULL){
+make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets=NULL, param_file=NULL){
   write.params = function(vars){
     fname=paste0(tclvalue(vars$working_dir), "/Parameters.R")
     write(paste("#OmicsNotebook"), fname, append=F)
@@ -47,6 +47,16 @@ make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets
          inherit_paths = tclBool(FALSE),
          libraries_path = tclStr('.'))
   v=c(v,extra_v)
+
+  # set default values from previous Parameters.R
+  if(!is.null(param_file) && file.exists(param_file)){
+    p.env = new.env()
+    sys.source(param_file, envir=p.env, toplevel.env=p.env)
+    for(p in names(p.env)){
+      if(!is.null(v[[p]]))
+        tclvalue(v[[p]]) = p.env[[p]]
+    }
+  }
 
   tkgrid(tklabel(tt, text="Project Name:"), column=0, row=1, sticky="E") 
   tkgrid(tkentry(tt, textvariable=v$project_name), column=1, row=1, sticky="W")

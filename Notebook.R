@@ -74,7 +74,8 @@ run.singularity = function(param,container,libdir,outputlog,...){
 
 getopt = function(args, choices){
   ret=as.list(choices[,3])
-  names(ret)=choices[,1]
+  nondefault = as.list(rep(F,nrow(choices)))
+  names(nondefault) = names(ret) = choices[,1]
  
   i=1
   while(i<=length(args)){
@@ -90,6 +91,7 @@ getopt = function(args, choices){
           i=i+1
         }
         ret[[r_i]]=val
+        nondefault[[r_i]]=T
       }
     }
     i=i+1
@@ -98,7 +100,7 @@ getopt = function(args, choices){
   for(i in 1:nrow(choices)){
     class(ret[[i]])=choices[i,4]
   }
-  ret
+  list(nondefault=nondefault,options=ret)
 }
 
 choices=matrix(c(
@@ -109,7 +111,8 @@ choices=matrix(c(
   'outputlog', 'o', F, 'logical',
   'help', 'h', F, 'logical'
   ), byrow=T, ncol=4)
-opts=getopt(args,choices)
+optlist=getopt(args,choices)
+opts=optlist$options
 
 if(opts$help){
   print("[GUI | [[R] [Docker | Singularity]]] {options ...}")
@@ -124,7 +127,8 @@ if(opts$nogui){
   analysis_dir = getwd()
 } else {
   source(paste0(notebook_path,"/NotebookGUI.R"))
-  analysis_dir = make.gui(startdir=startdir)
+  analysis_dir = if(optlist$nondefault$param) make.gui(startdir=startdir, param_file=opts$param) else make.gui(startdir=startdir)
+  opts$param = "Parameters.R" # use arg param to load config, then use GUI-generated file for the notebook
 }
 
 #short circuits
