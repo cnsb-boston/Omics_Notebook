@@ -115,12 +115,11 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
   
   if ( "Protein" %in% colnames(data) ){
     # Add uniprot annotation
+    uprot = data$Protein
     if(uniprot_annotation == TRUE) { try({
       data <- cbind(data, getUniprotAnnotation(IDs=data[,"Protein"], genes=!("Gene.names" %in% colnames(data))))
       uprot = data$ENTRY
-    }, silent=TRUE)} else {
-      uprot = data$Protein
-    }
+    }, silent=FALSE)}
     # Make uniprot hyperlink
     data[, "Link"] <- paste("https://www.uniprot.org/uniprot/", uprot, sep="")
     data[,"Uniprot"] <- paste("<a href='https://www.uniprot.org/uniprot/",uprot,"'>",
