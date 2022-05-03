@@ -156,7 +156,7 @@ g.make.omicsList = function(global, deps=T){
   }
 
   annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
-  global$contrastgroups <- unique(gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3])))) );
+  global$contrastgroups <- unique(sub("^[TC]-","",gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3])))) ));
   global$contrast_strings <- c();
   annot<-annot[c(-1,-4),];
 
