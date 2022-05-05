@@ -49,6 +49,10 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     ncol(emat)>50 || nrow(emat)>100
   }
 
+  safe_scale = function(m){
+    stats::na.omit(t(scale(t(m))))
+  }
+
   getHeatmap=function(`matrix`,name="Z-score",show_row_names.=show_row_names,column_title,
                       cluster_columns=cluster_samples,split=NULL,title_names="",col=mapcolor) {
     ComplexHeatmap::Heatmap (`matrix`=`matrix`, col=col, name=name, top_annotation=ha_column,
@@ -65,7 +69,7 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     pdf(output_filename);
     
     # all features, z-score
-    emat_sel <- stats::na.omit(t(scale(t(exprs(eset))))) # Z-score across rows
+    emat_sel <- safe_scale(exprs(eset)) # Z-score across rows
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2
     ht1 <- getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=cluster_samples,
@@ -91,8 +95,9 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     # Subset features only
     if( class(subset)!="logical" ){ 
       for( k in 1:length(subset) ){ suppressWarnings({ try({
-        emat_sel <- exprs(eset)[subset[[k]],]
-        emat_sel <- na.omit(t(scale(t(emat_sel)))) # Z-score across rows
+        if(length(subset[[k]])<1) next;
+        emat_sel <- exprs(eset)[subset[[k]],,drop=F]
+        emat_sel <- safe_scale(emat_sel) # Z-score across rows
         emat_sel[emat_sel < -2] <- -2
         emat_sel[emat_sel > 2] <- 2
         print(getHeatmap(matrix=emat_sel, cluster_columns=TRUE,
@@ -113,8 +118,8 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
   
     # variation filter, z score
     if ( class(emat_top) !="logical" ){
-      emat_sel <- exprs(eset)[emat_top,]
-      emat_sel <- stats::na.omit(t(scale(t(emat_sel)))) # Z-score across rows
+      emat_sel <- exprs(eset)[emat_top,,drop=F]
+      emat_sel <- safe_scale(emat_sel) # Z-score across rows
       emat_sel[emat_sel < -2] <- -2
       emat_sel[emat_sel > 2] <- 2
       print( getHeatmap(matrix=emat_sel, show_row_names=FALSE, cluster_columns=TRUE,
@@ -139,8 +144,8 @@ drawHeatmaps <- function(eset, emat_top=FALSE, type, title_add="",
     pdf(output_filename);
 
     # limma differential expression, z score
-    emat_sel <- exprs(eset[rownames(eset) %in% limmaSig,])
-    emat_sel <- stats::na.omit(t(scale(t(emat_sel)))) # Z-score across rows
+    emat_sel <- exprs(eset[rownames(eset) %in% limmaSig,,drop=F])
+    emat_sel <- safe_scale(emat_sel) # Z-score across rows
     emat_sel[emat_sel < -2] <- -2
     emat_sel[emat_sel > 2] <- 2 
     print(getHeatmap(matrix=emat_sel, cluster_columns=TRUE,

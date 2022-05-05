@@ -537,13 +537,13 @@ g.boxplots = function(g, deps=T){
   for(i in 1:length(g$omicsList)){ try({
     subset_rows=FALSE;
     if( class(g$subset_genes)!="logical" ){ try({
-      g$subset_genes <- unique(unlist(g$subset_genes, use.names = F))
+      subset_genes <- unique(unlist(g$subset_genes, use.names = F))
       subset_rows <- c()
       if( "Gene" %in% colnames(fData(g$omicsList[[i]][["eSet"]])) ){
-        subset_rows <- rownames(g$omicsList[[i]][["eSet"]])[which(fData(g$omicsList[[i]][["eSet"]])$Gene %in% g$subset_genes )]
+        subset_rows <- rownames(g$omicsList[[i]][["eSet"]])[which(fData(g$omicsList[[i]][["eSet"]])$Gene %in% subset_genes )]
       }
       if( length(subset_rows)==0 ){
-        subset_rows <- rownames(g$omicsList[[i]][["eSet"]])[ which(rownames(g$omicsList[[i]][["eSet"]]) %in% g$subset_genes ) ]
+        subset_rows <- rownames(g$omicsList[[i]][["eSet"]])[ which(rownames(g$omicsList[[i]][["eSet"]]) %in% subset_genes ) ]
       }
     },silent=T) }
     # Draw the boxplots
