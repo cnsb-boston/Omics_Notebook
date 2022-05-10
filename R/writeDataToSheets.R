@@ -42,7 +42,9 @@ writeDataToSheets <- function(wb, eset, limmaFit=NULL, data_format, mapcolor=map
       }
     }
     if(length(DiffList)>1){
+      try({
       DiffList_F <- limma::topTable(limmaFit, adjust.method="BH", n=Inf)
+      })
     }
     for(i in 1:length(coef_index) ) {
       DiffList[[i]] = limma::topTable(limmaFit, adjust.method="BH", n=Inf, sort.by='p', coef=coef_index[i])[,c("P.Value","adj.P.Val","logFC")]
