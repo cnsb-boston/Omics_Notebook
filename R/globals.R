@@ -156,7 +156,8 @@ g.make.omicsList = function(global, deps=T){
   }
 
   annot <- data.frame(openxlsx::read.xlsx(annotation_filename, 1, colNames=FALSE)); # read annotation
-  global$contrastgroups <- unique(sub("^[TC]-","",gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3])))) ));
+  contrasts <- gsub("\\.","", make.names(na.omit(t(annot[1,-1:-3]))));
+  global$contrastgroups <- unique(contrasts)
   global$contrast_strings <- c();
   annot<-annot[c(-1,-4),];
 
@@ -183,7 +184,11 @@ g.make.omicsList = function(global, deps=T){
   rownames(annot) <- NULL;
   colnames(annot)<-make.unique(annot[1,]);
   annot<-data.frame((annot[-1,]));
-  annot[,"Group"]<-gsub("\\.","",make.names(annot[,"Group"]))
+  if(length(annot$Group) == length(contrasts)){ ## hack // Group is sometimes used differently in other pipelines
+    annot$Group = contrasts
+  } else {
+    annot[,"Group"]<-gsub("\\.","",make.names(annot[,"Group"]))
+  }
   annot[,"SampleName"]<-gsub("\\.","",make.names(make.unique(as.character(annot[,"SampleName"]))))
 
   # Get batch information if there
