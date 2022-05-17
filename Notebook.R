@@ -24,6 +24,8 @@ LocationOfThisScript = function() {
   return(NULL)
 }
 script.dir = LocationOfThisScript()
+if(script.dir == ".")
+  script.dir = getwd();
 
 notebook_path=if(is.null(script.dir)) "/project/cnsbomic/Omics_Notebook" else script.dir
 source(paste0(notebook_path,"/Config.R"))
