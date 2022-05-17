@@ -102,7 +102,7 @@ g.mumm2omicsList = function(g, deps=T){
         
         output_mummichog_reldir_tmp <- file.path(g$mumm_working_dir, paste0(analysis_name, "_",g$contrast_strings_file[1]))
         output_mummichog_absdir_tmp <- file.path(working_dir, output_mummichog_reldir_tmp)
-        infile <- file.path(output_mummichog_absdir_tmp, "mummichog_matched_compound_all.csv")
+        infile <- file.path(output_mummichog_reldir_tmp, "mummichog_matched_compound_all.csv")
         if(!file.exists(infile)) return(NULL);
         met_ids <- read.delim(infile, header=TRUE, stringsAsFactors = F, sep=",")
         
@@ -151,7 +151,7 @@ g.combine.rnk = function(g, deps=T){
         
         output_mummichog_reldir_tmp <- file.path(g$mumm_working_dir, analysis_name)
         output_mummichog_absdir_tmp <- file.path(working_dir, output_mummichog_reldir_tmp)
-        infile <- file.path(output_mummichog_absdir_tmp, "mummichog_matched_compound_all.csv")
+        infile <- file.path(output_mummichog_reldir_tmp, "mummichog_matched_compound_all.csv")
         if(!file.exists(infile)) return(NULL);
         met_ids <- read.delim(infile, header=TRUE, stringsAsFactors = F, sep=",")
     
@@ -250,10 +250,13 @@ g.momenta = function(g, working_dir="4_MOMENTA_Integrated", deps=T){
   all_rnk_files = unlist(g$combine_rnk_files)
   for(gmt_i in 1:length(gmt_files)){
     rnk_files = all_rnk_files[grep(gmt_shortnames[gmt_i], names(all_rnk_files))]
+    if(length(rnk_files)==0) next;
     rnk_files = rnk_files[file.exists(rnk_files)]
     if(length(rnk_files)==0) next;
 
     dest_gmt_file2 <- OmicsNotebook:::get.data.fileconn(file.path("feature",gmt_files[gmt_i]))
+    gmt_fname = OmicsNotebook:::get.data.filename(dest_gmt_file2)
+    file.copy(gmt_fname, file.path(gsea_working_path, basename(gmt_fname)))
 
     for(rf in rnk_files){
       analysis_name <- paste(basename(gsub(".rnk", "", rf)), "_", gmt_names[gmt_i], sep="" )
