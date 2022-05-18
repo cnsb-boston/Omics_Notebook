@@ -541,13 +541,14 @@ g.metabo.enrich = function(g, working_dir="3_Metabo_Enrichment", deps=T){
         
           if( grepl("Negative.Ion", g$omicsList[[ g$metab_data_index[i] ]][["dataFormat"]] ) ) { ion_mode<-"negative" } else { ion_mode<-"positive"}
         
+          if(exists("mSet")) rm(mSet)
           mSet <- MetaboAnalystR::InitDataObjects("mass_all", "mummichog", FALSE);
           #SetPeakFormat("mpt")
           mSet <- MetaboAnalystR::UpdateInstrumentParameters(mSet, 0.1, ion_mode)
           mSet <- MetaboAnalystR::Read.PeakListData(mSet, output_filename);
           mSet <- MetaboAnalystR::SanityCheckMummichogData(mSet);
           mSet <- MetaboAnalystR::SetPeakEnrichMethod(mSet, "integ");
-          mSet <- MetaboAnalystR::SetMummichogPval(mSet, 0.05);
+          mSet <- MetaboAnalystR::SetMummichogPval(mSet, 0.15);
           
           mSet <- MetaboAnalystR::PerformPSEA(mSet, mumm_libs[mumm_lib_i], "current", permNum=1000);
         
