@@ -27,7 +27,7 @@ script.dir = LocationOfThisScript()
 if(script.dir == ".")
   script.dir = getwd();
 
-notebook_path=if(is.null(script.dir)) "/project/cnsbomic/Omics_Notebook" else script.dir
+notebook_path=if(is.null(script.dir)) "/project/cnsb2022/Omics_Notebook" else script.dir
 source(paste0(notebook_path,"/Config.R"))
 
 native.cmd = function(notebook="/home", analysis="/data", parameters="Parameters.R"){

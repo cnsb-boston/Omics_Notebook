@@ -8,7 +8,7 @@ tclBool=function(default=T) tcltype(default,tclbool)
 tclStr=function(default="") tcltype(default,tclstring)
 tclNum=function(default=0) tcltype(default,tclnum)
 
-make.gui = function(startdir="/projectnb/cnsbomic",extra_v=list(), extra_widgets=NULL, param_file=NULL){
+make.gui = function(startdir="/projectnb/cnsb2022", extra_v=list(), extra_widgets=NULL, param_file=NULL){
   write.params = function(vars){
     fname=paste0(tclvalue(vars$working_dir), "/Parameters.R")
     write(paste("#OmicsNotebook"), fname, append=F)
