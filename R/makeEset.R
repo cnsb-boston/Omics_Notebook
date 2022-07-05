@@ -112,12 +112,38 @@ makeEset <- function(data, annotate, type, log_transform=TRUE,
   
   # log2 Intensity Values
   if(log_transform){ data.matrix <- log2(data.matrix+1); }
+
+  merge_str_nonempty <- function(a, b){
+    if (is.null(a))
+      return(b)
+    if (is.null(b))
+      return(a)
+    i <- is.na(a) | a==""
+    a[i] = b[i]
+    return(a)
+  }
+  emptysub <- function(p, r, x){
+    missing <- grep(p, x, invert=T)
+    ret <- sub(p, r, x)
+    ret[missing] <- ""
+    ret
+  }
   
   if ( "Protein" %in% colnames(data) ){
     # Add uniprot annotation
     uprot = data$Protein
     if(uniprot_annotation == TRUE) { try({
-      data <- cbind(data, getUniprotAnnotation(IDs=data[,"Protein"], genes=!("Gene.names" %in% colnames(data))))
+      udata <- getUniprotAnnotation(IDs=data[,"Protein"], genes=!("Gene.names" %in% colnames(data)))
+      missing <- udata$ENTRY == ""
+      if(any(missing)){
+        gn = Reduce(merge_str_nonempty,
+          list(data[missing,"Gene.names"],
+              emptysub(".*(gene|GN)=([^ ]*).*","\\2",data[missing,"Fasta.headers"])))
+        gn=paste0("gene=", gn)
+        g_udata <- getUniprotAnnotation(IDs=gn, genes=!("Gene.names" %in% colnames(data)))
+        udata[missing,] <- merge_str_nonempty(udata[missing,],g_udata)
+      }
+      data <- cbind(data, udata)
       uprot = data$ENTRY
     }, silent=FALSE)}
     # Make uniprot hyperlink
